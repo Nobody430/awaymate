@@ -140,6 +140,15 @@ struct SettingsView: View {
                     Button { importing = true } label: {
                         Label("Flüge importieren", systemImage: "square.and.arrow.down")
                     }
+                    let dupes = store.duplicates.count
+                    if dupes > 0 {
+                        Button(role: .destructive) {
+                            let n = store.removeDuplicates()
+                            message = "\(n) doppelte Flüge entfernt."
+                        } label: {
+                            Label("Duplikate entfernen (\(dupes))", systemImage: "square.on.square.dashed")
+                        }
+                    }
                     let junk = store.incomplete.count
                     if junk > 0 {
                         Button(role: .destructive) {

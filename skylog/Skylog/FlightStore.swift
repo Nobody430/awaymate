@@ -65,6 +65,23 @@ final class FlightStore {
 
     func flight(_ id: UUID) -> Flight? { flights.first { $0.id == id } }
 
+    /// Duplicates among the stored flights (keeps the best entry of each group).
+    var duplicates: [Flight] {
+        var keep: [Flight] = []
+        var dupes: [Flight] = []
+        for f in flights.sorted(by: { Self.quality($0) > Self.quality($1) }) {
+            if keep.contains(where: { Self.isSameFlight($0, f) }) { dupes.append(f) } else { keep.append(f) }
+        }
+        return dupes
+    }
+
+    @discardableResult
+    func removeDuplicates() -> Int {
+        let ids = duplicates.map(\.id)
+        delete(ids)
+        return ids.count
+    }
+
     func contains(number: String, date: Date) -> Bool {
         let d = Fmt.apiDate.string(from: date)
         let n = number.replacingOccurrences(of: " ", with: "").uppercased()
@@ -73,11 +90,27 @@ final class FlightStore {
 
     // MARK: Mutations
 
+    static func normalizedNumber(_ n: String) -> String { n.replacingOccurrences(of: " ", with: "").uppercased() }
+
+    /// Same flight: same number + date, or a codeshare (same route, departure within 60 min / same day without times).
+    static func isSameFlight(_ a: Flight, _ b: Flight) -> Bool {
+        if normalizedNumber(a.number) == normalizedNumber(b.number) && a.date == b.date { return true }
+        guard a.departure.code == b.departure.code, a.arrival.code == b.arrival.code else { return false }
+        if let da = a.departure.scheduled, let db = b.departure.scheduled { return abs(da.timeIntervalSince(db)) < 3600 }
+        return a.date == b.date
+    }
+
+    /// Prefer the entry with live data, then with times.
+    private static func quality(_ f: Flight) -> Int {
+        (f.lastUpdated != nil ? 2 : 0) + (f.departure.scheduled != nil ? 1 : 0)
+    }
+
     func add(_ flight: Flight) {
         var f = flight
-        if let i = flights.firstIndex(where: { $0.number == f.number && $0.date == f.date && $0.departure.code == f.departure.code }) {
+        if let i = flights.firstIndex(where: { Self.isSameFlight($0, f) }) {
+            guard Self.quality(f) >= Self.quality(flights[i]) else { return }   // keep the better existing entry
             f.id = flights[i].id
-            f.notes = flights[i].notes
+            f.notes = flights[i].notes.isEmpty ? f.notes : flights[i].notes
             f.seat = flights[i].seat
             flights[i] = f
         } else {

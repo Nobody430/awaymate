@@ -15,6 +15,7 @@ enum MailAI {
         let mailIndex: Int
         let passengers: [String]
         let forwarded: Bool
+        let mailType: String
     }
     private struct Response: Codable { let flights: [Extracted] }
 
@@ -44,6 +45,10 @@ enum MailAI {
     - status: "booked", "changed" (neue/geänderte Zeiten durch Umbuchung) oder "cancelled"
     - mailIndex: Nummer der Mail, aus der die Info stammt
     - passengers: alle Passagiernamen dieses Flugs genau wie in der Mail (leer, wenn keine genannt)
+    - mailType: Art der Mail: "confirmation" (Buchungsbestätigung/E-Ticket mit vollständigem Reiseplan), "change" (Umbuchung/Flugplanänderung mit neuem Reiseplan), \
+      "cancellation" (Storno), "checkin" (Check-in-Bestätigung), "boardingpass" (Bordkarte), "reminder" (Reiseerinnerung), "other"
+    - Bei "confirmation" und "change" ALLE Teilstrecken des aktuellen Reiseplans auflisten, auch Rückflüge und Anschlussflüge.
+    - Codeshares: nur die durchführende (operating) Flugnummer angeben, nicht zusätzlich die Marketing-Nummer.
     - forwarded: true, wenn die Mail weitergeleitet wurde (z.B. „WG:“, „Fwd:“, „Weitergeleitete Nachricht“) oder an jemand anderen gerichtet ist
     Erfinde nichts. Wenn eine Mail keine echte Buchung enthält, liefere für sie nichts.
     """
@@ -51,7 +56,7 @@ enum MailAI {
     static let schema: [String: Any] = {
         let flight: [String: Any] = [
             "type": "object", "additionalProperties": false,
-            "required": ["flightNumber", "date", "from", "to", "departureTime", "arrivalTime", "arrivalDayOffset", "bookingReference", "status", "mailIndex", "passengers", "forwarded"],
+            "required": ["flightNumber", "date", "from", "to", "departureTime", "arrivalTime", "arrivalDayOffset", "bookingReference", "status", "mailIndex", "passengers", "forwarded", "mailType"],
             "properties": [
                 "flightNumber": ["type": "string"], "date": ["type": "string"], "from": ["type": "string"], "to": ["type": "string"],
                 "departureTime": ["type": "string"], "arrivalTime": ["type": "string"], "arrivalDayOffset": ["type": "integer"],
@@ -59,6 +64,7 @@ enum MailAI {
                 "mailIndex": ["type": "integer"],
                 "passengers": ["type": "array", "items": ["type": "string"]],
                 "forwarded": ["type": "boolean"],
+                "mailType": ["type": "string", "enum": ["confirmation", "change", "cancellation", "checkin", "boardingpass", "reminder", "other"]],
             ],
         ]
         return ["type": "object", "additionalProperties": false, "required": ["flights"],
@@ -79,7 +85,63 @@ enum MailAI {
         }
     }
 
-    static let maxCharsPerMail = 3500
+    private static func flightKey(_ e: Extracted) -> String {
+        e.flightNumber.uppercased().replacingOccurrences(of: " ", with: "") + "|" + e.date
+    }
+
+    /// Per booking reference, only the legs of the newest full itinerary count (older legs were re-booked).
+    /// Boarding passes / check-ins prove a flight and are always kept; cancellations remove legs.
+    static func reconcileBookings(_ items: [(Extracted, OutlookMail.MailItem)]) -> [(Extracted, OutlookMail.MailItem)] {
+        let groups = Dictionary(grouping: items) { $0.0.bookingReference.uppercased().trimmingCharacters(in: .whitespaces) }
+        var result: [(Extracted, OutlookMail.MailItem)] = []
+        for (ref, group) in groups {
+            guard !ref.isEmpty else { result += group; continue }
+            let full = group.filter { ["confirmation", "change"].contains($0.0.mailType) }
+            guard let newestFull = full.max(by: { $0.1.received < $1.1.received })?.1 else { result += group; continue }
+            let current = full.filter { $0.1.id == newestFull.id }
+            let currentKeys = Set(current.map { flightKey($0.0) })
+            result += current
+            for item in group where !currentKeys.contains(flightKey(item.0)) {
+                switch item.0.mailType {
+                case "boardingpass", "checkin":
+                    result.append(item)                        // proof of travel
+                case "reminder", "other":
+                    if item.1.received > newestFull.received { result.append(item) }
+                case "cancellation":
+                    result.append(item)                        // handled as cancelled below
+                default:
+                    break                                      // legs of an outdated itinerary
+                }
+            }
+        }
+        return result
+    }
+
+    static let maxCharsPerMail = 9000
+
+    /// Text sent to the AI: the start of the mail plus the passages around every flight number (long mails are not just cut off).
+    static func relevantText(_ m: OutlookMail.MailItem) -> String {
+        let text = m.text
+        guard text.count > maxCharsPerMail else { return text }
+        let ns = text as NSString
+        let regex = try! NSRegularExpression(pattern: "\\b[A-Z0-9]{2}\\s?\\d{1,4}\\b")
+        var ranges: [NSRange] = [NSRange(location: 0, length: min(2000, ns.length))]
+        for match in regex.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
+            let start = max(0, match.range.location - 350)
+            let end = min(ns.length, match.range.location + 550)
+            if let last = ranges.last, start <= last.location + last.length {
+                ranges[ranges.count - 1] = NSRange(location: last.location, length: max(last.length, end - last.location))
+            } else {
+                ranges.append(NSRange(location: start, length: end - start))
+            }
+        }
+        var out = ""
+        for r in ranges {
+            out += ns.substring(with: r) + "\n[…]\n"
+            if out.count > maxCharsPerMail { break }
+        }
+        return String(out.prefix(maxCharsPerMail))
+    }
     static let mailsPerRequest = 6
 
     /// Mails worth sending to the AI (cheap pre-filter).
@@ -114,7 +176,7 @@ enum MailAI {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
         let body = batch.map { index, m in
-            "### Mail \(index)\nVon: \(m.from)\nDatum: \(f.string(from: m.received))\nBetreff: \(m.subject)\n\n\(m.text.prefix(maxCharsPerMail))"
+            "### Mail \(index)\nVon: \(m.from)\nDatum: \(f.string(from: m.received))\nBetreff: \(m.subject)\n\n\(relevantText(m))"
         }.joined(separator: "\n\n")
         let text = try await AIClient.send(system: fullSystem, user: body, schema: schema, effort: "low", maxTokens: 8000)
         let flights = try JSONDecoder().decode(Response.self, from: Data(text.utf8)).flights
@@ -145,6 +207,8 @@ enum MailAI {
         }
         if found.isEmpty, let lastError { throw lastError }
 
+        found = reconcileBookings(found)
+
         // Latest mail per flight wins (re-bookings / cancellations)
         var latest: [String: (Extracted, OutlookMail.MailItem)] = [:]
         for item in found {
@@ -168,7 +232,7 @@ enum MailAI {
             c.arrivalDayOffset = e.arrivalDayOffset
             c.bookingReference = e.bookingReference.isEmpty ? nil : e.bookingReference
             c.aiVerified = true
-            c.cancelled = e.status == "cancelled"
+            c.cancelled = e.status == "cancelled" || e.mailType == "cancellation"
             return c
         }
         .sorted { $0.date > $1.date }
