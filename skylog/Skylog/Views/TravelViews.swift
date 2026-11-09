@@ -311,6 +311,8 @@ struct TripDetailView: View {
     @State private var editing = false
     @State private var planning = false
     @State private var bookingStore = BookingStore.shared
+    @State private var packingBusy = false
+    @State private var packingMessage: String?
 
     var body: some View {
         if let trip = store.trips.first(where: { $0.id == tripID }) {
@@ -367,6 +369,24 @@ struct TripDetailView: View {
                         for i in t.packing.indices { t.packing[i].done = false }
                         store.upsert(t)
                     }
+                    Button {
+                        Task { await personalPacking(trip) }
+                    } label: {
+                        HStack {
+                            Label("Persönliche Packliste mit KI", systemImage: "sparkles")
+                            if packingBusy { Spacer(); ProgressView() }
+                        }
+                    }
+                    .disabled(packingBusy || !AIClient.hasKey)
+                    if ObsidianVault.isConnected {
+                        Button {
+                            do {
+                                let path = try ObsidianVault.write(name: "\(trip.name) – Packliste", markdown: PackingAI.markdown(trip: trip))
+                                packingMessage = "In Obsidian gespeichert: \(path)"
+                            } catch { packingMessage = error.localizedDescription }
+                        } label: { Label("Packliste in Obsidian speichern", systemImage: "square.and.arrow.down") }
+                    }
+                    if let packingMessage { Text(packingMessage).font(.caption).foregroundStyle(.secondary) }
                 }
             }
             .navigationTitle(trip.name)
@@ -374,6 +394,23 @@ struct TripDetailView: View {
             .toolbar { Button("Bearbeiten") { editing = true } }
             .sheet(isPresented: $editing) { TripEditor(trip: trip) }
             .sheet(isPresented: $planning) { TripPlannerView(trip: trip) }
+        }
+    }
+
+    private func personalPacking(_ trip: Trip) async {
+        packingBusy = true
+        defer { packingBusy = false }
+        do {
+            let items = try await PackingAI.generate(trip: trip, flights: store.flights(for: trip, in: flights),
+                                                     bookings: bookingStore.bookings(for: trip))
+            guard var t = store.trips.first(where: { $0.id == tripID }) else { return }
+            let existing = Set(t.packing.map { $0.name.lowercased() })
+            let new = items.filter { !existing.contains($0.name.lowercased()) }
+            t.packing += new.map { PackItem(name: $0.name) }
+            store.upsert(t)
+            packingMessage = "\(new.count) persönliche Punkte hinzugefügt" + (PersonalProfile.text.isEmpty ? " (Tipp: Profil/Obsidian in den Einstellungen ergänzen)." : ".")
+        } catch {
+            packingMessage = error.localizedDescription
         }
     }
 

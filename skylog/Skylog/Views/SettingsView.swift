@@ -64,6 +64,9 @@ struct SettingsView: View {
                 Section {
                     TextField("Dein Name wie auf dem Ticket (z.B. Raffael Muster)", text: $passengerName)
                         .textContentType(.name)
+                    NavigationLink { ProfileSettingsView() } label: {
+                        Label("Persönliches Profil & Obsidian", systemImage: "person.text.rectangle")
+                    }
                 } header: {
                     Text("Reisender")
                 } footer: {

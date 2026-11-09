@@ -136,6 +136,11 @@ struct TripPlanView: View {
             }
             .navigationTitle("Reiseplan")
             .toolbar {
+                if ObsidianVault.isConnected {
+                    Button {
+                        _ = try? ObsidianVault.write(name: "\(trip.name) – Reiseplan", markdown: PackingAI.planMarkdown(trip: trip, plan: plan))
+                    } label: { Image(systemName: "square.and.arrow.down") }
+                }
                 ShareLink(item: shareText(trip.name, plan)) { Image(systemName: "square.and.arrow.up") }
             }
         }

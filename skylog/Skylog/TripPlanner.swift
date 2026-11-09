@@ -51,6 +51,8 @@ enum TripPlanner {
         Budget: \(prefs.budget)
         Wünsche: \(prefs.notes.isEmpty ? "keine" : prefs.notes)
         """
+        let profile = PersonalProfile.text
+        if !profile.isEmpty { context += "\n\nPersönliches (für passende Vorschläge berücksichtigen):\n\(profile)" }
 
         let system = """
         Du bist ein erfahrener Reiseplaner. Erstelle einen realistischen Tag-für-Tag-Plan auf Deutsch (Schweizer Schreibweise, kein ß).
