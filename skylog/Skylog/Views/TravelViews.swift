@@ -309,11 +309,23 @@ struct TripDetailView: View {
     let tripID: UUID
     @State private var newItem = ""
     @State private var editing = false
+    @State private var planning = false
+    @State private var bookingStore = BookingStore.shared
 
     var body: some View {
         if let trip = store.trips.first(where: { $0.id == tripID }) {
             List {
                 if !trip.notes.isEmpty { Section { Text(trip.notes) } }
+                Section("Reiseplan") {
+                    if trip.plan != nil {
+                        NavigationLink { TripPlanView(tripID: trip.id) } label: {
+                            Label("Tag-für-Tag-Plan ansehen", systemImage: "map")
+                        }
+                    }
+                    Button { planning = true } label: {
+                        Label(trip.plan == nil ? "Reise mit KI planen" : "Plan neu erstellen", systemImage: "sparkles")
+                    }
+                }
                 Section("Flüge") {
                     let list = store.flights(for: trip, in: flights)
                     if list.isEmpty { Text("Keine Flüge in diesem Zeitraum.").foregroundStyle(.secondary) }
@@ -321,6 +333,13 @@ struct TripDetailView: View {
                         NavigationLink(value: f.id) { FlightCard(flight: f) }
                             .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
                             .listRowBackground(Color.clear)
+                    }
+                }
+                let stays = bookingStore.bookings(for: trip)
+                if !stays.isEmpty {
+                    Section("Unterkünfte & Buchungen") {
+                        ForEach(stays) { BookingRow(booking: $0) }
+                            .onDelete { idx in bookingStore.delete(idx.map { stays[$0].id }) }
                     }
                 }
                 Section("Packliste \(trip.packing.filter(\.done).count)/\(trip.packing.count)") {
@@ -354,6 +373,7 @@ struct TripDetailView: View {
             .navigationDestination(for: UUID.self) { FlightDetailView(flightID: $0) }
             .toolbar { Button("Bearbeiten") { editing = true } }
             .sheet(isPresented: $editing) { TripEditor(trip: trip) }
+            .sheet(isPresented: $planning) { TripPlannerView(trip: trip) }
         }
     }
 

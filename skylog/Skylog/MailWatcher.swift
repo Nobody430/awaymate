@@ -28,7 +28,13 @@ enum MailWatcher {
 
             var candidates: [FlightCandidate]
             if AIClient.hasKey {
-                candidates = try await MailAI.extract(relevant) { _ in }
+                let result = try await MailAI.extractAll(relevant) { _ in }
+                candidates = result.flights
+                for b in result.bookings where BookingStore.shared.upsert(b) {
+                    let title = b.cancelled ? "\(b.kind.label) storniert" : "Neue Buchung: \(b.kind.label)"
+                    Notifier.post(id: "mail-booking-\(b.key)", title: title,
+                                  body: "\(b.name), \(b.city) · \(Fmt.day(b.start))" + (b.kind == .hotel && b.nights > 0 ? " · \(b.nights) Nächte" : ""))
+                }
             } else {
                 candidates = relevant.flatMap { m in
                     FlightTextParser.parse(m.subject + "\n" + m.text, source: m.subject, reference: m.received)

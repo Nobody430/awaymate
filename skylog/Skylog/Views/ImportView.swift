@@ -222,12 +222,16 @@ struct ImportView: View {
         }
         do {
             if replaceExisting { store.deleteAll() }
-            let found = try await MailAI.extract(pendingMails) { message in status = message }
+            let result = try await MailAI.extractAll(pendingMails) { message in status = message }
             pendingMails = []
             candidates = []
             selected = []
-            merge(found)
-            status = "\(found.count) Flüge erkannt – prüfen und importieren."
+            merge(result.flights)
+            if replaceExisting { BookingStore.shared.deleteAll() }
+            var stays = 0
+            for b in result.bookings where BookingStore.shared.upsert(b) && !b.cancelled { stays += 1 }
+            status = "\(result.flights.count) Flüge erkannt – prüfen und importieren."
+                + (stays > 0 ? " \(stays) Hotels/Mietwagen/Züge wurden direkt den Reisen hinzugefügt." : "")
         } catch {
             status = error.localizedDescription
         }

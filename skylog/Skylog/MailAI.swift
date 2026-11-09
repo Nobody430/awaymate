@@ -17,7 +17,21 @@ enum MailAI {
         let forwarded: Bool
         let mailType: String
     }
-    private struct Response: Codable { let flights: [Extracted] }
+    struct ExtractedBooking: Codable {
+        let kind: String
+        let name: String
+        let city: String
+        let address: String
+        let startDate: String
+        let endDate: String
+        let bookingReference: String
+        let provider: String
+        let status: String
+        let guests: [String]
+        let forwarded: Bool
+        let mailIndex: Int
+    }
+    private struct Response: Codable { let flights: [Extracted]; let bookings: [ExtractedBooking] }
 
     static var passengerName: String {
         (UserDefaults.standard.string(forKey: "passengerName") ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -50,6 +64,11 @@ enum MailAI {
     - Bei "confirmation" und "change" ALLE Teilstrecken des aktuellen Reiseplans auflisten, auch Rückflüge und Anschlussflüge.
     - Codeshares: nur die durchführende (operating) Flugnummer angeben, nicht zusätzlich die Marketing-Nummer.
     - forwarded: true, wenn die Mail weitergeleitet wurde (z.B. „WG:“, „Fwd:“, „Weitergeleitete Nachricht“) oder an jemand anderen gerichtet ist
+    Zusätzlich unter "bookings" weitere Reisebuchungen des Inhabers: Unterkünfte (Hotel, Booking.com, Airbnb → kind "hotel"), \
+    Mietwagen ("car"), Zug ("train"), Fernbus ("bus"), Fähre ("ferry"), gebuchte Touren/Tickets ("activity"). \
+    startDate/endDate im Format YYYY-MM-DD (Hotel: Check-in/Check-out; Mietwagen: Abholung/Rückgabe; Zug: Reisedatum für beide). \
+    name = Hotel-/Firmenname bzw. Strecke („Zürich → Mailand“), city = Ort, provider = Buchungsplattform (z.B. Booking.com), \
+    guests = Namen der Gäste/Mieter/Reisenden, status wie bei Flügen. Keine Werbung oder Angebote.
     Erfinde nichts. Wenn eine Mail keine echte Buchung enthält, liefere für sie nichts.
     """
 
@@ -67,8 +86,21 @@ enum MailAI {
                 "mailType": ["type": "string", "enum": ["confirmation", "change", "cancellation", "checkin", "boardingpass", "reminder", "other"]],
             ],
         ]
-        return ["type": "object", "additionalProperties": false, "required": ["flights"],
-                "properties": ["flights": ["type": "array", "items": flight]]]
+        let booking: [String: Any] = [
+            "type": "object", "additionalProperties": false,
+            "required": ["kind", "name", "city", "address", "startDate", "endDate", "bookingReference", "provider", "status", "guests", "forwarded", "mailIndex"],
+            "properties": [
+                "kind": ["type": "string", "enum": ["hotel", "car", "train", "bus", "ferry", "activity", "other"]],
+                "name": ["type": "string"], "city": ["type": "string"], "address": ["type": "string"],
+                "startDate": ["type": "string"], "endDate": ["type": "string"],
+                "bookingReference": ["type": "string"], "provider": ["type": "string"],
+                "status": ["type": "string", "enum": ["booked", "changed", "cancelled"]],
+                "guests": ["type": "array", "items": ["type": "string"]],
+                "forwarded": ["type": "boolean"], "mailIndex": ["type": "integer"],
+            ],
+        ]
+        return ["type": "object", "additionalProperties": false, "required": ["flights", "bookings"],
+                "properties": ["flights": ["type": "array", "items": flight], "bookings": ["type": "array", "items": booking]]]
     }()
 
     /// True if the flight is the owner's: name among the passengers, or (no names) a direct, non-forwarded mail.
@@ -154,6 +186,9 @@ enum MailAI {
             guard keywords.contains(where: { t.contains($0) }) else { return false }
             // With a name set, the mail must mention at least part of it
             if !nameParts.isEmpty, !nameParts.contains(where: { t.contains($0) }) { return false }
+            let stay = ["hotel", "booking.com", "airbnb", "unterkunft", "übernachtung", "check-in:", "anreise", "mietwagen", "car rental",
+                        "sixt", "hertz", "europcar", "avis", "enterprise", "zugticket", "sbb", "trainline", "deutsche bahn", "flixbus"]
+            if stay.contains(where: { t.contains($0) }) { return true }
             return t.range(of: "\\b[a-z0-9]{2}\\s?-?\\d{1,4}\\b", options: .regularExpression) != nil
         }
     }
@@ -172,32 +207,45 @@ enum MailAI {
         return (input * inPrice + output * outPrice) / 1_000_000 * 0.9
     }
 
-    private static func request(_ batch: [(Int, OutlookMail.MailItem)]) async throws -> [(Extracted, OutlookMail.MailItem)] {
+    private static func request(_ batch: [(Int, OutlookMail.MailItem)]) async throws -> ([(Extracted, OutlookMail.MailItem)], [(ExtractedBooking, OutlookMail.MailItem)]) {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
         let body = batch.map { index, m in
             "### Mail \(index)\nVon: \(m.from)\nDatum: \(f.string(from: m.received))\nBetreff: \(m.subject)\n\n\(relevantText(m))"
         }.joined(separator: "\n\n")
         let text = try await AIClient.send(system: fullSystem, user: body, schema: schema, effort: "low", maxTokens: 8000)
-        let flights = try JSONDecoder().decode(Response.self, from: Data(text.utf8)).flights
+        let response = try JSONDecoder().decode(Response.self, from: Data(text.utf8))
         let byIndex = Dictionary(uniqueKeysWithValues: batch.map { ($0.0, $0.1) })
-        return flights.compactMap { e in byIndex[e.mailIndex].map { (e, $0) } }
+        return (response.flights.compactMap { e in byIndex[e.mailIndex].map { (e, $0) } },
+                response.bookings.compactMap { b in byIndex[b.mailIndex].map { (b, $0) } })
+    }
+
+    struct ExtractResult {
+        var flights: [FlightCandidate]
+        var bookings: [TravelBooking]
+    }
+
+    static func extract(_ mails: [OutlookMail.MailItem], progress: @escaping @MainActor (String) -> Void) async throws -> [FlightCandidate] {
+        try await extractAll(mails, progress: progress).flights
     }
 
     /// Runs the extraction over all mails (3 requests in parallel) and reconciles changes/cancellations.
-    static func extract(_ mails: [OutlookMail.MailItem], progress: @escaping @MainActor (String) -> Void) async throws -> [FlightCandidate] {
+    static func extractAll(_ mails: [OutlookMail.MailItem], progress: @escaping @MainActor (String) -> Void) async throws -> ExtractResult {
         let indexed = Array(mails.enumerated()).map { ($0.offset + 1, $0.element) }
         let batches = stride(from: 0, to: indexed.count, by: mailsPerRequest).map { Array(indexed[$0..<min($0 + mailsPerRequest, indexed.count)]) }
         var found: [(Extracted, OutlookMail.MailItem)] = []
+        var foundBookings: [(ExtractedBooking, OutlookMail.MailItem)] = []
         var done = 0
         var lastError: Error?
 
         for chunk in stride(from: 0, to: batches.count, by: 3).map({ Array(batches[$0..<min($0 + 3, batches.count)]) }) {
-            await withTaskGroup(of: Result<[(Extracted, OutlookMail.MailItem)], Error>.self) { group in
+            await withTaskGroup(of: Result<([(Extracted, OutlookMail.MailItem)], [(ExtractedBooking, OutlookMail.MailItem)]), Error>.self) { group in
                 for b in chunk { group.addTask { do { return .success(try await request(b)) } catch { return .failure(error) } } }
                 for await r in group {
                     switch r {
-                    case .success(let list): found += list
+                    case .success(let pair):
+                        found += pair.0
+                        foundBookings += pair.1
                     case .failure(let e): lastError = e
                     }
                     done += 1
@@ -205,7 +253,7 @@ enum MailAI {
                 }
             }
         }
-        if found.isEmpty, let lastError { throw lastError }
+        if found.isEmpty && foundBookings.isEmpty, let lastError { throw lastError }
 
         found = reconcileBookings(found)
 
@@ -219,7 +267,7 @@ enum MailAI {
         let day = DateFormatter()
         day.dateFormat = "yyyy-MM-dd"
         day.locale = Locale(identifier: "en_US_POSIX")
-        return latest.values.compactMap { item -> FlightCandidate? in
+        let flights: [FlightCandidate] = latest.values.compactMap { item -> FlightCandidate? in
             let (e, mail) = item
             guard Self.belongsToOwner(e), let d = day.date(from: e.date),
                   e.flightNumber.count >= 3, e.from.count == 3, e.to.count == 3 else { return nil }
@@ -236,5 +284,34 @@ enum MailAI {
             return c
         }
         .sorted { $0.date > $1.date }
+
+        return ExtractResult(flights: flights, bookings: convertBookings(foundBookings))
+    }
+
+    /// Newest mail per booking wins; only bookings with the owner as guest (if a name is set).
+    static func convertBookings(_ items: [(ExtractedBooking, OutlookMail.MailItem)]) -> [TravelBooking] {
+        let day = DateFormatter()
+        day.dateFormat = "yyyy-MM-dd"
+        day.locale = Locale(identifier: "en_US_POSIX")
+        let surname = passengerName.lowercased().folding(options: .diacriticInsensitive, locale: nil).split(separator: " ").last.map(String.init)
+        var latest: [String: (ExtractedBooking, OutlookMail.MailItem)] = [:]
+        for item in items {
+            let b = item.0
+            let k = b.kind + "|" + (b.bookingReference.isEmpty ? b.name.lowercased() + b.startDate : b.bookingReference.uppercased())
+            if let existing = latest[k], existing.1.received > item.1.received { continue }
+            latest[k] = item
+        }
+        return latest.values.compactMap { item -> TravelBooking? in
+            let (b, mail) = item
+            if let surname, !b.guests.isEmpty,
+               !b.guests.contains(where: { $0.lowercased().folding(options: .diacriticInsensitive, locale: nil).contains(surname) }) { return nil }
+            if b.guests.isEmpty && b.forwarded { return nil }
+            guard let start = day.date(from: b.startDate) else { return nil }
+            let end = day.date(from: b.endDate) ?? start
+            return TravelBooking(kind: TravelBooking.Kind(rawValue: b.kind) ?? .other, name: b.name, city: b.city, address: b.address,
+                                 start: start, end: max(end, start), bookingReference: b.bookingReference,
+                                 provider: b.provider.isEmpty ? mail.from : b.provider, cancelled: b.status == "cancelled")
+        }
+        .sorted { $0.start > $1.start }
     }
 }
