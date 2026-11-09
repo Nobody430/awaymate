@@ -29,6 +29,7 @@ struct FlightDetailView: View {
                 LiveActivityButton(flight: f)
                 times(f)
                 gates(f)
+                if let i = f.inbound, !f.isInAir, !f.normalizedStatus.isFinal { inbound(i, f) }
                 if f.isInAir, let p = f.lastPosition { live(p) }
                 if f.isPast || f.normalizedStatus.isFinal || (f.arrival.delayMinutes ?? 0) >= 120 {
                     CompensationCard(flight: f)
@@ -198,6 +199,29 @@ struct FlightDetailView: View {
                 InfoTile(title: "Gepäck", value: f.arrival.baggageBelt, icon: "suitcase.rolling")
             }
         }
+    }
+
+    private func inbound(_ i: InboundFlight, _ f: Flight) -> some View {
+        let delay = i.expectedDelay(ourDeparture: f.departure.best)
+        let color: Color = i.isCanceled ? .red : delay >= 15 ? .orange : i.landed ? .green : Theme.accent
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Image(systemName: i.landed ? "airplane.arrival" : i.departed ? "airplane" : "airplane.departure")
+                    .foregroundStyle(color)
+                Text("Dein Flugzeug").font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Text("vor \(Fmt.countdown(Date().timeIntervalSince(i.updated)))").font(.caption2).foregroundStyle(.secondary)
+            }
+            Text(i.headline).font(.headline).foregroundStyle(color)
+            Text(i.detail(tz: f.departure.tz)).font(.subheadline)
+            if delay >= 15 {
+                Text("Abflug voraussichtlich ca. \(delay) Min. später (inkl. \(Int(InboundFlight.turnaround / 60)) Min. Bodenzeit)")
+                    .font(.caption).foregroundStyle(.orange)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private func live(_ p: LivePosition) -> some View {

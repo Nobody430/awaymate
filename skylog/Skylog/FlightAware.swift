@@ -103,7 +103,41 @@ enum FlightData {
         f.callSign = f.callSign ?? b.callSign
         f.distanceKm = f.distanceKm ?? b.distanceKm
         f.lastPosition = f.lastPosition ?? b.lastPosition
+        f.inboundFAID = f.inboundFAID ?? b.inboundFAID
         return f
+    }
+
+    // MARK: Inbound aircraft
+
+    /// Previous leg of our aircraft: FlightAware knows it directly (inbound id),
+    /// AeroDataBox via the aircraft registration's flights of the day.
+    static func inbound(for f: Flight) async throws -> InboundFlight? {
+        if let id = f.inboundFAID, FlightAware.hasKey, current != .aerodatabox {
+            if let i = try? await FlightAware.inbound(id) { return i }
+        }
+        guard Settings.hasKey, let reg = f.aircraftReg, !reg.isEmpty,
+              let ourDep = f.departure.scheduled ?? f.departure.best else { return nil }
+        var legs: [Flight] = []
+        let local = Fmt.apiDate.date(from: f.date) ?? ourDep
+        for day in [local, local.addingTimeInterval(-86400)] {
+            if let l = try? await AeroDataBox.flights(registration: reg, date: day) { legs += l }
+            if legs.contains(where: { $0.arrival.code == f.departure.code }) { break }
+        }
+        // latest leg that arrives at our departure airport before we leave
+        let candidates = legs.filter {
+            $0.arrival.code == f.departure.code && $0.number != f.number
+                && ($0.arrival.scheduled ?? .distantFuture) < ourDep
+        }
+        guard let leg = candidates.max(by: { ($0.arrival.scheduled ?? .distantPast) < ($1.arrival.scheduled ?? .distantPast) })
+        else { return nil }
+        let st = leg.normalizedStatus
+        let landed = st == .arrived || leg.arrival.runway != nil
+        return InboundFlight(
+            number: leg.number, fromCode: leg.departure.code, fromCity: leg.departure.city,
+            status: leg.status, departure: leg.departure.runway ?? leg.departure.best,
+            departed: landed || st.isAirborne || leg.departure.runway != nil,
+            arrival: leg.arrival.best, scheduledArrival: leg.arrival.scheduled,
+            landed: landed, updated: Date())
     }
 }
 
@@ -150,6 +184,7 @@ enum FlightAware {
         let ident: String?
         let ident_iata: String?
         let fa_flight_id: String?
+        let inbound_fa_flight_id: String?
         let operator_iata: String?
         let atc_ident: String?
         let registration: String?
@@ -260,9 +295,30 @@ enum FlightAware {
         flight.aircraftModel = fa.aircraft_type
         flight.aircraftReg = fa.registration
         flight.faFlightID = fa.fa_flight_id
+        flight.inboundFAID = fa.inbound_fa_flight_id
         flight.distanceKm = fa.route_distance.map { $0 * 1.60934 }
         flight.lastUpdated = Date()
         return flight
+    }
+
+    // MARK: Inbound aircraft
+
+    /// Status of the inbound flight (one query, no airport lookups).
+    static func inbound(_ faFlightID: String) async throws -> InboundFlight? {
+        let data = try await get("/flights/\(faFlightID)")
+        guard let fa = try JSONDecoder().decode(FlightsResponse.self, from: data).flights.first else { return nil }
+        let landed = fa.actual_on != nil || fa.actual_in != nil
+        return InboundFlight(
+            number: fa.ident_iata ?? fa.ident ?? "?",
+            fromCode: fa.origin?.code_iata ?? fa.origin?.code ?? "?",
+            fromCity: fa.origin?.city,
+            status: fa.cancelled == true ? "Canceled" : landed ? "Arrived" : fa.actual_off != nil ? "EnRoute" : nil,
+            departure: date(fa.actual_off ?? fa.actual_out ?? fa.estimated_off ?? fa.estimated_out ?? fa.scheduled_off ?? fa.scheduled_out),
+            departed: fa.actual_off != nil || fa.actual_out != nil,
+            arrival: date(fa.actual_in ?? fa.actual_on ?? fa.estimated_in ?? fa.estimated_on ?? fa.scheduled_in ?? fa.scheduled_on),
+            scheduledArrival: date(fa.scheduled_in ?? fa.scheduled_on),
+            landed: landed,
+            updated: Date())
     }
 
     // MARK: Live position

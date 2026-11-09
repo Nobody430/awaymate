@@ -1,4 +1,13 @@
 import Foundation
+/// "18:59" in the airport's local time zone (falls back to the phone's zone).
+func airportTime(_ date: Date, _ tz: String?) -> String {
+    let f = DateFormatter()
+    f.locale = Locale(identifier: "de_CH")
+    f.timeZone = tz.flatMap(TimeZone.init(identifier:)) ?? .current
+    f.dateFormat = "HH:mm"
+    return f.string(from: date)
+}
+
 #if canImport(ActivityKit)
 import ActivityKit
 #endif
@@ -50,6 +59,9 @@ struct FlightActivityAttributes: ActivityAttributes {
         var delayMinutes: Int
         var belt: String?
         var inAir: Bool
+        /// e.g. "Zubringer in der Luft aus ORD" (optional, may be missing in server pushes)
+        var inbound: String? = nil
+        var inboundWarn: Bool? = nil
     }
 
     var flightID: String
@@ -58,5 +70,8 @@ struct FlightActivityAttributes: ActivityAttributes {
     var to: String
     var fromCity: String
     var toCity: String
+    /// Airport time zones, so times show in local airport time (like on the boarding pass)
+    var fromTZ: String? = nil
+    var toTZ: String? = nil
 }
 #endif

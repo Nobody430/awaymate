@@ -19,19 +19,31 @@ enum AeroDataBox {
     static let host = "aerodatabox.p.rapidapi.com"
 
     static func search(number: String, date: Date) async throws -> [Flight] {
-        let key = Settings.apiKey
-        guard !key.isEmpty else { throw APIError.noKey }
         let num = number.replacingOccurrences(of: " ", with: "").uppercased()
         let dateString = Fmt.apiDate.string(from: date)
+        let items = try await fetch("/flights/number/\(num)/\(dateString)", extra: [
+            URLQueryItem(name: "withLocation", value: "true"),
+            URLQueryItem(name: "dateLocalRole", value: "Departure"),
+        ])
+        return items.map { $0.toFlight(fallbackNumber: num, date: dateString) }
+    }
+
+    /// All flights of one aircraft (registration) on a local date – used to find the inbound leg.
+    static func flights(registration reg: String, date: Date) async throws -> [Flight] {
+        let r = reg.replacingOccurrences(of: " ", with: "").uppercased()
+        let dateString = Fmt.apiDate.string(from: date)
+        let items = try await fetch("/flights/reg/\(r)/\(dateString)", extra: [])
+        return items.map { $0.toFlight(fallbackNumber: $0.number ?? "?", date: dateString) }
+    }
+
+    private static func fetch(_ path: String, extra: [URLQueryItem]) async throws -> [ADBFlight] {
+        let key = Settings.apiKey
+        guard !key.isEmpty else { throw APIError.noKey }
         var comps = URLComponents()
         comps.scheme = "https"
         comps.host = host
-        comps.path = "/flights/number/\(num)/\(dateString)"
-        comps.queryItems = [
-            URLQueryItem(name: "withAircraftImage", value: "false"),
-            URLQueryItem(name: "withLocation", value: "true"),
-            URLQueryItem(name: "dateLocalRole", value: "Departure"),
-        ]
+        comps.path = path
+        comps.queryItems = [URLQueryItem(name: "withAircraftImage", value: "false")] + extra
         guard let url = comps.url else { throw APIError.notFound }
         var request = URLRequest(url: url)
         request.timeoutInterval = 20
@@ -49,7 +61,7 @@ enum AeroDataBox {
         }
         let items = try JSONDecoder().decode([ADBFlight].self, from: data)
         if items.isEmpty { throw APIError.notFound }
-        return items.map { $0.toFlight(fallbackNumber: num, date: dateString) }
+        return items
     }
 }
 

@@ -169,6 +169,8 @@ final class FlightStore {
         new.lastUpdated = Date()
         if new.lastPosition == nil { new.lastPosition = old.lastPosition }
         if new.icao24 == nil { new.icao24 = old.icao24 }
+        if new.inbound == nil { new.inbound = old.inbound }
+        if new.inboundFAID == nil { new.inboundFAID = old.inboundFAID }
 
         if notify && Settings.notifyChanges {
             for change in Notifier.changes(old: old, new: new) {
@@ -222,8 +224,49 @@ final class FlightStore {
                 }
             }
         }
+        await updateInbounds(force: force, notify: notify)
         await updateLivePositions()
         LiveFlight.autoStartIfNeeded(upcoming)
+    }
+
+    // MARK: Inbound aircraft
+
+    /// Tracks the plane's previous leg from 8 h before departure until we board (every 15 min).
+    func updateInbounds(force: Bool = false, notify: Bool = true) async {
+        let now = Date()
+        for f in flights {
+            guard let dep = f.departure.best, dep > now, dep < now.addingTimeInterval(8 * 3600),
+                  !f.normalizedStatus.isAirborne, !f.normalizedStatus.isFinal else { continue }
+            if f.inbound?.landed == true { continue }
+            if !force, let u = f.inbound?.updated, now.timeIntervalSince(u) < 15 * 60 { continue }
+            await updateInbound(f.id, notify: notify)
+        }
+    }
+
+    func updateInbound(_ id: UUID, notify: Bool = true) async {
+        guard let f = flight(id), let new = try? await FlightData.inbound(for: f) else { return }
+        guard var current = flight(id) else { return }
+        let old = current.inbound
+        current.inbound = new
+        update(current)
+        guard notify, Settings.notifyChanges else { return }
+        let ourDep = current.departure.best
+        let delay = new.expectedDelay(ourDeparture: ourDep)
+        let oldDelay = old?.expectedDelay(ourDeparture: ourDep) ?? 0
+        let tag = "\(id)-inbound"
+        if new.isCanceled && old?.isCanceled != true {
+            Notifier.post(id: "\(tag)-cancel", title: "\(current.number): Zubringer annulliert",
+                          body: "Der Flug \(new.number), der dein Flugzeug bringen sollte, ist annulliert. Mögliche Verspätung oder Flugzeugwechsel.")
+        } else if delay >= 15 && delay >= oldDelay + 15 {
+            Notifier.post(id: "\(tag)-delay-\(delay)", title: "\(current.number): Flugzeug kommt spät",
+                          body: "Dein Flugzeug (\(new.number) aus \(new.fromCode)) landet erst \(Fmt.time(new.arrival, current.departure.tz)). Abflug wohl ca. \(delay) Min. später.")
+        } else if new.departed && old?.departed == false {
+            Notifier.post(id: "\(tag)-dep", title: "\(current.number): Flugzeug ist unterwegs",
+                          body: "Dein Flugzeug ist als \(new.number) in \(new.fromCode) gestartet. Landung ca. \(Fmt.time(new.arrival, current.departure.tz)).")
+        } else if new.landed && old?.landed == false {
+            Notifier.post(id: "\(tag)-land", title: "\(current.number): Flugzeug ist da",
+                          body: "Dein Flugzeug ist aus \(new.fromCode) gelandet.")
+        }
     }
 
     /// Live data: free ADS-B first (departure/landing detection, position, ETA), then OpenSky / FlightAware as fallback.

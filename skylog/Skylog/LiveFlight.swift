@@ -18,8 +18,18 @@ enum LiveFlight {
             terminal: f.isInAir || status == .arrived ? f.arrival.terminal : f.departure.terminal,
             delayMinutes: max(0, f.departure.delayMinutes ?? 0),
             belt: f.arrival.baggageBelt,
-            inAir: f.isInAir
+            inAir: f.isInAir,
+            inbound: inboundLine(f),
+            inboundWarn: f.inbound.map { $0.isCanceled || $0.expectedDelay(ourDeparture: f.departure.best) >= 15 }
         )
+    }
+
+    private static func inboundLine(_ f: Flight) -> String? {
+        guard let i = f.inbound, !f.isInAir, !f.normalizedStatus.isFinal, f.departure.runway == nil else { return nil }
+        let delay = i.expectedDelay(ourDeparture: f.departure.best)
+        if delay >= 15 { return "\(i.headline) · ca. +\(delay) Min" }
+        if i.landed { return i.headline }
+        return "\(i.headline) · Landung \(Fmt.time(i.arrival, f.departure.tz))"
     }
 
     static func activity(for f: Flight) -> Activity<FlightActivityAttributes>? {
@@ -32,7 +42,8 @@ enum LiveFlight {
         guard ActivityAuthorizationInfo().areActivitiesEnabled, activity(for: f) == nil, let s = state(for: f) else { return }
         let attributes = FlightActivityAttributes(flightID: f.id.uuidString, flightNumber: f.number,
                                                   from: f.departure.code, to: f.arrival.code,
-                                                  fromCity: f.departure.displayCity, toCity: f.arrival.displayCity)
+                                                  fromCity: f.departure.displayCity, toCity: f.arrival.displayCity,
+                                                  fromTZ: f.departure.tz.identifier, toTZ: f.arrival.tz.identifier)
         let content = ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(3600))
         // With a push server, the Live Activity is updated remotely in real time
         if PushClient.isConfigured, let activity = try? Activity.request(attributes: attributes, content: content, pushType: .token) {

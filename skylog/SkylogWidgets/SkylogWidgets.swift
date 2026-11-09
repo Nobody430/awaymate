@@ -115,13 +115,13 @@ struct FlightLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.leading) {
                     VStack(alignment: .leading) {
                         Text(context.attributes.from).font(.title2.bold())
-                        Text(context.state.departure.formatted(date: .omitted, time: .shortened)).font(.caption)
+                        Text(airportTime(context.state.departure, context.attributes.fromTZ)).font(.caption)
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     VStack(alignment: .trailing) {
                         Text(context.attributes.to).font(.title2.bold())
-                        Text(context.state.arrival.formatted(date: .omitted, time: .shortened)).font(.caption)
+                        Text(airportTime(context.state.arrival, context.attributes.toTZ)).font(.caption)
                     }
                 }
                 DynamicIslandExpandedRegion(.center) {
@@ -166,7 +166,7 @@ struct LockScreenFlightView: View {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading) {
                     Text(context.attributes.from).font(.title.bold())
-                    Text(s.departure.formatted(date: .omitted, time: .shortened)).font(.caption)
+                    Text(airportTime(s.departure, context.attributes.fromTZ)).font(.caption)
                 }
                 Spacer()
                 VStack {
@@ -182,10 +182,19 @@ struct LockScreenFlightView: View {
                 Spacer()
                 VStack(alignment: .trailing) {
                     Text(context.attributes.to).font(.title.bold())
-                    Text(s.arrival.formatted(date: .omitted, time: .shortened)).font(.caption)
+                    Text(airportTime(s.arrival, context.attributes.toTZ)).font(.caption)
                 }
             }
             FlightProgressRow(state: s)
+            if let line = s.inbound {
+                HStack(spacing: 6) {
+                    Image(systemName: "airplane.arrival")
+                    Text(line).lineLimit(1)
+                    Spacer()
+                }
+                .font(.caption)
+                .foregroundStyle(s.inboundWarn == true ? .orange : .secondary)
+            }
         }
         .foregroundStyle(.white)
     }

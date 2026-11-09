@@ -51,6 +51,51 @@ struct LivePosition: Codable, Hashable {
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
 }
 
+/// The plane that will operate our flight, on its previous leg.
+struct InboundFlight: Codable, Hashable {
+    var number: String
+    var fromCode: String
+    var fromCity: String?
+    var status: String?
+    var departure: Date?
+    var departed: Bool
+    var arrival: Date?
+    var scheduledArrival: Date?
+    var landed: Bool
+    var updated: Date
+
+    var normalizedStatus: FlightStatus { FlightStatus(raw: status) }
+    var isCanceled: Bool { normalizedStatus == .canceled }
+
+    /// Minimum ground time between arrival and next departure.
+    static let turnaround: TimeInterval = 35 * 60
+
+    /// Expected departure delay of our flight caused by a late inbound plane (minutes, 0 if none).
+    func expectedDelay(ourDeparture: Date?) -> Int {
+        guard !landed, let arr = arrival, let dep = ourDeparture else { return 0 }
+        let ready = arr.addingTimeInterval(Self.turnaround)
+        return max(0, Int(ready.timeIntervalSince(dep) / 60))
+    }
+
+    /// Short line like Flighty: "Zubringer in der Luft aus ORD"
+    var headline: String {
+        if isCanceled { return "Zubringer-Flug \(number) annulliert" }
+        if landed { return "Flugzeug ist gelandet (aus \(fromCode))" }
+        if departed { return "Zubringer in der Luft aus \(fromCode)" }
+        return "Zubringer noch in \(fromCode)"
+    }
+
+    /// Arrival times are shown in local time of our departure airport (where the inbound lands).
+    func detail(tz: TimeZone) -> String {
+        let arr = Fmt.time(arrival, tz)
+        if isCanceled { return "Flugzeugwechsel oder Verspätung möglich" }
+        if landed { return "\(number) gelandet um \(arr)" }
+        if departed { return "\(number) · Landung ca. \(arr)" }
+        if let d = departure, d < Date() { return "\(number) · Abflug überfällig · Landung ca. \(arr)" }
+        return "\(number) · Abflug in \(Fmt.countdown(max(0, (departure ?? Date()).timeIntervalSinceNow))) · Landung \(arr)"
+    }
+}
+
 enum FlightStatus: String {
     case scheduled, delayed, checkIn, boarding, gateClosed, departed, enRoute, approaching, arrived, canceled, diverted, unknown
 
@@ -112,6 +157,10 @@ struct Flight: Identifiable, Codable, Hashable {
     var lastPosition: LivePosition?
     /// FlightAware flight id (for live positions)
     var faFlightID: String? = nil
+    /// FlightAware id of the inbound flight (the plane's previous leg)
+    var inboundFAID: String? = nil
+    /// The aircraft's previous leg arriving at our departure airport
+    var inbound: InboundFlight? = nil
     var notes: String = ""
     var seat: String = ""
 
