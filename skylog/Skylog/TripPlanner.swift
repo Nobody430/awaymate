@@ -66,7 +66,24 @@ enum TripPlanner {
         - summary: 2–3 Sätze Überblick. date im Format YYYY-MM-DD.
         Erfinde keine konkreten Preise oder Öffnungszeiten als Fakten – formuliere sie als ungefähr.
         """
-        let text = try await AIClient.send(system: system, user: context, schema: schema, effort: "medium", maxTokens: 16000)
-        return try JSONDecoder().decode(TripPlan.self, from: Data(text.utf8))
+        // Name every day explicitly so the model can't return an empty skeleton
+        var days: [String] = []
+        var d = Calendar.current.startOfDay(for: trip.start)
+        while d <= trip.end && days.count < 21 {
+            days.append(f.string(from: d))
+            d = Calendar.current.date(byAdding: .day, value: 1, to: d) ?? trip.end.addingTimeInterval(1)
+        }
+        if !days.isEmpty {
+            context += "\n\nErstelle für JEDEN dieser Tage einen Eintrag in days (mit 2–6 items): " + days.joined(separator: ", ")
+        }
+
+        var lastText = ""
+        for attempt in 0..<2 {
+            let extra = attempt == 0 ? "" : "\n\nWICHTIG: Deine letzte Antwort war leer. Fülle ALLE Felder vollständig aus – summary, days mit items, tips, packing, budget."
+            let text = try await AIClient.send(system: system, user: context + extra, schema: schema, effort: "medium", maxTokens: 16000)
+            lastText = text
+            if let plan = try? JSONDecoder().decode(TripPlan.self, from: Data(text.utf8)), plan.isUsable { return plan }
+        }
+        throw AIClient.Failure(message: "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " + String(lastText.prefix(200)))
     }
 }

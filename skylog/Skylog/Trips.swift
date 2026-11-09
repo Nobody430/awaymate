@@ -25,6 +25,9 @@ struct TripPlan: Codable, Hashable {
     let tips: [String]
     let packing: [String]
     let budget: String
+
+    /// The model sometimes returns an empty skeleton – don't save that.
+    var isUsable: Bool { !days.isEmpty && days.contains { !$0.items.isEmpty } }
 }
 
 struct Trip: Identifiable, Codable, Hashable {

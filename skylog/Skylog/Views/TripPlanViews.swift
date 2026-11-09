@@ -92,12 +92,22 @@ struct TripPlannerView: View {
 
 struct TripPlanView: View {
     @State private var store = TripStore.shared
+    @State private var replanning = false
     let tripID: UUID
 
     var body: some View {
-        if let trip = store.trips.first(where: { $0.id == tripID }), let plan = trip.plan {
+        if let trip = store.trips.first(where: { $0.id == tripID }), let plan = trip.plan, !plan.isUsable {
+            ContentUnavailableView {
+                Label("Plan ist leer", systemImage: "exclamationmark.triangle")
+            } description: {
+                Text("Die KI hat beim letzten Mal keinen Inhalt geliefert.")
+            } actions: {
+                Button("Neu erstellen") { replanning = true }.buttonStyle(.borderedProminent)
+            }
+            .sheet(isPresented: $replanning) { TripPlannerView(trip: trip) }
+        } else if let trip = store.trips.first(where: { $0.id == tripID }), let plan = trip.plan {
             List {
-                Section { Text(plan.summary) }
+                if !plan.summary.isEmpty { Section { Text(plan.summary) } }
                 ForEach(plan.days, id: \.self) { day in
                     Section {
                         ForEach(day.items, id: \.self) { item in
@@ -117,11 +127,13 @@ struct TripPlanView: View {
                         Text("\(dayLabel(day.date)) · \(day.title)")
                     }
                 }
-                Section("Tipps") {
-                    ForEach(plan.tips, id: \.self) { Label($0, systemImage: "lightbulb").font(.subheadline) }
+                if !plan.tips.isEmpty {
+                    Section("Tipps") {
+                        ForEach(plan.tips, id: \.self) { Label($0, systemImage: "lightbulb").font(.subheadline) }
+                    }
                 }
-                Section("Budget") { Text(plan.budget) }
-                Section {
+                if !plan.budget.isEmpty { Section("Budget") { Text(plan.budget) } }
+                if !plan.packing.isEmpty { Section {
                     ForEach(plan.packing, id: \.self) { Text($0) }
                     Button("Zur Packliste hinzufügen") {
                         var t = trip
@@ -129,12 +141,16 @@ struct TripPlanView: View {
                         t.packing += plan.packing.filter { !existing.contains($0.lowercased()) }.map { PackItem(name: $0) }
                         store.upsert(t)
                     }
-                } header: { Text("Packliste-Vorschläge") }
+                } header: { Text("Packliste-Vorschläge") } }
+                Section {
+                    Button { replanning = true } label: { Label("Plan neu erstellen", systemImage: "arrow.clockwise") }
+                }
                 Section {
                     Text("KI-Vorschlag – Öffnungszeiten, Preise und Sicherheitslage vor Ort prüfen.").font(.caption).foregroundStyle(.secondary)
                 }
             }
             .navigationTitle("Reiseplan")
+            .sheet(isPresented: $replanning) { TripPlannerView(trip: trip) }
             .toolbar {
                 if ObsidianVault.isConnected {
                     Button {
