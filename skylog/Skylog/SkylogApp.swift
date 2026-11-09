@@ -22,6 +22,7 @@ struct SkylogApp: App {
                     await Notifier.requestAuthorization()
                     PushClient.register()
                     LiveFlight.observeExistingTokens()
+                    TravelMode.shared.evaluate(store)
                 }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -31,6 +32,7 @@ struct SkylogApp: App {
             case .active:
                 Task {
                     await store.refreshActive()
+                    TravelMode.shared.evaluate(store)
                     await MailWatcher.check(store: store)
                 }
             default:
@@ -41,6 +43,7 @@ struct SkylogApp: App {
             BackgroundRefresh.schedule()
             await FlightStore.shared.refreshActive(notify: true)
             await MailWatcher.check(store: FlightStore.shared)
+            await TravelMode.shared.evaluate(FlightStore.shared)
         }
     }
 }

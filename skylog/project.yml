@@ -33,7 +33,9 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleDisplayName: Skylog
         UILaunchScreen: {}
-        UIBackgroundModes: [fetch, remote-notification]
+        UIBackgroundModes: [fetch, remote-notification, location]
+        NSLocationWhenInUseUsageDescription: Skylog nutzt deinen ungefähren Standort am Reisetag, um Flugdaten im Hintergrund aktuell zu halten.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Am Reisetag hält Skylog die App über deinen ungefähren Standort wach und aktualisiert Gate, Verspätungen und Landung – auch wenn die App geschlossen ist. Am Flughafen wird automatisch aktualisiert.
         BGTaskSchedulerPermittedIdentifiers: [com.nobody430.skylog.refresh]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false

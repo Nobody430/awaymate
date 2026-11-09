@@ -18,6 +18,7 @@ struct SettingsView: View {
     @AppStorage("passengerName") private var passengerName = ""
     @AppStorage("mailWatch") private var mailWatch = true
     @AppStorage("pushServerURL") private var pushServerURL = ""
+    @AppStorage("travelMode") private var travelMode = true
     @AppStorage("pushServerToken") private var pushServerToken = ""
     @State private var pushStatus: String?
     @AppStorage("mailAutoAdd") private var mailAutoAdd = false
@@ -143,6 +144,8 @@ struct SettingsView: View {
 
                 Section {
                     Toggle("Automatisch aktualisieren", isOn: $autoRefresh)
+                    Toggle("Reisemodus (im Hintergrund aktualisieren)", isOn: $travelMode)
+                        .onChange(of: travelMode) { _, _ in TravelMode.shared.evaluate(store) }
                     Toggle("Mitteilung bei Gate-/Zeitänderung", isOn: $notifyChanges)
                     Toggle("Live-Aktivität automatisch (4 h vor Abflug)", isOn: $liveActivities)
                     Toggle("Erinnerungen (Check-in, Boarding, Landung)", isOn: $reminders)
