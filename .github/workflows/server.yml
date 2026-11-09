@@ -1,0 +1,65 @@
+name: Deploy push server
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'server/**'
+      - '.github/workflows/server.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: server-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      APP: ${{ secrets.FLY_APP_NAME }}
+    steps:
+      - name: Check secrets
+        id: check
+        run: |
+          if [ -n "$FLY_API_TOKEN" ] && [ -n "$APP" ]; then echo "ready=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::FLY_API_TOKEN / FLY_APP_NAME fehlen – Server-Deployment übersprungen."; echo "ready=false" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ready == 'true'
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+        if: steps.check.outputs.ready == 'true'
+
+      - name: Create app and volume (first run only)
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          flyctl apps list --json | grep -q "\"$APP\"" || flyctl apps create "$APP" --org personal
+          flyctl volumes list -a "$APP" --json | grep -q skylog_data || flyctl volumes create skylog_data -a "$APP" --region fra --size 1 --yes
+
+      - name: Set secrets
+        if: steps.check.outputs.ready == 'true'
+        env:
+          SERVER_TOKEN: ${{ secrets.SERVER_TOKEN }}
+          APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+          APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          FLIGHTAWARE_KEY: ${{ secrets.FLIGHTAWARE_KEY }}
+        run: |
+          args=()
+          for k in SERVER_TOKEN APNS_KEY_ID APNS_KEY_P8 APPLE_TEAM_ID FLIGHTAWARE_KEY; do
+            v="${!k}"; [ -n "$v" ] && args+=("$k=$v")
+          done
+          flyctl secrets set "${args[@]}" -a "$APP" --stage
+
+      - name: Deploy
+        if: steps.check.outputs.ready == 'true'
+        working-directory: server
+        run: flyctl deploy --remote-only -a "$APP" --ha=false --yes
+
+      - name: Health check
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          sleep 10
+          curl -fsS "https://$APP.fly.dev/health" && echo
+          echo "::notice::Server läuft: https://$APP.fly.dev"

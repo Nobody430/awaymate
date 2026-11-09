@@ -14,6 +14,7 @@ targets:
       path: Skylog/Skylog.entitlements
       properties:
         com.apple.security.application-groups: [group.com.nobody430.skylog]
+        aps-environment: production
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.nobody430.skylog
@@ -32,7 +33,7 @@ targets:
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleDisplayName: Skylog
         UILaunchScreen: {}
-        UIBackgroundModes: [fetch]
+        UIBackgroundModes: [fetch, remote-notification]
         BGTaskSchedulerPermittedIdentifiers: [com.nobody430.skylog.refresh]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false

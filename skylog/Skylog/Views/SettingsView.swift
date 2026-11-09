@@ -17,6 +17,9 @@ struct SettingsView: View {
     @AppStorage("aiProvider") private var aiProvider = AIClient.Provider.claudeFast.rawValue
     @AppStorage("passengerName") private var passengerName = ""
     @AppStorage("mailWatch") private var mailWatch = true
+    @AppStorage("pushServerURL") private var pushServerURL = ""
+    @AppStorage("pushServerToken") private var pushServerToken = ""
+    @State private var pushStatus: String?
     @AppStorage("mailAutoAdd") private var mailAutoAdd = false
 
     @State private var importing = false
@@ -120,6 +123,22 @@ struct SettingsView: View {
                     Text("E-Mail-Import")
                 } footer: {
                     Text("Einmalig: App registrieren → Kontotyp „Beliebiges Verzeichnis + persönliche Microsoft-Konten“ → Plattform „iOS/macOS“ mit Bundle-ID com.nobody430.skylog → Anwendungs-ID (Client-ID) hier einfügen. Details im README.")
+                }
+
+                Section {
+                    TextField("Server-Adresse (z.B. skylog-push-n430.fly.dev)", text: $pushServerURL)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
+                    SecureField("Server-Token", text: $pushServerToken)
+                        .textInputAutocapitalization(.never).autocorrectionDisabled()
+                    Button("Verbindung testen") {
+                        Task { pushStatus = await PushClient.test() }
+                    }
+                    .disabled(pushServerURL.isEmpty || pushServerToken.isEmpty)
+                    if let s = pushStatus ?? PushClient.lastStatus { Text(s).font(.caption).foregroundStyle(.secondary) }
+                } header: {
+                    Text("Echtzeit-Pushs (eigener Server)")
+                } footer: {
+                    Text("Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit.")
                 }
 
                 Section {

@@ -292,6 +292,7 @@ final class FlightStore {
         guard let data = try? Self.encoder.encode(flights) else { return }
         try? data.write(to: fileURL, options: .atomic)
         LiveFlight.publish(upcoming)
+        PushClient.scheduleSync()
     }
 
     func exportURL() -> URL? {

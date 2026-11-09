@@ -33,7 +33,26 @@ enum LiveFlight {
         let attributes = FlightActivityAttributes(flightID: f.id.uuidString, flightNumber: f.number,
                                                   from: f.departure.code, to: f.arrival.code,
                                                   fromCity: f.departure.displayCity, toCity: f.arrival.displayCity)
-        _ = try? Activity.request(attributes: attributes, content: ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(3600)))
+        let content = ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(3600))
+        // With a push server, the Live Activity is updated remotely in real time
+        if PushClient.isConfigured, let activity = try? Activity.request(attributes: attributes, content: content, pushType: .token) {
+            observe(activity)
+        } else {
+            _ = try? Activity.request(attributes: attributes, content: content)
+        }
+    }
+
+    private static func observe(_ activity: Activity<FlightActivityAttributes>) {
+        Task {
+            for await token in activity.pushTokenUpdates {
+                PushClient.setLiveToken(flightID: activity.attributes.flightID, token: token)
+            }
+        }
+    }
+
+    /// After an app restart: keep listening for token changes of running activities.
+    static func observeExistingTokens() {
+        for a in Activity<FlightActivityAttributes>.activities { observe(a) }
     }
 
     static func stop(_ f: Flight) async {

@@ -4,6 +4,7 @@ import UserNotifications
 
 @main
 struct SkylogApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var store = FlightStore.shared
     @Environment(\.scenePhase) private var scenePhase
 
@@ -17,7 +18,11 @@ struct SkylogApp: App {
             RootView()
                 .environment(store)
                 .preferredColorScheme(.dark)
-                .task { await Notifier.requestAuthorization() }
+                .task {
+                    await Notifier.requestAuthorization()
+                    PushClient.register()
+                    LiveFlight.observeExistingTokens()
+                }
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
