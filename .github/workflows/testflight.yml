@@ -1,0 +1,126 @@
+name: Apps to TestFlight
+
+on:
+  push:
+    paths:
+      - 'skylog/**'
+      - 'vital/**'
+      - 'saldo/**'
+      - '.github/workflows/testflight.yml'
+      - '.github/scripts/**'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apple-setup:
+    runs-on: ubuntu-latest
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Register bundle IDs and capabilities
+        run: |
+          if [ -z "$ASC_KEY_ID" ]; then echo "::notice::Apple-Secrets fehlen noch"; exit 0; fi
+          pip install --quiet pyjwt cryptography requests
+          python .github/scripts/apple_setup.py
+
+  testflight:
+    needs: apple-setup
+    runs-on: macos-15
+    env:
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+    steps:
+      - name: Check secrets
+        id: check
+        run: |
+          if [ -n "$ASC_KEY_ID" ] && [ -n "$ASC_ISSUER_ID" ] && [ -n "$ASC_KEY_P8" ] && [ -n "$APPLE_TEAM_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Apple-Secrets fehlen noch – TestFlight-Upload übersprungen."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.ready == 'true'
+
+      - name: Select latest Xcode (App Store requires the current SDK)
+        if: steps.check.outputs.ready == 'true'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26'
+
+      - name: Restore signing certificate
+        if: steps.check.outputs.ready == 'true'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/certcache
+          key: apple-dist-cert-none
+          restore-keys: apple-dist-cert-
+
+      - name: Signing (certificate + App Store profiles)
+        id: signing
+        if: steps.check.outputs.ready == 'true'
+        env:
+          CERT_CACHE: ${{ runner.temp }}/certcache
+        run: |
+          xcodebuild -version
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --quiet pyjwt cryptography requests
+          export P12_PASSWORD="$(uuidgen)"
+          SIGN="$RUNNER_TEMP/signing"
+          "$RUNNER_TEMP/venv/bin/python" .github/scripts/apple_signing.py "$SIGN"
+
+          KEYCHAIN="$RUNNER_TEMP/build.keychain-db"
+          security create-keychain -p ci "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p ci "$KEYCHAIN"
+          curl -sSL -o "$RUNNER_TEMP/wwdr.cer" https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer
+          security import "$RUNNER_TEMP/wwdr.cer" -k "$KEYCHAIN" -A || true
+          security import "$SIGN/dist.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k ci "$KEYCHAIN"
+          security list-keychains -d user -s "$KEYCHAIN" $(security list-keychains -d user | tr -d '"')
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          cp "$SIGN"/*.mobileprovision "$HOME/Library/MobileDevice/Provisioning Profiles/"
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s\n' "$ASC_KEY_P8" > "$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8"
+          brew install xcodegen
+
+      - name: Save signing certificate
+        if: steps.signing.outputs.new_cert != ''
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ runner.temp }}/certcache
+          key: apple-dist-cert-${{ steps.signing.outputs.new_cert }}
+
+      - name: Build & upload
+        if: steps.check.outputs.ready == 'true'
+        run: |
+          set -o pipefail
+          FAILED=""
+          for pair in Skylog:skylog Vital:vital Saldo:saldo; do
+            APP="${pair%%:*}"; DIR="${pair##*:}"
+            echo "::group::$APP"
+            (
+              cd "$DIR" && xcodegen generate &&
+              xcodebuild -project "$APP.xcodeproj" -scheme "$APP" -configuration Release \
+                -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/$APP.xcarchive" archive \
+                DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Manual CODE_SIGNING_ALLOWED=YES \
+                CODE_SIGN_IDENTITY="Apple Distribution" OTHER_CODE_SIGN_FLAGS="--keychain $RUNNER_TEMP/build.keychain-db" \
+                CURRENT_PROJECT_VERSION="${{ github.run_number }}" &&
+              xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/$APP.xcarchive" \
+                -exportOptionsPlist "$RUNNER_TEMP/signing/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export-$APP" \
+                -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_$ASC_KEY_ID.p8" \
+                -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+            ) || FAILED="$FAILED $APP"
+            echo "::endgroup::"
+          done
+          if [ -n "$FAILED" ]; then echo "::error::Fehlgeschlagen:$FAILED"; exit 1; fi

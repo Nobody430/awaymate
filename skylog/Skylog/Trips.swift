@@ -1,0 +1,111 @@
+import Foundation
+import Observation
+
+struct PackItem: Identifiable, Codable, Hashable {
+    var id = UUID()
+    var name: String
+    var done = false
+}
+
+struct Trip: Identifiable, Codable, Hashable {
+    var id = UUID()
+    var name: String
+    var start: Date
+    var end: Date
+    var notes = ""
+    var packing: [PackItem] = Trip.defaultPacking()
+
+    static func defaultPacking() -> [PackItem] {
+        ["Pass / ID", "Handy-Ladekabel", "Powerbank", "Kopfhörer", "Reiseadapter", "Medikamente", "Zahnbürste & Kulturbeutel",
+         "Kleider", "Kreditkarte & etwas Bargeld", "eSIM / Roaming geprüft", "Reiseversicherung", "Online eingecheckt"]
+            .map { PackItem(name: $0) }
+    }
+}
+
+@MainActor
+@Observable
+final class TripStore {
+    static let shared = TripStore()
+    private(set) var trips: [Trip] = []
+    private let file = URL.documentsDirectory.appending(path: "trips.json")
+
+    init() {
+        let d = JSONDecoder()
+        d.dateDecodingStrategy = .iso8601
+        if let data = try? Data(contentsOf: file), let t = try? d.decode([Trip].self, from: data) { trips = t }
+    }
+
+    private func save() {
+        let e = JSONEncoder()
+        e.dateEncodingStrategy = .iso8601
+        try? e.encode(trips).write(to: file, options: .atomic)
+    }
+
+    func upsert(_ t: Trip) {
+        if let i = trips.firstIndex(where: { $0.id == t.id }) { trips[i] = t } else { trips.append(t) }
+        trips.sort { $0.start > $1.start }
+        save()
+    }
+
+    func delete(_ ids: [UUID]) {
+        trips.removeAll { ids.contains($0.id) }
+        save()
+    }
+
+    func flights(for trip: Trip, in store: FlightStore) -> [Flight] {
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: trip.start)
+        let end = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: trip.end)) ?? trip.end
+        return store.flights.filter { $0.sortDate >= start && $0.sortDate < end }.sorted { $0.sortDate < $1.sortDate }
+    }
+
+    /// Suggests trips from flights that are not yet part of a trip (flights within 21 days of each other).
+    func suggestions(from store: FlightStore) -> [Trip] {
+        let covered = Set(trips.flatMap { flights(for: $0, in: store).map(\.id) })
+        let free = store.flights.filter { !covered.contains($0.id) }.sorted { $0.sortDate < $1.sortDate }
+        var groups: [[Flight]] = []
+        for f in free {
+            if let last = groups.last?.last, f.sortDate.timeIntervalSince(last.sortDate) < 21 * 86400 {
+                groups[groups.count - 1].append(f)
+            } else {
+                groups.append([f])
+            }
+        }
+        return groups.map { g in
+            let destination = g.count > 1 ? g[g.count / 2 - (g.count % 2 == 0 ? 1 : 0)].arrival.displayCity : g[0].arrival.displayCity
+            return Trip(name: destination, start: g.first!.sortDate, end: g.last!.arrival.best ?? g.last!.sortDate)
+        }
+    }
+}
+
+/// Files (boarding passes, bookings, …) stored per flight.
+enum FlightDocs {
+    static func folder(_ id: UUID) -> URL {
+        let url = URL.documentsDirectory.appending(path: "docs/\(id.uuidString)")
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
+
+    static func list(_ id: UUID) -> [URL] {
+        (try? FileManager.default.contentsOfDirectory(at: folder(id), includingPropertiesForKeys: [.creationDateKey]))?
+            .sorted { $0.lastPathComponent < $1.lastPathComponent } ?? []
+    }
+
+    @discardableResult
+    static func add(_ source: URL, to id: UUID) -> Bool {
+        let scoped = source.startAccessingSecurityScopedResource()
+        defer { if scoped { source.stopAccessingSecurityScopedResource() } }
+        var target = folder(id).appending(path: source.lastPathComponent)
+        if FileManager.default.fileExists(atPath: target.path()) {
+            target = folder(id).appending(path: "\(Int(Date().timeIntervalSince1970))-\(source.lastPathComponent)")
+        }
+        return (try? FileManager.default.copyItem(at: source, to: target)) != nil
+    }
+
+    static func addImage(_ data: Data, to id: UUID) {
+        let target = folder(id).appending(path: "Foto-\(Int(Date().timeIntervalSince1970)).jpg")
+        try? data.write(to: target)
+    }
+
+    static func delete(_ url: URL) { try? FileManager.default.removeItem(at: url) }
+}

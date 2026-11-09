@@ -1,0 +1,214 @@
+import WidgetKit
+import SwiftUI
+import ActivityKit
+
+@main
+struct SkylogWidgetBundle: WidgetBundle {
+    var body: some Widget {
+        NextFlightWidget()
+        FlightLiveActivity()
+    }
+}
+
+private let accent = Color(red: 0.36, green: 0.62, blue: 1.0)
+
+// MARK: - Home screen widget
+
+struct NextFlightEntry: TimelineEntry {
+    let date: Date
+    let flight: WidgetFlight?
+}
+
+struct NextFlightProvider: TimelineProvider {
+    func placeholder(in context: Context) -> NextFlightEntry {
+        NextFlightEntry(date: .now, flight: WidgetFlight(id: "x", number: "LX 1612", from: "ZRH", to: "LIS", fromCity: "Zürich",
+                                                        toCity: "Lissabon", departure: .now.addingTimeInterval(7200),
+                                                        arrival: .now.addingTimeInterval(18000), gate: "E42", terminal: "2",
+                                                        status: "Planmässig", delayMinutes: 0))
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (NextFlightEntry) -> Void) {
+        completion(entry())
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<NextFlightEntry>) -> Void) {
+        completion(Timeline(entries: [entry()], policy: .after(.now.addingTimeInterval(30 * 60))))
+    }
+
+    private func entry() -> NextFlightEntry {
+        let next = SharedStore.read().filter { $0.arrival > .now }.sorted { $0.departure < $1.departure }.first
+        return NextFlightEntry(date: .now, flight: next)
+    }
+}
+
+struct NextFlightView: View {
+    @Environment(\.widgetFamily) private var family
+    let entry: NextFlightEntry
+
+    var body: some View {
+        if let f = entry.flight {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text(f.number).font(.caption.weight(.semibold))
+                    Spacer()
+                    Text(f.delayMinutes >= 15 ? "+\(f.delayMinutes) Min" : f.status)
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(f.delayMinutes >= 15 ? .orange : accent)
+                }
+                HStack {
+                    Text(f.from).font(.title2.bold())
+                    Image(systemName: "airplane").font(.caption).foregroundStyle(.secondary)
+                    Text(f.to).font(.title2.bold())
+                }
+                if f.departure > .now {
+                    Text("Abflug in").font(.caption2).foregroundStyle(.secondary)
+                    Text(f.departure, style: .relative).font(.headline.monospacedDigit())
+                } else {
+                    Text("Landung").font(.caption2).foregroundStyle(.secondary)
+                    ProgressView(timerInterval: f.departure...f.arrival, countsDown: false) { EmptyView() } currentValueLabel: { EmptyView() }
+                        .tint(accent)
+                }
+                if family != .systemSmall {
+                    HStack {
+                        Text("\(f.departure.formatted(date: .abbreviated, time: .shortened))")
+                        Spacer()
+                        if let t = f.terminal { Text("T\(t)") }
+                        if let g = f.gate { Text("Gate \(g)").bold() }
+                    }
+                    .font(.caption)
+                }
+            }
+            .containerBackground(for: .widget) { Color.black }
+        } else {
+            VStack(spacing: 6) {
+                Image(systemName: "airplane").font(.title)
+                Text("Keine anstehenden Flüge").font(.caption).multilineTextAlignment(.center)
+            }
+            .foregroundStyle(.secondary)
+            .containerBackground(for: .widget) { Color.black }
+        }
+    }
+}
+
+struct NextFlightWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "NextFlight", provider: NextFlightProvider()) { entry in
+            NextFlightView(entry: entry)
+        }
+        .configurationDisplayName("Nächster Flug")
+        .description("Countdown, Gate und Status deines nächsten Flugs.")
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+    }
+}
+
+// MARK: - Live Activity
+
+struct FlightLiveActivity: Widget {
+    var body: some WidgetConfiguration {
+        ActivityConfiguration(for: FlightActivityAttributes.self) { context in
+            LockScreenFlightView(context: context)
+                .padding()
+                .activityBackgroundTint(Color.black.opacity(0.85))
+                .activitySystemActionForegroundColor(.white)
+        } dynamicIsland: { context in
+            DynamicIsland {
+                DynamicIslandExpandedRegion(.leading) {
+                    VStack(alignment: .leading) {
+                        Text(context.attributes.from).font(.title2.bold())
+                        Text(context.state.departure.formatted(date: .omitted, time: .shortened)).font(.caption)
+                    }
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    VStack(alignment: .trailing) {
+                        Text(context.attributes.to).font(.title2.bold())
+                        Text(context.state.arrival.formatted(date: .omitted, time: .shortened)).font(.caption)
+                    }
+                }
+                DynamicIslandExpandedRegion(.center) {
+                    VStack(spacing: 2) {
+                        Text(context.attributes.flightNumber).font(.caption.bold())
+                        Text(context.state.status).font(.caption2).foregroundStyle(accent)
+                    }
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    FlightProgressRow(state: context.state)
+                }
+            } compactLeading: {
+                HStack(spacing: 2) {
+                    Image(systemName: "airplane").foregroundStyle(accent)
+                    Text(context.attributes.to).font(.caption.bold())
+                }
+            } compactTrailing: {
+                Text(timerInterval: Date.now...(context.state.inAir ? context.state.arrival : context.state.departure), countsDown: true)
+                    .monospacedDigit()
+                    .frame(maxWidth: 52)
+                    .font(.caption)
+            } minimal: {
+                Image(systemName: "airplane").foregroundStyle(accent)
+            }
+        }
+    }
+}
+
+struct LockScreenFlightView: View {
+    let context: ActivityViewContext<FlightActivityAttributes>
+
+    var body: some View {
+        let s = context.state
+        VStack(spacing: 8) {
+            HStack {
+                Text(context.attributes.flightNumber).font(.subheadline.bold())
+                Spacer()
+                Text(s.delayMinutes >= 15 ? "\(s.status) · +\(s.delayMinutes) Min" : s.status)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(s.delayMinutes >= 15 ? .orange : accent)
+            }
+            HStack(alignment: .firstTextBaseline) {
+                VStack(alignment: .leading) {
+                    Text(context.attributes.from).font(.title.bold())
+                    Text(s.departure.formatted(date: .omitted, time: .shortened)).font(.caption)
+                }
+                Spacer()
+                VStack {
+                    if s.inAir {
+                        Text("Landung in").font(.caption2).foregroundStyle(.secondary)
+                        Text(timerInterval: Date.now...max(Date.now, s.arrival), countsDown: true).font(.headline.monospacedDigit())
+                    } else {
+                        Text("Abflug in").font(.caption2).foregroundStyle(.secondary)
+                        Text(timerInterval: Date.now...max(Date.now, s.departure), countsDown: true).font(.headline.monospacedDigit())
+                    }
+                }
+                .multilineTextAlignment(.center)
+                Spacer()
+                VStack(alignment: .trailing) {
+                    Text(context.attributes.to).font(.title.bold())
+                    Text(s.arrival.formatted(date: .omitted, time: .shortened)).font(.caption)
+                }
+            }
+            FlightProgressRow(state: s)
+        }
+        .foregroundStyle(.white)
+    }
+}
+
+struct FlightProgressRow: View {
+    let state: FlightActivityAttributes.ContentState
+
+    var body: some View {
+        VStack(spacing: 4) {
+            if state.inAir {
+                ProgressView(timerInterval: state.departure...max(state.departure.addingTimeInterval(60), state.arrival), countsDown: false) {
+                    EmptyView()
+                } currentValueLabel: { EmptyView() }
+                .tint(accent)
+            }
+            HStack {
+                if let t = state.terminal { Text("Terminal \(t)") }
+                if let g = state.gate { Text("Gate \(g)").bold() }
+                Spacer()
+                if let b = state.belt { Label("Band \(b)", systemImage: "suitcase.rolling") }
+            }
+            .font(.caption)
+        }
+    }
+}
