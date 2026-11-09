@@ -112,7 +112,7 @@ enum FlightData {
     /// Previous leg of our aircraft: FlightAware knows it directly (inbound id),
     /// AeroDataBox via the aircraft registration's flights of the day.
     static func inbound(for f: Flight) async throws -> InboundFlight? {
-        if let id = f.inboundFAID, FlightAware.hasKey, current != .aerodatabox {
+        if let id = f.inboundFAID, FlightAware.hasKey, FlightProvider.current != .aerodatabox {
             if let i = try? await FlightAware.inbound(id) { return i }
         }
         guard Settings.hasKey, let reg = f.aircraftReg, !reg.isEmpty,
