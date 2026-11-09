@@ -2,29 +2,108 @@ import Foundation
 
 /// Which flight data service to use.
 enum FlightProvider: String, CaseIterable, Identifiable {
-    case aerodatabox, flightaware
+    case aerodatabox, flightaware, both
     var id: String { rawValue }
-    var label: String { self == .aerodatabox ? "AeroDataBox (RapidAPI)" : "FlightAware AeroAPI" }
+    var label: String {
+        switch self {
+        case .aerodatabox: "AeroDataBox (RapidAPI)"
+        case .flightaware: "FlightAware AeroAPI"
+        case .both: "Beide kombiniert (empfohlen)"
+        }
+    }
 
     static var current: FlightProvider {
         FlightProvider(rawValue: UserDefaults.standard.string(forKey: "provider") ?? "") ?? .aerodatabox
     }
 }
 
-/// Entry point for flight lookups – dispatches to the selected provider.
+/// Entry point for flight lookups – dispatches to the selected provider(s).
 enum FlightData {
     static var isConfigured: Bool {
         switch FlightProvider.current {
         case .aerodatabox: Settings.hasKey
         case .flightaware: FlightAware.hasKey
+        case .both: Settings.hasKey || FlightAware.hasKey
         }
     }
 
     static func search(number: String, date: Date) async throws -> [Flight] {
-        if FlightProvider.current == .flightaware {
-            return try await FlightAware.search(number: number, date: date)
+        switch FlightProvider.current {
+        case .flightaware: return try await FlightAware.search(number: number, date: date)
+        case .aerodatabox: return try await AeroDataBox.search(number: number, date: date)
+        case .both: return try await combined(number: number, date: date)
         }
-        return try await AeroDataBox.search(number: number, date: date)
+    }
+
+    /// FlightAware for the next ~2 days (best live data), AeroDataBox for flights further ahead.
+    /// Each falls back to the other; close to departure / after landing, missing fields are filled from AeroDataBox.
+    private static func combined(number: String, date: Date) async throws -> [Flight] {
+        let near = date.timeIntervalSinceNow < 2 * 86400 && date.timeIntervalSinceNow > -2 * 86400
+        let useFA = near && FlightAware.hasKey
+        var results: [Flight]
+        do {
+            results = useFA || !Settings.hasKey
+                ? try await FlightAware.search(number: number, date: date)
+                : try await AeroDataBox.search(number: number, date: date)
+        } catch {
+            // fallback to the other service
+            if useFA || !Settings.hasKey, Settings.hasKey {
+                results = try await AeroDataBox.search(number: number, date: date)
+            } else if FlightAware.hasKey {
+                results = try await FlightAware.search(number: number, date: date)
+            } else {
+                throw error
+            }
+            return results
+        }
+        guard useFA, Settings.hasKey, let first = results.first, needsEnrichment(first) else { return results }
+        if let extra = try? await AeroDataBox.search(number: number, date: date) {
+            results = results.map { f in
+                guard let other = extra.first(where: { $0.departure.code == f.departure.code }) ?? extra.first else { return f }
+                return merge(f, with: other)
+            }
+        }
+        return results
+    }
+
+    /// Only spend an AeroDataBox query when something useful is missing at the right moment.
+    private static func needsEnrichment(_ f: Flight) -> Bool {
+        let now = Date()
+        if f.icao24 == nil && f.isInAir { return true }
+        if let dep = f.departure.best, dep.timeIntervalSince(now) < 3 * 3600, dep > now.addingTimeInterval(-30 * 60),
+           f.departure.gate == nil || f.departure.terminal == nil || f.departure.checkInDesk == nil { return true }
+        if f.normalizedStatus == .arrived, f.arrival.baggageBelt == nil,
+           let arr = f.arrival.best, now.timeIntervalSince(arr) < 2 * 3600 { return true }
+        return false
+    }
+
+    /// Fills empty fields of `a` with values from `b`.
+    static func merge(_ a: Flight, with b: Flight) -> Flight {
+        var f = a
+        func fill(_ e: inout FlightEndpoint, _ o: FlightEndpoint) {
+            e.gate = e.gate ?? o.gate
+            e.terminal = e.terminal ?? o.terminal
+            e.checkInDesk = e.checkInDesk ?? o.checkInDesk
+            e.baggageBelt = e.baggageBelt ?? o.baggageBelt
+            e.name = e.name ?? o.name
+            e.city = e.city ?? o.city
+            e.countryCode = e.countryCode ?? o.countryCode
+            e.lat = e.lat ?? o.lat
+            e.lon = e.lon ?? o.lon
+            e.timeZone = e.timeZone ?? o.timeZone
+            e.predicted = e.predicted ?? o.predicted
+        }
+        fill(&f.departure, b.departure)
+        fill(&f.arrival, b.arrival)
+        f.icao24 = f.icao24 ?? b.icao24
+        f.aircraftReg = f.aircraftReg ?? b.aircraftReg
+        f.aircraftModel = f.aircraftModel ?? b.aircraftModel
+        f.airlineName = f.airlineName ?? b.airlineName
+        f.airlineIata = f.airlineIata ?? b.airlineIata
+        f.callSign = f.callSign ?? b.callSign
+        f.distanceKm = f.distanceKm ?? b.distanceKm
+        f.lastPosition = f.lastPosition ?? b.lastPosition
+        return f
     }
 }
 

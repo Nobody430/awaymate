@@ -34,31 +34,29 @@ struct SettingsView: View {
                     Picker("Datenquelle", selection: $provider) {
                         ForEach(FlightProvider.allCases) { Text($0.label).tag($0.rawValue) }
                     }
-                    if provider == FlightProvider.flightaware.rawValue {
+                    if provider != FlightProvider.aerodatabox.rawValue {
                         SecureField("FlightAware API-Key", text: $flightawareKey)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
-                        Link(destination: URL(string: "https://www.flightaware.com/aeroapi/portal/")!) {
-                            Label("Key holen (AeroAPI → Personal)", systemImage: "key")
-                        }
-                    } else {
-                        SecureField("RapidAPI-Key einfügen", text: $apiKey)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-                        Link(destination: URL(string: "https://rapidapi.com/aedbx-aedbx/api/aerodatabox")!) {
-                            Label("Gratis-Key holen (AeroDataBox)", systemImage: "key")
+                        NavigationLink { KeyGuideView(guide: .flightaware) } label: {
+                            Label("So bekommst du den FlightAware-Key", systemImage: "questionmark.circle")
                         }
                     }
-                    NavigationLink {
-                        KeyGuideView(guide: provider == FlightProvider.flightaware.rawValue ? .flightaware : .aerodatabox)
-                    } label: {
-                        Label("So bekommst du den Key", systemImage: "questionmark.circle")
+                    if provider != FlightProvider.flightaware.rawValue {
+                        SecureField("RapidAPI-Key (AeroDataBox)", text: $apiKey)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        NavigationLink { KeyGuideView(guide: .aerodatabox) } label: {
+                            Label("So bekommst du den AeroDataBox-Key", systemImage: "questionmark.circle")
+                        }
                     }
                     LabeledContent("Abfragen diesen Monat", value: "\(Usage.thisMonth)")
                 } header: {
                     Text("Flugdaten")
                 } footer: {
-                    if provider == FlightProvider.flightaware.rawValue {
+                    if provider == FlightProvider.both.rawValue {
+                        Text("Kombiniert: Kurzfristige Flüge (±2 Tage) und Live-Status über FlightAware, Flüge weiter in der Zukunft über AeroDataBox. Fällt eine Quelle aus, springt die andere ein. Kurz vor Abflug bzw. nach der Landung ergänzt AeroDataBox fehlendes Gate, Terminal, Check-in-Schalter oder Gepäckband.")
+                    } else if provider == FlightProvider.flightaware.rawValue {
                         Text("FlightAware AeroAPI, Stufe „Personal“: monatliches Gratis-Guthaben, danach Abrechnung pro Abfrage (Preis je nach Abfrage). Sehr zuverlässige Zeiten, Gates und Gepäckbänder. Jeder Flughafen wird nur einmal abgefragt und dann gespeichert. Tipp: In FlightAware ein monatliches Ausgabenlimit setzen.")
                     } else {
                         Text("AeroDataBox über RapidAPI: Plan „Basic“ ist gratis (begrenzte Abfragen), grössere Pläne kosten monatlich. Live-Positionen kommen gratis von OpenSky. Flugzeug-Details (Alter) nutzen immer AeroDataBox, falls ein Key hinterlegt ist.")
