@@ -100,7 +100,7 @@ struct ImportView: View {
                 }
 
                 if !candidates.isEmpty {
-                    Section("Gefundene Flüge (\(candidates.count))") {
+                    Section {
                         ForEach(candidates) { c in
                             let exists = store.contains(number: c.number, date: c.date)
                             Toggle(isOn: Binding(
@@ -124,6 +124,10 @@ struct ImportView: View {
                             Spacer()
                             Button("Keine") { selected = [] }.buttonStyle(.borderless)
                         }
+                    } header: {
+                        Text("Gefundene Flüge (\(candidates.count))")
+                    } footer: {
+                        Text("Schalter aus = nicht geflogen bzw. nicht importieren.")
                     }
                     Section {
                         Button {
@@ -133,7 +137,7 @@ struct ImportView: View {
                         }
                         .disabled(selected.isEmpty || busy)
                     } footer: {
-                        Text("Pro Flug wird eine API-Abfrage benötigt. Flüge, die die API nicht kennt, werden mit den Angaben aus der Mail gespeichert.")
+                        Text("Live-Daten werden nur für Flüge der nächsten 3 Tage abgefragt, alle anderen kommen aus den Mail-Angaben.")
                     }
                 }
             }

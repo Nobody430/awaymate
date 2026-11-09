@@ -28,6 +28,16 @@ struct AddFlightView: View {
                 }
 
                 Section {
+                    NavigationLink {
+                        ManualFlightView(onSaved: { dismiss() })
+                    } label: {
+                        Label("Ohne Suche manuell eintragen", systemImage: "square.and.pencil")
+                    }
+                } footer: {
+                    Text("Für alte Flüge oder wenn das API-Kontingent leer ist – braucht keine Abfrage.")
+                }
+
+                Section {
                     Button {
                         Task { await search() }
                     } label: {
