@@ -46,6 +46,9 @@ struct ManualFlightView: View {
             }
         }
         .navigationTitle("Flug manuell eintragen")
+        .onAppear {
+            if from.isEmpty, let home = UserDefaults.standard.string(forKey: "homeAirport"), home.count == 3 { from = home }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {

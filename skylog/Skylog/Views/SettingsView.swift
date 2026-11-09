@@ -22,6 +22,9 @@ struct SettingsView: View {
     @AppStorage("pushServerToken") private var pushServerToken = ""
     @State private var pushStatus: String?
     @AppStorage("mailAutoAdd") private var mailAutoAdd = false
+    @AppStorage("homeStation") private var homeStation = ""
+    @AppStorage("homeAirport") private var homeAirport = ""
+    @AppStorage(AirportBuffer.key) private var airportBuffer = 0
 
     @State private var importing = false
     @State private var confirmWipe = false
@@ -73,6 +76,28 @@ struct SettingsView: View {
                     Text("Reisender")
                 } footer: {
                     Text("Beim Mail-Import werden nur Buchungen übernommen, auf denen dieser Name steht.")
+                }
+
+                Section {
+                    TextField("Heimat-Bahnhof / Haltestelle (z.B. Frauenfeld)", text: $homeStation)
+                    HStack {
+                        TextField("Heimat-Flughafen (Code, z.B. ZRH)", text: $homeAirport)
+                            .textInputAutocapitalization(.characters).autocorrectionDisabled()
+                            .onChange(of: homeAirport) { _, v in
+                                let c = String(v.uppercased().filter(\.isLetter).prefix(3))
+                                if c != v { homeAirport = c }
+                            }
+                        if homeAirport.count == 3, let info = AirportLookup.bundledInfo(homeAirport) {
+                            Text(info.city ?? info.name ?? "").font(.caption).foregroundStyle(.secondary)
+                        }
+                    }
+                    Picker("Am Flughafen sein", selection: $airportBuffer) {
+                        ForEach(AirportBuffer.choices, id: \.self) { Text(AirportBuffer.label($0)).tag($0) }
+                    }
+                } header: {
+                    Text("Zuhause")
+                } footer: {
+                    Text("Für Zugverbindungen zum/vom Flughafen und als Vorschlag beim manuellen Eintragen. Unterwegs erkennt Skylog gebuchte Hotels und zeigt den Weg Flughafen ↔ Hotel.")
                 }
 
                 Section {

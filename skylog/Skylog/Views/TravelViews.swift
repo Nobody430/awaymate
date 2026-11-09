@@ -99,8 +99,14 @@ struct TransitCard: View {
     @State private var loading = false
     @State private var error: String?
 
-    private var depStation: String? { Transit.airportStations[flight.departure.code] }
-    private var arrStation: String? { Transit.airportStations[flight.arrival.code] }
+    @AppStorage("homeAirport") private var homeAirport = ""
+    // Only for trips from/to home (abroad the hotel card shows the way)
+    private var depStation: String? {
+        homeAirport.isEmpty || homeAirport == flight.departure.code ? Transit.airportStations[flight.departure.code] : nil
+    }
+    private var arrStation: String? {
+        homeAirport.isEmpty || homeAirport == flight.arrival.code ? Transit.airportStations[flight.arrival.code] : nil
+    }
 
     var body: some View {
         if depStation != nil || arrStation != nil {

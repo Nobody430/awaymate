@@ -36,6 +36,7 @@ struct FlightDetailView: View {
                 }
                 TravelDayCard(flight: f)
                 TransitCard(flight: f)
+                HotelRouteCard(flight: f)
                 DestinationCard(flight: f)
                 FamilyCard(flight: f)
                 AircraftSeatCard(flight: f)
