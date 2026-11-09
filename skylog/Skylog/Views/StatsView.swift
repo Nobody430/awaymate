@@ -67,6 +67,10 @@ struct StatsView: View {
                         InfoTile(title: "Länder", value: "\(s.countries.count)", icon: "flag")
                     }
 
+                    if !s.flights.isEmpty {
+                        PlacesCard(flights: s.flights)
+                    }
+
                     if let l = s.longest, let km = l.computedDistanceKm {
                         card("Längster Flug") {
                             HStack {
