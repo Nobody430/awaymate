@@ -4,6 +4,7 @@ import MapKit
 /// Shows how to get from the airport to the booked hotel (after landing) and from the hotel to the airport (departure day).
 struct HotelRouteCard: View {
     let flight: Flight
+    @Environment(FlightStore.self) private var store
     @Environment(\.openURL) private var openURL
     @State private var toHotel: Leg?
     @State private var fromHotel: Leg?
@@ -75,15 +76,15 @@ struct HotelRouteCard: View {
     }
 
     private func load() async {
-        let arrHotel = HotelRoute.hotel(after: flight)
-        let depHotel = HotelRoute.hotel(before: flight)
+        let arrHotel = HotelRoute.hotel(after: flight, flights: store.flights)
+        let depHotel = HotelRoute.hotel(before: flight, flights: store.flights)
         if let h = arrHotel, flight.arrival.best.map({ $0 > Date().addingTimeInterval(-12 * 3600) }) ?? true {
             let item = await HotelRoute.locate(h, near: flight.arrival.coordinate)
             var times = HotelRoute.Times()
             if let item, let ap = HotelRoute.airportItem(flight.arrival) {
                 times = await HotelRoute.times(from: ap, to: item, departAt: flight.arrival.best?.addingTimeInterval(30 * 60))
             }
-            toHotel = Leg(hotel: h, item: item, times: times)
+            toHotel = item == nil && flight.arrival.coordinate != nil ? nil : Leg(hotel: h, item: item, times: times)
         } else { toHotel = nil }
         if let h = depHotel, !flight.isInAir, !flight.normalizedStatus.isFinal {
             let item = await HotelRoute.locate(h, near: flight.departure.coordinate)
@@ -92,9 +93,9 @@ struct HotelRouteCard: View {
                 times = await HotelRoute.times(from: item, to: ap,
                                                arriveBy: dep.addingTimeInterval(-Double(AirportBuffer.minutes(for: flight)) * 60))
             }
-            fromHotel = Leg(hotel: h, item: item, times: times)
+            fromHotel = item == nil && flight.departure.coordinate != nil ? nil : Leg(hotel: h, item: item, times: times)
         } else { fromHotel = nil }
-        HotelRoute.scheduleReminders(for: flight)
+        HotelRoute.scheduleReminders(for: flight, flights: store.flights)
     }
 
     private func openAppleMaps(_ leg: Leg, outbound: Bool) {

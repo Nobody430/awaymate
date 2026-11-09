@@ -113,9 +113,15 @@ struct TransitCard: View {
             VStack(alignment: .leading, spacing: 10) {
                 Label("Zug & Bus", systemImage: "tram.fill").font(.headline)
                 if home.isEmpty {
-                    TextField("Deine Heimat-Haltestelle (z.B. Frauenfeld)", text: $home)
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit { Task { await load() } }
+                    HStack {
+                        TextField("Deine Heimat-Haltestelle (z.B. Frauenfeld)", text: $draft)
+                            .textFieldStyle(.roundedBorder)
+                            .submitLabel(.done)
+                            .onSubmit { saveHome() }
+                        Button("OK") { saveHome() }
+                            .buttonStyle(.borderedProminent)
+                            .disabled(draft.trimmingCharacters(in: .whitespaces).count < 2)
+                    }
                 } else {
                     if let depStation, !flight.isPast, let dep = flight.departure.best {
                         Text("Hin: \(home) → \(depStation), Ankunft spätestens \(Fmt.time(dep.addingTimeInterval(-Double(buffer) * 60), flight.departure.tz)) (\(buffer) Min vor Abflug)")
@@ -128,7 +134,7 @@ struct TransitCard: View {
                         connections(fromAirport)
                     }
                     HStack {
-                        Button("Haltestelle ändern") { home = "" }.font(.caption)
+                        Button("Haltestelle ändern") { draft = home; home = "" }.font(.caption)
                         Spacer()
                         Picker("Puffer", selection: $bufferSetting) {
                             ForEach(AirportBuffer.choices, id: \.self) { Text(AirportBuffer.label($0)).tag($0) }
@@ -160,6 +166,12 @@ struct TransitCard: View {
                 if let p = c.platform, !p.isEmpty { Text("Gl. \(p)").font(.caption.weight(.medium)) }
             }
         }
+    }
+
+    private func saveHome() {
+        let v = draft.trimmingCharacters(in: .whitespaces)
+        guard v.count >= 2 else { return }
+        home = v
     }
 
     private func load() async {

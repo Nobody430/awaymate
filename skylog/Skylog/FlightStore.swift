@@ -179,7 +179,7 @@ final class FlightStore {
         }
         update(new)
         Notifier.scheduleReminders(for: new)
-        HotelRoute.scheduleReminders(for: new)
+        HotelRoute.scheduleReminders(for: new, flights: flights)
     }
 
     /// Smart refresh interval to save API queries:
