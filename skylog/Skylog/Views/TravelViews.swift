@@ -92,6 +92,7 @@ struct ClaimView: View {
 struct TransitCard: View {
     let flight: Flight
     @AppStorage("homeStation") private var home = ""
+    @State private var draft = ""
     @AppStorage(AirportBuffer.key) private var bufferSetting = 0
     private var buffer: Int { AirportBuffer.minutes(for: flight) }
     @State private var toAirport: [Transit.Connection] = []
