@@ -51,6 +51,37 @@ struct LivePosition: Codable, Hashable {
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
 }
 
+/// How early to be at the airport. 0 in settings = automatic (depends on the flight).
+enum AirportBuffer {
+    static let key = "airportBuffer"
+    static let choices = [0, 60, 90, 120, 150, 180, 240]
+
+    static func isLongHaul(_ f: Flight) -> Bool { (f.computedDistanceKm ?? 0) > 3500 }
+    static func isInternational(_ f: Flight) -> Bool {
+        guard let a = f.departure.countryCode, let b = f.arrival.countryCode else { return false }
+        return a != b
+    }
+
+    /// Recommendation: 3 h long-haul or leaving the US/UK, 2 h otherwise (Schengen/domestic).
+    static func recommended(_ f: Flight) -> Int {
+        let strictOrigin = ["US", "GB", "IL", "CA"].contains(f.departure.countryCode ?? "")
+        if isLongHaul(f) || (isInternational(f) && strictOrigin) { return 180 }
+        if isInternational(f) && !Schengen.contains(f.departure.countryCode ?? "") { return 150 }
+        return 120
+    }
+
+    /// Never later than 30 min before bag drop closes.
+    static func minutes(for f: Flight) -> Int {
+        let setting = UserDefaults.standard.integer(forKey: key)
+        let minimum = (isLongHaul(f) ? 60 : 40) + 30
+        return max(setting == 0 ? recommended(f) : setting, minimum)
+    }
+
+    static func label(_ m: Int) -> String { m == 0 ? "Automatisch" : m % 60 == 0 ? "\(m / 60) h" : "\(m / 60) h \(m % 60) Min" }
+
+    private static let Schengen: Set<String> = ["AT","BE","BG","CH","CZ","DE","DK","EE","ES","FI","FR","GR","HR","HU","IS","IT","LI","LT","LU","LV","MT","NL","NO","PL","PT","RO","SE","SI","SK"]
+}
+
 /// The plane that will operate our flight, on its previous leg.
 struct InboundFlight: Codable, Hashable {
     var number: String

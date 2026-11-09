@@ -92,7 +92,8 @@ struct ClaimView: View {
 struct TransitCard: View {
     let flight: Flight
     @AppStorage("homeStation") private var home = ""
-    @AppStorage("airportBufferMinutes") private var buffer = 120
+    @AppStorage(AirportBuffer.key) private var bufferSetting = 0
+    private var buffer: Int { AirportBuffer.minutes(for: flight) }
     @State private var toAirport: [Transit.Connection] = []
     @State private var fromAirport: [Transit.Connection] = []
     @State private var loading = false
@@ -111,7 +112,7 @@ struct TransitCard: View {
                         .onSubmit { Task { await load() } }
                 } else {
                     if let depStation, !flight.isPast, let dep = flight.departure.best {
-                        Text("Hin: \(home) → \(depStation), Ankunft spätestens \(Fmt.time(dep.addingTimeInterval(-Double(buffer) * 60), .current)) (\(buffer) Min vor Abflug)")
+                        Text("Hin: \(home) → \(depStation), Ankunft spätestens \(Fmt.time(dep.addingTimeInterval(-Double(buffer) * 60), flight.departure.tz)) (\(buffer) Min vor Abflug)")
                             .font(.caption).foregroundStyle(.secondary)
                         connections(toAirport)
                     }
@@ -123,7 +124,10 @@ struct TransitCard: View {
                     HStack {
                         Button("Haltestelle ändern") { home = "" }.font(.caption)
                         Spacer()
-                        Stepper("Puffer \(buffer) Min", value: $buffer, in: 30...240, step: 15).font(.caption).fixedSize()
+                        Picker("Puffer", selection: $bufferSetting) {
+                            ForEach(AirportBuffer.choices, id: \.self) { Text(AirportBuffer.label($0)).tag($0) }
+                        }
+                        .font(.caption).fixedSize()
                     }
                 }
                 if loading { ProgressView() }

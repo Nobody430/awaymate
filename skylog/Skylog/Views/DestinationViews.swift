@@ -61,8 +61,7 @@ struct DestinationCard: View {
 /// Step-by-step plan for the travel day.
 struct TravelDayCard: View {
     let flight: Flight
-    @AppStorage("airportBufferMinutes") private var buffer = 120
-    @AppStorage("homeStation") private var home = ""
+    @AppStorage(AirportBuffer.key) private var bufferSetting = 0
 
     struct Step: Identifiable {
         let id = UUID()
@@ -74,6 +73,7 @@ struct TravelDayCard: View {
 
     private var steps: [Step] {
         guard let dep = flight.departure.best else { return [] }
+        let buffer = AirportBuffer.minutes(for: flight)
         let longHaul = (flight.computedDistanceKm ?? 0) > 3500
         let dtz = flight.departure.tz, atz = flight.arrival.tz
         var s: [Step] = [
@@ -92,7 +92,19 @@ struct TravelDayCard: View {
     var body: some View {
         if !flight.isPast, let dep = flight.departure.best, dep.timeIntervalSinceNow < 3 * 86400 {
             VStack(alignment: .leading, spacing: 10) {
-                Label("Reisetag", systemImage: "list.bullet.clipboard").font(.headline)
+                HStack {
+                    Label("Reisetag", systemImage: "list.bullet.clipboard").font(.headline)
+                    Spacer()
+                    Menu {
+                        Picker("Am Flughafen", selection: $bufferSetting) {
+                            ForEach(AirportBuffer.choices, id: \.self) { m in
+                                Text(m == 0 ? "Automatisch (\(AirportBuffer.label(AirportBuffer.recommended(flight))))" : "\(AirportBuffer.label(m)) vorher").tag(m)
+                            }
+                        }
+                    } label: {
+                        Text("\(AirportBuffer.label(AirportBuffer.minutes(for: flight))) vorher").font(.caption)
+                    }
+                }
                 ForEach(steps) { step in
                     HStack(spacing: 12) {
                         Image(systemName: step.icon)
