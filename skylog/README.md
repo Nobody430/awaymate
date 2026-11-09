@@ -80,3 +80,5 @@ Für TestFlight braucht Skylog zusätzlich die App Group `group.com.nobody430.sk
 - **Flughafen:** Innenpläne in Apple Karten, Lounges/Essen/Apotheke/Geld aus Apple Maps, offizielle Seiten mit Wartezeiten (ZRH, GVA, BSL).
 
 Flughafen-Datenbank: [mwgg/Airports](https://github.com/mwgg/Airports) (MIT-Lizenz, siehe `Skylog/Resources/airports-LICENSE.txt`).
+
+Live-Daten (gestartet, Position, voraussichtliche Ankunft, gelandet): kostenlos über die Community-ADS-B-Netze [adsb.lol](https://adsb.lol) und [airplanes.live](https://airplanes.live).

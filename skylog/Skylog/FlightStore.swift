@@ -226,8 +226,22 @@ final class FlightStore {
         LiveFlight.autoStartIfNeeded(upcoming)
     }
 
+    /// Live data: free ADS-B first (departure/landing detection, position, ETA), then OpenSky / FlightAware as fallback.
     func updateLive(_ id: UUID) async {
-        guard let f = flight(id), f.isInAir else { return }
+        guard let f = flight(id), isLiveWindow(f) else { return }
+        if let cs = LiveADSB.callsign(for: f.number) {
+            let fix = await LiveADSB.lookup(callsign: cs)
+            guard var current = flight(id) else { return }
+            let notes = LiveADSB.apply(fix, to: &current)
+            if fix != nil || !notes.isEmpty {
+                update(current)
+                if UserDefaults.standard.object(forKey: "notifyChanges") as? Bool ?? true {
+                    for n in notes { Notifier.post(id: "adsb-\(id)-\(n.title)", title: n.title, body: n.body) }
+                }
+                if fix != nil { return }
+            }
+        }
+        guard f.isInAir else { return }
         var pos: LivePosition?
         if let hex = f.icao24, !hex.isEmpty {
             pos = try? await OpenSky.position(icao24: hex)
@@ -241,8 +255,16 @@ final class FlightStore {
         update(current)
     }
 
+    /// From 45 min before departure until 3 h after the expected arrival (unless landed/cancelled).
+    private func isLiveWindow(_ f: Flight, now: Date = Date()) -> Bool {
+        guard !f.normalizedStatus.isFinal || (f.normalizedStatus == .arrived && f.arrival.runway == nil),
+              let dep = f.departure.best else { return f.isInAir }
+        let arr = f.arrival.best ?? dep.addingTimeInterval(12 * 3600)
+        return now > dep.addingTimeInterval(-45 * 60) && now < arr.addingTimeInterval(3 * 3600)
+    }
+
     func updateLivePositions() async {
-        for f in flights where f.isInAir { await updateLive(f.id) }
+        for f in flights where isLiveWindow(f) { await updateLive(f.id) }
     }
 
     // MARK: Persistence
