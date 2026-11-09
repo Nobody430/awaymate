@@ -130,7 +130,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Automatik")
                 } footer: {
-                    Text("Aktualisiert nur Flüge der nächsten 36 Stunden, um das Gratis-Kontingent zu schonen. Im Hintergrund entscheidet iOS, wie oft die App laufen darf.")
+                    Text("Sparsam: ab 24 h vor Abflug alle 4 h, ab 4 h vor Abflug bis zur Landung alle 20 Min., nach der Landung einmal (Gepäckband). Ca. 20 Abfragen pro Flug. Im Hintergrund entscheidet iOS, wie oft die App laufen darf.")
                 }
 
                 Section("Daten") {

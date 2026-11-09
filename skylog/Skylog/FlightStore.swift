@@ -179,7 +179,19 @@ final class FlightStore {
         Notifier.scheduleReminders(for: new)
     }
 
-    /// Refreshes flights departing within the next 36h or currently in the air.
+    /// Smart refresh interval to save API queries:
+    /// 24–4 h before departure every 4 h, then every 20 min until landing, after landing once (baggage belt).
+    static func refreshInterval(departure dep: Date, arrival arr: Date, now: Date, flight f: Flight) -> TimeInterval {
+        if f.normalizedStatus == .arrived {
+            // one more update after landing, then stop
+            if let last = f.lastUpdated, last > arr { return .infinity }
+            return 0
+        }
+        if dep.timeIntervalSince(now) > 4 * 3600 { return 4 * 3600 }
+        return 20 * 60
+    }
+
+    /// Refreshes flights departing within the next 24 h or currently in the air.
     func refreshActive(force: Bool = false, notify: Bool = true) async {
         guard force || Settings.autoRefresh else { return }
         isRefreshing = true
@@ -193,8 +205,8 @@ final class FlightStore {
                 guard !f.isPast, f.normalizedStatus != .canceled else { return false }
                 let dep = f.departure.best ?? f.sortDate
                 let arr = f.arrival.best ?? dep.addingTimeInterval(4 * 3600)
-                let inWindow = dep < now.addingTimeInterval(36 * 3600) && arr > now.addingTimeInterval(-3600)
-                let minAge: TimeInterval = force ? 60 : 15 * 60
+                let inWindow = dep < now.addingTimeInterval(24 * 3600) && arr > now.addingTimeInterval(-90 * 60)
+                let minAge: TimeInterval = force ? 60 : Self.refreshInterval(departure: dep, arrival: arr, now: now, flight: f)
                 let stale = f.lastUpdated.map { now.timeIntervalSince($0) > minAge } ?? true
                 return inWindow && stale
             }

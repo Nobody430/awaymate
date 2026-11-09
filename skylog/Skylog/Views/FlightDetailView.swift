@@ -96,7 +96,7 @@ struct FlightDetailView: View {
         }
         .task(id: flightID) {
             if let current = store.flight(flightID), !current.isPast,
-               current.lastUpdated.map({ Date().timeIntervalSince($0) > 10 * 60 }) ?? true {
+               current.lastUpdated.map({ Date().timeIntervalSince($0) > 20 * 60 }) ?? true {
                 await refresh()
             }
             while !Task.isCancelled {
