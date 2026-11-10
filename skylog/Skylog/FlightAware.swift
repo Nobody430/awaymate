@@ -133,8 +133,10 @@ enum FlightData {
     /// Previous leg of our aircraft: FlightAware knows it directly (inbound id),
     /// AeroDataBox via the aircraft registration's flights of the day.
     static func inbound(for f: Flight) async throws -> InboundFlight? {
-        if let id = f.inboundFAID, FlightAware.hasKey, FlightProvider.current != .aerodatabox {
-            if let i = try? await FlightAware.inbound(id) { return i }
+        if FlightAware.hasKey, FlightProvider.current != .aerodatabox {
+            if let id = f.inboundFAID, let i = try? await FlightAware.inbound(id) { return i }
+            if let reg = f.aircraftReg, !reg.isEmpty, let dep = f.departure.scheduled ?? f.departure.best,
+               let i = try? await FlightAware.inbound(registration: reg, arrivingAt: f.departure.code, before: dep) { return i }
         }
         guard FlightProvider.current != .flightaware, adbAvailable, let reg = f.aircraftReg, !reg.isEmpty,
               let ourDep = f.departure.scheduled ?? f.departure.best else { return nil }
@@ -335,6 +337,24 @@ enum FlightAware {
     static func inbound(_ faFlightID: String) async throws -> InboundFlight? {
         let data = try await get("/flights/\(faFlightID)")
         guard let fa = try JSONDecoder().decode(FlightsResponse.self, from: data).flights.first else { return nil }
+        return inbound(from: fa)
+    }
+
+    /// Fallback when FlightAware gives no inbound id: the aircraft's recent legs by registration –
+    /// the latest one that arrives at our departure airport before we leave.
+    static func inbound(registration: String, arrivingAt code: String, before dep: Date) async throws -> InboundFlight? {
+        let reg = registration.replacingOccurrences(of: " ", with: "").uppercased()
+        let data = try await get("/flights/\(reg)", query: [URLQueryItem(name: "ident_type", value: "registration")])
+        let legs = try JSONDecoder().decode(FlightsResponse.self, from: data).flights.filter { fa in
+            guard fa.destination?.code_iata == code || fa.destination?.code_icao == code || fa.destination?.code == code,
+                  let arr = date(fa.scheduled_in ?? fa.scheduled_on) else { return false }
+            return arr < dep && arr > dep.addingTimeInterval(-18 * 3600)
+        }
+        let latest = legs.max { (date($0.scheduled_in ?? $0.scheduled_on) ?? .distantPast) < (date($1.scheduled_in ?? $1.scheduled_on) ?? .distantPast) }
+        return latest.map(inbound(from:))
+    }
+
+    private static func inbound(from fa: FAFlight) -> InboundFlight {
         let landed = fa.actual_on != nil || fa.actual_in != nil
         return InboundFlight(
             number: fa.ident_iata ?? fa.ident ?? "?",

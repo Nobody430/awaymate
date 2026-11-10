@@ -22,7 +22,8 @@ enum LiveFlight {
             belt: f.arrival.baggageBelt,
             inAir: f.isInAir,
             inbound: inboundLine(f),
-            inboundWarn: f.inbound.map { $0.isCanceled || $0.expectedDelay(ourDeparture: f.departure.best) >= 15 }
+            inboundWarn: f.inbound.map { $0.isCanceled || $0.expectedDelay(ourDeparture: f.departure.best) >= 15 },
+            arrivalDelay: f.arrival.delayMinutes
         )
     }
 

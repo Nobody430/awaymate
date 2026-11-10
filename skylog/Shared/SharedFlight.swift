@@ -62,6 +62,8 @@ struct FlightActivityAttributes: ActivityAttributes {
         /// e.g. "Zubringer in der Luft aus ORD" (optional, may be missing in server pushes)
         var inbound: String? = nil
         var inboundWarn: Bool? = nil
+        /// Arrival delay in minutes (negative = early); nil when unknown
+        var arrivalDelay: Int? = nil
     }
 
     var flightID: String

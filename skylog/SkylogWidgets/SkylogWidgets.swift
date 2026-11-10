@@ -174,9 +174,12 @@ struct LockScreenFlightView: View {
                     .foregroundStyle(!showDelay ? (s.status == "Gelandet" ? .green : accent) : s.delayMinutes >= 15 ? .red : .orange)
             }
             HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 1) {
                     Text(context.attributes.from).font(.title.bold())
-                    Text(airportTime(s.departure, context.attributes.fromTZ)).font(.caption)
+                    Text(airportTime(s.departure, context.attributes.fromTZ))
+                        .font(.subheadline.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(delayColor(s.delayMinutes))
+                    Text(delayText(s.delayMinutes)).font(.caption2).foregroundStyle(delayColor(s.delayMinutes))
                 }
                 Spacer()
                 VStack {
@@ -199,9 +202,14 @@ struct LockScreenFlightView: View {
                 }
                 .multilineTextAlignment(.center)
                 Spacer()
-                VStack(alignment: .trailing) {
+                VStack(alignment: .trailing, spacing: 1) {
                     Text(context.attributes.to).font(.title.bold())
-                    Text(airportTime(s.arrival, context.attributes.toTZ)).font(.caption)
+                    Text(airportTime(s.arrival, context.attributes.toTZ))
+                        .font(.subheadline.weight(.semibold).monospacedDigit())
+                        .foregroundStyle(s.arrivalDelay.map(delayColor) ?? .white)
+                    if let d = s.arrivalDelay {
+                        Text(delayText(d)).font(.caption2).foregroundStyle(delayColor(d))
+                    }
                 }
             }
             FlightProgressRow(state: s)
@@ -217,6 +225,17 @@ struct LockScreenFlightView: View {
         }
         .foregroundStyle(.white)
     }
+}
+
+/// "Pünktlich" / "49 Min. später" / "16 Min. früher"
+func delayText(_ minutes: Int) -> String {
+    if minutes >= 5 { return "\(minutes) Min. später" }
+    if minutes <= -5 { return "\(-minutes) Min. früher" }
+    return "Pünktlich"
+}
+
+func delayColor(_ minutes: Int) -> Color {
+    minutes >= 15 ? .red : minutes >= 5 ? .orange : .green
 }
 
 struct FlightProgressRow: View {
