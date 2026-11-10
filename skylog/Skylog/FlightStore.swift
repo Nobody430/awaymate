@@ -289,7 +289,8 @@ final class FlightStore {
             let title = change.title.replacingOccurrences(of: "\(new.number): ", with: "").replacingOccurrences(of: "\(new.number) ", with: "")
             new.log(title.prefix(1).uppercased() + String(title.dropFirst()) + " – " + change.body)
         }
-        if notify && Settings.notifyChanges {
+        // with an own push server, the server sends these – don't notify twice
+        if notify && Settings.notifyChanges && !PushClient.isConfigured {
             for change in changes {
                 Notifier.post(id: "\(new.id)-\(change.title)", title: change.title, body: change.body)
             }
@@ -443,7 +444,7 @@ final class FlightStore {
             if fix != nil || !notes.isEmpty {
                 for n in notes { current.log(n.title.contains("gestartet") ? "Gestartet (Live-Position)" : "Gelandet (Live-Position)") }
                 update(current)
-                if Settings.notifyChanges {
+                if Settings.notifyChanges && !PushClient.isConfigured {
                     for n in notes { Notifier.post(id: "\(id)-\(n.title)", title: n.title, body: n.body) }
                 }
                 if fix != nil { return }

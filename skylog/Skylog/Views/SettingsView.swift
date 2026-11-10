@@ -180,7 +180,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Echtzeit-Pushs (eigener Server)")
                 } footer: {
-                    Text("Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Kostet ca. 2–3 $ pro Monat bei Fly.io.")
+                    Text("Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys.")
                 }
 
                 Section {

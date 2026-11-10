@@ -10,27 +10,23 @@ struct KeyGuide: Identifiable {
     let note: String?
 
     static let pushServer = KeyGuide(
-        id: "push", title: "Eigener Push-Server (Fly.io)", icon: "bolt.horizontal.circle",
-        intro: "Mit dem Server kommen Gate-Wechsel, Verspätungen, Start und Landung sofort – auch wenn das iPhone gesperrt ist – und die Live-Aktivität aktualisiert sich von selbst. Einmalig ca. 20 Minuten, am besten am Computer. Kosten: ca. 2–3 $ pro Monat bei Fly.io (kein Gratis-Plan mehr für neue Konten). Die Schlüssel trägst du nur bei GitHub ein, nie in einem Chat.",
+        id: "push", title: "Eigener Push-Server (gratis)", icon: "bolt.horizontal.circle",
+        intro: "Für Bastler. Mit einem eigenen kleinen Server kommen Gate-Wechsel, Verspätungen, Start und Landung sofort – auch wenn das iPhone gesperrt ist – und die Live-Aktivität aktualisiert sich von selbst. Der Server läuft gratis bei Cloudflare und nutzt deine eigenen Flugdaten-Keys. Einmalig ca. 20 Minuten, am besten am Computer. Ohne Server funktioniert Skylog ganz normal weiter.",
         steps: [
-            ("TEIL 1 – Fly.io. Konto erstellen (E-Mail, Google oder GitHub). Neue Konten starten mit einer kurzen Testphase; damit der Server danach weiterläuft, unter „Billing“ eine Kreditkarte hinterlegen.", URL(string: "https://fly.io/app/sign-up")),
-            ("Im Fly.io-Dashboard die Organisation „Personal“ wählen und links auf „Tokens“ tippen.", URL(string: "https://fly.io/dashboard/personal/tokens")),
-            ("Name „skylog“ eingeben, auf „Create Organization Token“ tippen und den ganzen Text kopieren – inklusive „FlyV1 “ am Anfang. Er wird nur einmal angezeigt. Das ist später das Secret FLY_API_TOKEN.", nil),
-            ("TEIL 2 – Apple. Im Apple-Developer-Konto „Keys“ öffnen und auf + tippen.", URL(string: "https://developer.apple.com/account/resources/authkeys/list")),
-            ("Key Name „Skylog Push“. Haken bei „Apple Push Notifications service (APNs)“ setzen, daneben auf „Configure“: Umgebung „Sandbox & Production“ (falls nicht angeboten: „Production“), Art „Team Scoped (All Topics)“. Speichern → „Continue“ → „Confirm“ (bzw. „Register“).", nil),
-            ("Auf „Download“ tippen: Die Datei AuthKey_XXXXXXXXXX.p8 lässt sich nur EINMAL laden – gut aufbewahren. Die 10 Zeichen „Key ID“ auf der Seite notieren (stehen auch im Dateinamen).", nil),
-            ("TEIL 3 – GitHub. Dein Repository „ios-apps“ im Browser öffnen: Settings → Secrets and variables → Actions → „New repository secret“. (In der GitHub-Handy-App geht das nicht – github.com im Browser nutzen.)", URL(string: "https://github.com/Nobody430/ios-apps/settings/secrets/actions")),
-            ("Secret 1 – Name: FLY_API_TOKEN · Inhalt: der Token aus Teil 1 (mit „FlyV1 “).", nil),
-            ("Secret 2 – Name: FLY_APP_NAME · Inhalt: ein eigener, weltweit eindeutiger Name nur aus Kleinbuchstaben, Zahlen und Bindestrichen, z.B. skylog-push-n430. Daraus wird die Adresse skylog-push-n430.fly.dev.", nil),
+            ("TEIL 1 – Projekt kopieren. Bei GitHub anmelden (oder Konto erstellen), das Skylog-Projekt öffnen und oben rechts auf „Fork“ tippen. Damit hast du deine eigene Kopie.", URL(string: "https://github.com/Nobody430/ios-apps")),
+            ("TEIL 2 – Cloudflare. Gratis-Konto erstellen (keine Kreditkarte nötig).", URL(string: "https://dash.cloudflare.com/sign-up")),
+            ("Im Dashboard einmal „Workers & Pages“ öffnen (legt deine workers.dev-Adresse an). Rechts steht die „Account ID“ – kopieren.", URL(string: "https://dash.cloudflare.com/?to=/:account/workers-and-pages")),
+            ("Profil → „API Tokens“ → „Create Token“ → Vorlage „Edit Cloudflare Workers“ → „Continue to summary“ → „Create Token“. Den Token kopieren (wird nur einmal angezeigt).", URL(string: "https://dash.cloudflare.com/profile/api-tokens")),
+            ("TEIL 3 – Secrets. In DEINER Kopie bei GitHub: Settings → Secrets and variables → Actions → „New repository secret“. (Geht nur im Browser, nicht in der GitHub-App.)", nil),
+            ("Secret 1 – Name: CLOUDFLARE_API_TOKEN · Inhalt: der Token aus Teil 2.", nil),
+            ("Secret 2 – Name: CLOUDFLARE_ACCOUNT_ID · Inhalt: die Account ID aus Teil 2.", nil),
             ("Secret 3 – Name: SERVER_TOKEN · Inhalt: ein langes, selbst erfundenes Passwort (mind. 24 Zeichen, nur Buchstaben und Zahlen). Du brauchst es gleich nochmal in Skylog.", nil),
-            ("Secret 4 – Name: APNS_KEY_ID · Inhalt: die 10 Zeichen Key ID aus Teil 2.", nil),
-            ("Secret 5 – Name: APNS_KEY_P8 · Inhalt: die .p8-Datei mit einem Texteditor öffnen und ALLES einfügen, von „-----BEGIN PRIVATE KEY-----“ bis „-----END PRIVATE KEY-----“.", nil),
-            ("Optional Secret 6 – Name: FLIGHTAWARE_KEY · Inhalt: dein FlightAware-Key. Damit meldet der Server auch Gate-Wechsel und Verspätungen; ohne ihn nur Start und Landung.", nil),
-            ("TEIL 4 – Server starten. Im Repository auf „Actions“ → links „Deploy push server“ → rechts „Run workflow“ → grüner Knopf „Run workflow“. Nach 2–3 Minuten sollte ein grüner Haken erscheinen.", URL(string: "https://github.com/Nobody430/ios-apps/actions/workflows/server.yml")),
-            ("TEIL 5 – Skylog verbinden. Einstellungen → „Echtzeit-Pushs (eigener Server)“: als Adresse deinen-namen.fly.dev eintragen, als Server-Token das Passwort aus Secret 3. Dann „Verbindung testen“ – es sollte eine Test-Mitteilung kommen.", nil),
-            ("Zum Schluss laufende Live-Aktivitäten einmal beenden und neu starten, damit sie die Updates vom Server bekommen.", nil),
+            ("Secret 4 – Name: RELAY_URL · Inhalt: die Adresse des Skylog-Relays. Sie steht in der Projektbeschreibung (README) unter „Relay“.", URL(string: "https://github.com/Nobody430/ios-apps#relay")),
+            ("TEIL 4 – Server starten. In deiner Kopie auf „Actions“ (beim ersten Mal Workflows aktivieren) → links „Deploy push server“ → „Run workflow“. Nach 1–2 Minuten erscheint ein grüner Haken; in der Zusammenfassung steht die Adresse deines Servers (…workers.dev).", nil),
+            ("TEIL 5 – Skylog verbinden. Einstellungen → „Echtzeit-Pushs (eigener Server)“: die Adresse aus Teil 4 und das Passwort aus Secret 3 eintragen. „Verbindung testen“ – es sollte eine Test-Mitteilung kommen.", nil),
+            ("Laufende Live-Aktivitäten einmal beenden und neu starten, damit sie die Updates vom Server bekommen.", nil),
         ],
-        note: "Roter Haken bei „Deploy push server“? Meist ist ein Secret-Name falsch geschrieben, der App-Name schon vergeben (anderen wählen) oder bei Fly.io fehlt die Kreditkarte. Apple erlaubt nur zwei solche Schlüssel pro Umgebung – ist das Limit erreicht, einen bestehenden Push-Schlüssel wiederverwenden. Bei Fly.io kannst du unter „Billing“ jederzeit die Kosten sehen und den Server unter „Apps“ löschen.")
+        note: "Dein FlightAware-Key aus den Einstellungen wird verschlüsselt an DEINEN Server geschickt, damit er Gates und Verspätungen abfragen kann; ohne Key meldet er nur Start und Landung (gratis über ADS-B). Das Relay des Herausgebers reicht nur die fertige Mitteilung an Apple weiter – es sieht weder deine Keys noch deine Flugliste. Statt Cloudflare geht auch Docker (Fly.io, eigener Rechner): siehe README im Ordner „server“. Roter Haken? Meist ist ein Secret-Name falsch geschrieben.")
 
     static let aerodatabox = KeyGuide(
         id: "adb", title: "AeroDataBox-Key (gratis)", icon: "airplane.circle",

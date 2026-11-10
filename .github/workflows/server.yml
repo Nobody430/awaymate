@@ -1,10 +1,15 @@
 name: Deploy push server
 
+# Deploys whatever the repository secrets allow:
+#  - relay  (Cloudflare): the publisher's push relay           – needs CLOUDFLARE_* and APNS_* secrets
+#  - server (Cloudflare): your own flight-watching push server – needs CLOUDFLARE_* and SERVER_TOKEN
+#  - server (Fly.io):     same server as a container           – needs FLY_API_TOKEN, FLY_APP_NAME, SERVER_TOKEN
 on:
   push:
     branches: [main]
     paths:
       - 'server/**'
+      - 'relay/**'
       - '.github/workflows/server.yml'
   workflow_dispatch:
 
@@ -13,7 +18,71 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  cloudflare:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      SERVER_TOKEN: ${{ secrets.SERVER_TOKEN }}
+      APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
+      APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      RELAY_URL: ${{ secrets.RELAY_URL }}
+      FLIGHTAWARE_KEY: ${{ secrets.FLIGHTAWARE_KEY }}
+    steps:
+      - name: Check secrets
+        id: check
+        run: |
+          cf=false; relay=false; server=false
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then cf=true; fi
+          if $cf && [ -n "$APNS_KEY_ID" ] && [ -n "$APNS_KEY_P8" ] && [ -n "$APPLE_TEAM_ID" ]; then relay=true; fi
+          if $cf && [ -n "$SERVER_TOKEN" ]; then server=true; fi
+          echo "cf=$cf" >> "$GITHUB_OUTPUT"; echo "relay=$relay" >> "$GITHUB_OUTPUT"; echo "server=$server" >> "$GITHUB_OUTPUT"
+          $cf || echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID fehlen – Cloudflare übersprungen."
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.cf == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.cf == 'true'
+        with:
+          node-version: 22
+
+      - name: Deploy relay (publisher only)
+        if: steps.check.outputs.relay == 'true'
+        working-directory: relay
+        run: |
+          npx --yes wrangler@4 deploy 2>&1 | tee deploy.log
+          python3 - <<'PY' > secrets.json
+          import json, os
+          print(json.dumps({k: os.environ[k] for k in ("APNS_KEY_ID", "APNS_KEY_P8", "APPLE_TEAM_ID")}))
+          PY
+          npx --yes wrangler@4 secret bulk secrets.json
+          rm -f secrets.json
+          url=$(grep -o 'https://[a-zA-Z0-9.-]*workers\.dev' deploy.log | head -1)
+          echo "### Relay: $url" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Relay läuft: $url"
+          sleep 5; curl -fsS "$url/health" && echo
+
+      - name: Deploy push server
+        if: steps.check.outputs.server == 'true'
+        working-directory: server
+        run: |
+          npx --yes wrangler@4 deploy 2>&1 | tee deploy.log
+          python3 - <<'PY' > secrets.json
+          import json, os
+          keys = ("SERVER_TOKEN", "APNS_KEY_ID", "APNS_KEY_P8", "APPLE_TEAM_ID", "RELAY_URL", "FLIGHTAWARE_KEY")
+          print(json.dumps({k: os.environ[k] for k in keys if os.environ.get(k)}))
+          PY
+          npx --yes wrangler@4 secret bulk secrets.json
+          rm -f secrets.json
+          url=$(grep -o 'https://[a-zA-Z0-9.-]*workers\.dev' deploy.log | head -1)
+          echo "### Push-Server: $url" >> "$GITHUB_STEP_SUMMARY"
+          echo "Diese Adresse (ohne https://) und dein SERVER_TOKEN gehören in Skylog → Einstellungen → Echtzeit-Pushs." >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Push-Server läuft: $url"
+          sleep 5; curl -fsS "$url/health" && echo
+
+  fly:
     runs-on: ubuntu-latest
     env:
       FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
@@ -23,7 +92,7 @@ jobs:
         id: check
         run: |
           if [ -n "$FLY_API_TOKEN" ] && [ -n "$APP" ]; then echo "ready=true" >> "$GITHUB_OUTPUT"
-          else echo "::notice::FLY_API_TOKEN / FLY_APP_NAME fehlen – Server-Deployment übersprungen."; echo "ready=false" >> "$GITHUB_OUTPUT"; fi
+          else echo "::notice::FLY_API_TOKEN / FLY_APP_NAME fehlen – Fly.io übersprungen."; echo "ready=false" >> "$GITHUB_OUTPUT"; fi
 
       - uses: actions/checkout@v4
         if: steps.check.outputs.ready == 'true'
@@ -44,10 +113,11 @@ jobs:
           APNS_KEY_ID: ${{ secrets.APNS_KEY_ID }}
           APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          RELAY_URL: ${{ secrets.RELAY_URL }}
           FLIGHTAWARE_KEY: ${{ secrets.FLIGHTAWARE_KEY }}
         run: |
           args=()
-          for k in SERVER_TOKEN APNS_KEY_ID APNS_KEY_P8 APPLE_TEAM_ID FLIGHTAWARE_KEY; do
+          for k in SERVER_TOKEN APNS_KEY_ID APNS_KEY_P8 APPLE_TEAM_ID RELAY_URL FLIGHTAWARE_KEY; do
             v="${!k}"; [ -n "$v" ] && args+=("$k=$v")
           done
           flyctl secrets set "${args[@]}" -a "$APP" --stage

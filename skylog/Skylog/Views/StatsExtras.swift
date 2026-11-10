@@ -94,19 +94,21 @@ struct PunctualityCard: View {
     private var rows: [Row] {
         var groups: [String: [Int]] = [:]
         for f in flights where f.isPast {
-            guard let name = f.airlineName ?? f.airlineIata, let s = f.arrival.scheduled,
-                  let a = f.arrival.runway ?? f.arrival.revised else { continue }
-            groups[name, default: []].append(Int(a.timeIntervalSince(s) / 60))
+            guard let name = f.airlineName ?? f.airlineIata, let sched = f.arrival.scheduled,
+                  let actual = f.arrival.runway ?? f.arrival.revised else { continue }
+            groups[name, default: []].append(Int(actual.timeIntervalSince(sched) / 60))
         }
-        return groups.map { name, delays in
-            Row(id: name, count: delays.count, onTime: delays.filter { $0 < 15 }.count * 100 / delays.count,
-                avgDelay: delays.reduce(0, +) / delays.count)
+        var result: [Row] = []
+        for (name, delays) in groups {
+            let onTime: Int = delays.filter { $0 < 15 }.count * 100 / delays.count
+            let avg: Int = delays.reduce(0, +) / delays.count
+            result.append(Row(id: name, count: delays.count, onTime: onTime, avgDelay: avg))
         }
-        .sorted { $0.count == $1.count ? $0.id < $1.id : $0.count > $1.count }
+        return result.sorted { a, b in a.count == b.count ? a.id < b.id : a.count > b.count }
     }
 
     var body: some View {
-        let rows = rows
+        let rows: [Row] = self.rows
         if !rows.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Pünktlichkeit deiner Flüge").font(.caption).foregroundStyle(.secondary)
@@ -138,13 +140,33 @@ struct AircraftCollectionCard: View {
     let flights: [Flight]
     @State private var expanded = false
 
+    private struct TypeRow { let model: String; let count: Int }
+    private struct RegRow { let reg: String; let count: Int; let model: String? }
+
+    private var typeRows: [TypeRow] {
+        var counts: [String: Int] = [:]
+        for f in flights {
+            if let m = f.aircraftModel, !m.isEmpty { counts[m, default: 0] += 1 }
+        }
+        let rows: [TypeRow] = counts.map { TypeRow(model: $0.key, count: $0.value) }
+        return rows.sorted { a, b in a.count == b.count ? a.model < b.model : a.count > b.count }
+    }
+
+    private var regRows: [RegRow] {
+        var counts: [String: Int] = [:]
+        var models: [String: String] = [:]
+        for f in flights {
+            guard let r = f.aircraftReg?.uppercased(), !r.isEmpty else { continue }
+            counts[r, default: 0] += 1
+            if let m = f.aircraftModel { models[r] = m }
+        }
+        let rows: [RegRow] = counts.map { RegRow(reg: $0.key, count: $0.value, model: models[$0.key]) }
+        return rows.sorted { a, b in a.count == b.count ? a.reg < b.reg : a.count > b.count }
+    }
+
     var body: some View {
-        let types = Dictionary(grouping: flights.filter { !($0.aircraftModel ?? "").isEmpty }) { $0.aircraftModel! }
-            .map { (model: $0.key, count: $0.value.count) }
-            .sorted { $0.count == $1.count ? $0.model < $1.model : $0.count > $1.count }
-        let regs = Dictionary(grouping: flights.filter { !($0.aircraftReg ?? "").isEmpty }) { $0.aircraftReg!.uppercased() }
-            .map { (reg: $0.key, count: $0.value.count, model: $0.value.first?.aircraftModel) }
-            .sorted { $0.count == $1.count ? $0.reg < $1.reg : $0.count > $1.count }
+        let types: [TypeRow] = typeRows
+        let regs: [RegRow] = regRows
         if !types.isEmpty || !regs.isEmpty {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
@@ -152,7 +174,7 @@ struct AircraftCollectionCard: View {
                     Spacer()
                     Text("\(types.count) Typen · \(regs.count) Flugzeuge").font(.caption).foregroundStyle(.secondary)
                 }
-                ForEach(types.prefix(expanded ? 40 : 4), id: \.model) { t in
+                ForEach(Array(types.prefix(expanded ? 40 : 4)), id: \.model) { t in
                     HStack {
                         Label(t.model, systemImage: "airplane").lineLimit(1)
                         Spacer()
@@ -161,10 +183,10 @@ struct AircraftCollectionCard: View {
                     .font(.subheadline)
                 }
                 if expanded {
-                    let repeats = regs.filter { $0.count > 1 }
+                    let repeats: [RegRow] = regs.filter { $0.count > 1 }
                     if !repeats.isEmpty {
                         Text("Mehrmals im selben Flugzeug").font(.caption).foregroundStyle(.secondary).padding(.top, 4)
-                        ForEach(repeats.prefix(15), id: \.reg) { r in
+                        ForEach(Array(repeats.prefix(15)), id: \.reg) { r in
                             HStack {
                                 Text(r.reg).font(.subheadline.monospaced())
                                 if let m = r.model { Text(m).font(.caption).foregroundStyle(.secondary).lineLimit(1) }

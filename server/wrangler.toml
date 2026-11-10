@@ -1,0 +1,18 @@
+# Cloudflare Workers deployment of the Skylog push server (free plan is enough for personal use).
+name = "skylog-push"
+main = "worker.mjs"
+compatibility_date = "2026-06-01"
+
+[triggers]
+crons = ["* * * * *"]
+
+[[durable_objects.bindings]]
+name = "STATE"
+class_name = "SkylogState"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["SkylogState"]
+
+[observability]
+enabled = true

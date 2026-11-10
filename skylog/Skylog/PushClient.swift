@@ -65,7 +65,7 @@ enum PushClient {
             "statusLabel": f.normalizedStatus.label, "longHaul": (f.computedDistanceKm ?? 0) > 3500,
         ]
         if let arr = f.arrival.best { p["arr"] = iso.string(from: arr) }
-        if let cs = LiveADSB.callsign(for: f.number) { p["callsign"] = cs }
+        if let cs = LiveADSB.callsign(for: f) { p["callsign"] = cs }
         if let g = f.departure.gate { p["gate"] = g }
         if let t = f.departure.terminal { p["terminal"] = t }
         if let c = f.arrival.coordinate { p["toLat"] = c.latitude; p["toLon"] = c.longitude }
@@ -79,7 +79,9 @@ enum PushClient {
         let flights = FlightStore.shared.upcoming
             .filter { !$0.normalizedStatus.isFinal && ($0.departure.best ?? .distantFuture) < horizon }
             .compactMap(payload(for:))
-        let body: [String: Any] = ["deviceToken": token, "flights": flights, "liveTokens": liveTokens]
+        var body: [String: Any] = ["deviceToken": token, "flights": flights, "liveTokens": liveTokens]
+        // Your own server uses your own FlightAware key (sent only to the server you entered, over HTTPS)
+        if FlightAware.hasKey, FlightProvider.current != .aerodatabox { body["flightawareKey"] = FlightAware.apiKey }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = 20

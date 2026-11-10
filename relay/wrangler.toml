@@ -1,0 +1,7 @@
+# Push relay for the published Skylog app. Secrets (APNS_KEY_ID, APNS_KEY_P8, APPLE_TEAM_ID) are set by the deploy workflow.
+name = "skylog-relay"
+main = "worker.mjs"
+compatibility_date = "2026-06-01"
+
+[observability]
+enabled = true
