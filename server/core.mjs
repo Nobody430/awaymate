@@ -33,6 +33,48 @@ const TEXTS = {
     boardingTitle: "{0}: boarding starts", boardingBody: "Probably now. Departure {0}.", boardingBodyGate: "Probably now at gate {0}. Departure {1}.",
     testTitle: "Skylog server connected ✅", testBody: "Push notifications work.",
   },
+  fr: {
+    scheduled: "À l'heure", cancelled: "Annulé", diverted: "Dérouté", leftGate: "A quitté la porte", inAir: "En vol",
+    landed: "Atterri", atGate: "À la porte", boarding: "Embarquement (env.)",
+    leftGateTitle: "🛫 Porte quittée", leftGateBody: "{0} roule vers la piste.",
+    departedTitle: "{0} a décollé", departedEta: "Arrivée vers {0}.", departedTo: "En route pour {0}.",
+    landedTitle: "{0} a atterri", landedBody: "Bienvenue à {0} !",
+    gateChangeTitle: "{0} : changement de porte", gateTitle: "{0} : porte {1}", gateChangeBody: "Nouvelle porte {0} (avant : {1}).",
+    gateBody: "Départ de la porte {0}.", gateBodyTerminal: "Départ de la porte {0}, terminal {1}.",
+    newDepTitle: "{0} : nouvelle heure de départ", newDepBody: "Départ maintenant à {0}.", newDepBodyDelay: "Départ maintenant à {0} (+{1} min).",
+    beltTitle: "{0} : tapis {1}", beltBody: "Vos bagages arrivent sur le tapis {0}.",
+    cancelledTitle: "{0} annulé", cancelledBody: "Votre vol a été annulé.",
+    boardingTitle: "{0} : l'embarquement commence", boardingBody: "Probablement maintenant. Départ {0}.", boardingBodyGate: "Probablement maintenant à la porte {0}. Départ {1}.",
+    testTitle: "Serveur Skylog connecté ✅", testBody: "Les notifications fonctionnent.",
+  },
+  it: {
+    scheduled: "In orario", cancelled: "Cancellato", diverted: "Dirottato", leftGate: "Ha lasciato il gate", inAir: "In volo",
+    landed: "Atterrato", atGate: "Al gate", boarding: "Imbarco (ca.)",
+    leftGateTitle: "🛫 Gate lasciato", leftGateBody: "{0} sta rullando verso la pista.",
+    departedTitle: "{0} è decollato", departedEta: "Arrivo verso le {0}.", departedTo: "In viaggio verso {0}.",
+    landedTitle: "{0} è atterrato", landedBody: "Benvenuto a {0}!",
+    gateChangeTitle: "{0}: cambio gate", gateTitle: "{0}: gate {1}", gateChangeBody: "Nuovo gate {0} (prima {1}).",
+    gateBody: "Partenza dal gate {0}.", gateBodyTerminal: "Partenza dal gate {0}, terminal {1}.",
+    newDepTitle: "{0}: nuovo orario di partenza", newDepBody: "Partenza ora alle {0}.", newDepBodyDelay: "Partenza ora alle {0} (+{1} min).",
+    beltTitle: "{0}: nastro bagagli {1}", beltBody: "I tuoi bagagli arrivano sul nastro {0}.",
+    cancelledTitle: "{0} cancellato", cancelledBody: "Il tuo volo è stato cancellato.",
+    boardingTitle: "{0}: inizia l'imbarco", boardingBody: "Probabilmente ora. Partenza {0}.", boardingBodyGate: "Probabilmente ora al gate {0}. Partenza {1}.",
+    testTitle: "Server Skylog collegato ✅", testBody: "Le notifiche funzionano.",
+  },
+  es: {
+    scheduled: "A tiempo", cancelled: "Cancelado", diverted: "Desviado", leftGate: "Salió de la puerta", inAir: "En vuelo",
+    landed: "Aterrizado", atGate: "En la puerta", boarding: "Embarque (aprox.)",
+    leftGateTitle: "🛫 Salió de la puerta", leftGateBody: "{0} rueda hacia la pista.",
+    departedTitle: "{0} ha despegado", departedEta: "Llegada sobre las {0}.", departedTo: "Rumbo a {0}.",
+    landedTitle: "{0} ha aterrizado", landedBody: "¡Bienvenido a {0}!",
+    gateChangeTitle: "{0}: cambio de puerta", gateTitle: "{0}: puerta {1}", gateChangeBody: "Nueva puerta {0} (antes {1}).",
+    gateBody: "Salida desde la puerta {0}.", gateBodyTerminal: "Salida desde la puerta {0}, terminal {1}.",
+    newDepTitle: "{0}: nueva hora de salida", newDepBody: "Salida ahora a las {0}.", newDepBodyDelay: "Salida ahora a las {0} (+{1} min).",
+    beltTitle: "{0}: cinta de equipaje {1}", beltBody: "Tu equipaje llega por la cinta {0}.",
+    cancelledTitle: "{0} cancelado", cancelledBody: "Tu vuelo ha sido cancelado.",
+    boardingTitle: "{0}: comienza el embarque", boardingBody: "Probablemente ahora. Salida {0}.", boardingBodyGate: "Probablemente ahora en la puerta {0}. Salida {1}.",
+    testTitle: "Servidor Skylog conectado ✅", testBody: "Las notificaciones funcionan.",
+  },
 };
 function t(lang, key, ...args) {
   const text = (TEXTS[lang] || TEXTS.de)[key] ?? TEXTS.de[key] ?? key;
@@ -113,7 +155,7 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
 
   function fmtTime(iso, tz, lang) {
     if (!iso) return "–";
-    try { return new Date(iso).toLocaleTimeString(lang === "en" ? "en-GB" : "de-CH", { hour: "2-digit", minute: "2-digit", timeZone: tz || "Europe/Zurich" }); }
+    try { return new Date(iso).toLocaleTimeString({ en: "en-GB", fr: "fr-FR", it: "it-IT", es: "es-ES" }[lang] || "de-CH", { hour: "2-digit", minute: "2-digit", timeZone: tz || "Europe/Zurich" }); }
     catch { return new Date(iso).toISOString().slice(11, 16); }
   }
 
