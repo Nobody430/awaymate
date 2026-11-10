@@ -22,7 +22,7 @@ final class FlightStore {
         set { UserDefaults.standard.set(Array(newValue), forKey: "ignoredMailFlights") }
     }
 
-    private static func key(_ f: Flight) -> String { f.number.replacingOccurrences(of: " ", with: "").uppercased() + "|" + f.date }
+    private static func key(_ f: Flight) -> String { normalizedNumber(f.number) + "|" + f.date }
 
     /// Adds a suggestion; returns false if it was ignored before or already exists.
     @discardableResult
@@ -84,18 +84,25 @@ final class FlightStore {
 
     func contains(number: String, date: Date) -> Bool {
         let d = Fmt.apiDate.string(from: date)
-        let n = number.replacingOccurrences(of: " ", with: "").uppercased()
-        return flights.contains { $0.date == d && $0.number.replacingOccurrences(of: " ", with: "").uppercased() == n }
+        let n = Self.normalizedNumber(number)
+        return flights.contains { $0.date == d && Self.normalizedNumber($0.number) == n }
     }
 
     // MARK: Mutations
 
-    static func normalizedNumber(_ n: String) -> String { n.replacingOccurrences(of: " ", with: "").uppercased() }
+    /// "lx 092" → "LX92"
+    static func normalizedNumber(_ n: String) -> String {
+        let t = n.replacingOccurrences(of: " ", with: "").uppercased()
+        guard t.count > 2 else { return t }
+        let digits = t.dropFirst(2).drop { $0 == "0" }
+        return String(t.prefix(2)) + (digits.isEmpty ? "0" : String(digits))
+    }
 
     /// Same flight: same number + date, or a codeshare (same route, departure within 60 min / same day without times).
     static func isSameFlight(_ a: Flight, _ b: Flight) -> Bool {
         if normalizedNumber(a.number) == normalizedNumber(b.number) && a.date == b.date { return true }
-        guard a.departure.code == b.departure.code, a.arrival.code == b.arrival.code else { return false }
+        guard a.departure.code == b.departure.code, a.arrival.code == b.arrival.code,
+              a.departure.code != "???", a.arrival.code != "???" else { return false }
         if let da = a.departure.scheduled, let db = b.departure.scheduled { return abs(da.timeIntervalSince(db)) < 3600 }
         return a.date == b.date
     }
@@ -130,6 +137,7 @@ final class FlightStore {
     func delete(_ ids: [UUID]) {
         for id in ids { if let f = flight(id) { Notifier.cancelReminders(for: f) } }
         flights.removeAll { ids.contains($0.id) }
+        for id in ids { attempts[id] = nil; inboundAttempts[id] = nil; positionQueries[id] = nil }
         save()
     }
 
@@ -137,8 +145,7 @@ final class FlightStore {
     var incomplete: [Flight] {
         flights.filter { f in
             f.departure.scheduled == nil && f.departure.best == nil &&
-            (f.departure.coordinate == nil || f.arrival.coordinate == nil ||
-             !FlightTextParser.airlines.contains(String(f.number.prefix(2))))
+            (f.departure.coordinate == nil || f.arrival.coordinate == nil)
         }
     }
 
@@ -157,24 +164,71 @@ final class FlightStore {
 
     // MARK: Refresh
 
+    /// Failed refreshes back off (5, 10, 20 … 60 min) instead of being retried every minute.
+    @ObservationIgnored private var attempts: [UUID: (last: Date, fails: Int)] = [:]
+    @ObservationIgnored private var inFlight: Set<UUID> = []
+    @ObservationIgnored private var refreshTask: Task<Void, Never>?
+    @ObservationIgnored private var inboundAttempts: [UUID: Date] = [:]
+    @ObservationIgnored private var positionQueries: [UUID: Date] = [:]
+    @ObservationIgnored private var ratePausedUntil = Date.distantPast
+
+    /// Picks the right record: same route, not cancelled if possible, closest to the known departure time.
+    private static func pick(_ results: [Flight], for cur: Flight) -> Flight? {
+        var c = results.filter { $0.departure.code == cur.departure.code }
+        if c.isEmpty { c = results }
+        let sameArr = c.filter { $0.arrival.code == cur.arrival.code }
+        if !sameArr.isEmpty { c = sameArr }
+        let alive = c.filter { $0.normalizedStatus != .canceled }
+        if !alive.isEmpty { c = alive }
+        guard let ref = cur.departure.scheduled else { return c.first }
+        return c.min { abs(($0.departure.scheduled ?? .distantFuture).timeIntervalSince(ref)) < abs(($1.departure.scheduled ?? .distantFuture).timeIntervalSince(ref)) }
+    }
+
     func refresh(_ id: UUID, notify: Bool = true) async throws {
-        guard let old = flight(id) else { return }
-        let date = Fmt.apiDate.date(from: old.date) ?? old.sortDate
-        let results = try await FlightData.search(number: old.number, date: date)
-        guard var new = results.first(where: { $0.departure.code == old.departure.code }) ?? results.first else { return }
-        new.id = old.id
-        new.notes = old.notes
-        new.seat = old.seat
-        new.date = old.date
+        guard let before = flight(id), !inFlight.contains(id) else { return }
+        inFlight.insert(id)
+        defer { inFlight.remove(id) }
+        let date = Fmt.apiDate.date(from: before.date) ?? before.sortDate
+        let results: [Flight]
+        do {
+            results = try await FlightData.search(number: before.number, date: date, stored: before)
+        } catch {
+            attempts[id] = (Date(), (attempts[id]?.fails ?? 0) + 1)
+            throw error
+        }
+        attempts[id] = nil
+        // The flight may have changed (ADS-B, notes, seat) or been deleted while we were waiting
+        guard let cur = flight(id), let picked = Self.pick(results, for: cur) else { return }
+        var new = FlightData.merge(picked, with: cur)
+        new.id = cur.id
+        new.number = cur.number          // keep the booked (codeshare) number
+        new.notes = cur.notes
+        new.seat = cur.seat
+        new.date = cur.date
+        new.inbound = cur.inbound
         new.lastUpdated = Date()
-        if new.lastPosition == nil { new.lastPosition = old.lastPosition }
-        if new.icao24 == nil { new.icao24 = old.icao24 }
-        if new.inbound == nil { new.inbound = old.inbound }
-        if new.inboundFAID == nil { new.inboundFAID = old.inboundFAID }
+
+        // Never fall back behind what live data already detected (takeoff / landing)
+        let curStatus = cur.normalizedStatus, newStatus = new.normalizedStatus
+        if (curStatus == .arrived || cur.arrival.runway != nil) && !newStatus.isFinal {
+            new.status = "Arrived"
+            new.arrival.runway = new.arrival.runway ?? cur.arrival.runway
+            new.departure.runway = new.departure.runway ?? cur.departure.runway
+        } else if (curStatus.isAirborne || cur.departure.runway != nil) && !newStatus.isAirborne && !newStatus.isFinal {
+            new.status = cur.status
+            new.departure.runway = new.departure.runway ?? cur.departure.runway
+        }
+
+        // Delay notifications compare against the last time we told the user (catches creeping delays)
+        let reference = cur.lastNotifiedDeparture ?? cur.departure.best
+        new.lastNotifiedDeparture = reference
+        if let r = reference, let n = new.departure.best, abs(n.timeIntervalSince(r)) >= 5 * 60 {
+            new.lastNotifiedDeparture = n
+        }
 
         if notify && Settings.notifyChanges {
-            for change in Notifier.changes(old: old, new: new) {
-                Notifier.post(id: "\(new.id)-\(change.title)-\(Date().timeIntervalSince1970)", title: change.title, body: change.body)
+            for change in Notifier.changes(old: cur, new: new) {
+                Notifier.post(id: "\(new.id)-\(change.title)", title: change.title, body: change.body)
             }
         }
         update(new)
@@ -205,38 +259,61 @@ final class FlightStore {
         return 5 * 60
     }
 
-    /// Refreshes flights departing within the next 24 h or currently in the air.
+    /// Is this flight due for a refresh (phase interval, backoff after failures)?
+    func isDue(_ f: Flight, force: Bool = false, now: Date = Date()) -> Bool {
+        guard !f.isPast else { return false }
+        let dep = f.departure.best ?? f.sortDate
+        let arr = f.arrival.best ?? dep.addingTimeInterval(4 * 3600)
+        guard dep < now.addingTimeInterval(72 * 3600), arr > now.addingTimeInterval(-90 * 60) else { return false }
+        if let a = attempts[f.id] {
+            let backoff = force ? 60 : min(3600, 300 * pow(2, Double(a.fails - 1)))
+            if now.timeIntervalSince(a.last) < backoff { return false }
+        }
+        let minAge: TimeInterval = force ? 60 : Self.refreshInterval(departure: dep, arrival: arr, now: now, flight: f)
+        return f.lastUpdated.map { now.timeIntervalSince($0) > minAge } ?? true
+    }
+
+    private var quotaPaused: Bool {
+        Date() < (UserDefaults.standard.object(forKey: "quotaPausedUntil") as? Date ?? .distantPast) || Date() < ratePausedUntil
+    }
+
+    /// Refreshes flights departing within the next 3 days or currently in the air. Only one run at a time.
     func refreshActive(force: Bool = false, notify: Bool = true) async {
         guard force || Settings.autoRefresh else { return }
+        if let running = refreshTask {
+            await running.value
+            return
+        }
+        let task = Task { await runRefresh(force: force, notify: notify) }
+        refreshTask = task
+        await task.value
+        refreshTask = nil
+    }
+
+    private func runRefresh(force: Bool, notify: Bool) async {
         isRefreshing = true
         defer { isRefreshing = false }
         lastError = nil
 
-        let pausedUntil = UserDefaults.standard.object(forKey: "quotaPausedUntil") as? Date ?? .distantPast
-        if FlightData.isConfigured && (force || Date() > pausedUntil) {
+        if FlightData.isConfigured && (force || !quotaPaused) {
             let now = Date()
-            let candidates = flights.filter { f in
-                guard !f.isPast, f.normalizedStatus != .canceled else { return false }
-                let dep = f.departure.best ?? f.sortDate
-                let arr = f.arrival.best ?? dep.addingTimeInterval(4 * 3600)
-                let inWindow = dep < now.addingTimeInterval(24 * 3600) && arr > now.addingTimeInterval(-90 * 60)
-                let minAge: TimeInterval = force ? 60 : Self.refreshInterval(departure: dep, arrival: arr, now: now, flight: f)
-                let stale = f.lastUpdated.map { now.timeIntervalSince($0) > minAge } ?? true
-                return inWindow && stale
-            }
-            for f in candidates {
+            for f in flights.filter({ isDue($0, force: force, now: now) }) {
                 do { try await refresh(f.id, notify: notify) } catch {
                     lastError = error.localizedDescription
+                    if case APIError.rateLimited = error {
+                        ratePausedUntil = Date().addingTimeInterval(120)   // per-minute limit: short pause
+                        break
+                    }
                     if case APIError.quota = error {
                         // Stop hammering the API when the monthly quota is used up
                         UserDefaults.standard.set(Date().addingTimeInterval(6 * 3600), forKey: "quotaPausedUntil")
-                        lastError = "API-Kontingent aufgebraucht – automatische Aktualisierung pausiert 6 h. Tipp: in den Einstellungen auf FlightAware wechseln."
+                        lastError = "API-Kontingent aufgebraucht – automatische Aktualisierung pausiert 6 h. Tipp: in den Einstellungen „Beide kombiniert“ oder FlightAware wählen."
                         break
                     }
                 }
             }
         }
-        await updateInbounds(force: force, notify: notify)
+        if force || !quotaPaused { await updateInbounds(force: force, notify: notify) }
         await updateLivePositions()
         await LiveFlight.syncAll(flights)
         LiveFlight.autoStartIfNeeded(upcoming)
@@ -244,14 +321,18 @@ final class FlightStore {
 
     // MARK: Inbound aircraft
 
-    /// Tracks the plane's previous leg from 8 h before departure until we board (every 15 min).
+    /// Tracks the plane's previous leg: hourly from 8 h before departure, every 15 min in the last 3 h,
+    /// and on past the planned time until we actually leave (that's when a late inbound matters most).
     func updateInbounds(force: Bool = false, notify: Bool = true) async {
         let now = Date()
         for f in flights {
-            guard let dep = f.departure.best, dep > now, dep < now.addingTimeInterval(8 * 3600),
-                  !f.normalizedStatus.isAirborne, !f.normalizedStatus.isFinal else { continue }
+            guard let dep = f.departure.best, dep > now.addingTimeInterval(-3 * 3600), dep < now.addingTimeInterval(8 * 3600),
+                  f.departure.runway == nil, !f.normalizedStatus.isAirborne, !f.normalizedStatus.isFinal else { continue }
             if f.inbound?.landed == true { continue }
-            if !force, let u = f.inbound?.updated, now.timeIntervalSince(u) < 15 * 60 { continue }
+            let interval: TimeInterval = force ? 60 : dep.timeIntervalSince(now) > 3 * 3600 ? 3600 : 15 * 60
+            let last = max(f.inbound?.updated ?? .distantPast, inboundAttempts[f.id] ?? .distantPast)
+            if now.timeIntervalSince(last) < interval { continue }
+            inboundAttempts[f.id] = now      // also counts when nothing is found
             await updateInbound(f.id, notify: notify)
         }
     }
@@ -285,28 +366,32 @@ final class FlightStore {
     /// Live data: free ADS-B first (departure/landing detection, position, ETA), then OpenSky / FlightAware as fallback.
     func updateLive(_ id: UUID) async {
         guard let f = flight(id), isLiveWindow(f) else { return }
-        if let cs = LiveADSB.callsign(for: f.number) {
+        if let cs = LiveADSB.callsign(for: f) {
             let fix = await LiveADSB.lookup(callsign: cs)
             guard var current = flight(id) else { return }
             let notes = LiveADSB.apply(fix, to: &current)
             if fix != nil || !notes.isEmpty {
                 update(current)
-                if UserDefaults.standard.object(forKey: "notifyChanges") as? Bool ?? true {
-                    for n in notes { Notifier.post(id: "adsb-\(id)-\(n.title)", title: n.title, body: n.body) }
+                if Settings.notifyChanges {
+                    for n in notes { Notifier.post(id: "\(id)-\(n.title)", title: n.title, body: n.body) }
                 }
                 if fix != nil { return }
             }
         }
-        guard f.isInAir else { return }
+        // re-read: ADS-B may just have marked the flight as landed
+        guard let now = flight(id), now.isInAir else { return }
         var pos: LivePosition?
-        if let hex = f.icao24, !hex.isEmpty {
+        if let hex = now.icao24, !hex.isEmpty {
             pos = try? await OpenSky.position(icao24: hex)
         }
-        if pos == nil, let faID = f.faFlightID, FlightAware.hasKey,
-           f.lastPosition.map({ Date().timeIntervalSince($0.timestamp) > 5 * 60 }) ?? true {
+        // paid fallback: at most every 15 min
+        if pos == nil, let faID = now.faFlightID, FlightAware.hasKey, !quotaPaused,
+           Date().timeIntervalSince(positionQueries[id] ?? .distantPast) > 15 * 60 {
+            positionQueries[id] = Date()
             pos = try? await FlightAware.position(faID)
         }
         guard let pos, var current = flight(id) else { return }
+        if let old = current.lastPosition, old.timestamp >= pos.timestamp { return }
         current.lastPosition = pos
         update(current)
     }
@@ -363,10 +448,12 @@ final class FlightStore {
         defer { if scoped { url.stopAccessingSecurityScopedResource() } }
         let data = try Data(contentsOf: url)
         let imported = try Self.decoder.decode([Flight].self, from: data)
-        let existing = Set(flights.map(\.id))
-        let new = imported.filter { !existing.contains($0.id) }
-        flights.append(contentsOf: new)
+        var added = 0
+        for f in imported where !flights.contains(where: { $0.id == f.id || Self.isSameFlight($0, f) }) {
+            flights.append(f)
+            added += 1
+        }
         save()
-        return new.count
+        return added
     }
 }

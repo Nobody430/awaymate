@@ -63,7 +63,11 @@ enum Notifier {
         let n = new.number
 
         let oldStatus = old.normalizedStatus, newStatus = new.normalizedStatus
-        if oldStatus != newStatus {
+        // No "ist gelandet" an hour later when the app is opened again
+        func recent(_ d: Date?) -> Bool { d.map { Date().timeIntervalSince($0) < 45 * 60 } ?? true }
+        let stale = (newStatus == .arrived && !recent(new.arrival.runway ?? new.arrival.best))
+            || (newStatus.isAirborne && !recent(new.departure.runway ?? new.departure.best))
+        if oldStatus != newStatus && !stale {
             switch newStatus {
             case .boarding:
                 result.append(Change(title: "\(n): Boarding", body: "Boarding hat begonnen" + (new.departure.gate.map { " an Gate \($0)" } ?? "") + "."))
@@ -95,7 +99,7 @@ enum Notifier {
         }
 
         if !newStatus.isAirborne && !newStatus.isFinal,
-           let oldTime = old.departure.best, let newTime = new.departure.best,
+           let oldTime = old.lastNotifiedDeparture ?? old.departure.best, let newTime = new.departure.best,
            abs(newTime.timeIntervalSince(oldTime)) >= 5 * 60 {
             let delay = Fmt.delay(new.departure.delayMinutes).map { " (\($0))" } ?? ""
             result.append(Change(title: "\(n): Neue Abflugzeit", body: "Abflug jetzt \(Fmt.time(newTime, new.departure.tz))\(delay)."))

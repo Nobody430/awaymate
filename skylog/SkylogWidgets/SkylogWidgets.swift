@@ -32,12 +32,18 @@ struct NextFlightProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<NextFlightEntry>) -> Void) {
-        completion(Timeline(entries: [entry()], policy: .after(.now.addingTimeInterval(30 * 60))))
+        // One entry per phase change, so the widget switches at departure and moves on after landing
+        let now = Date()
+        var entries = [entry(at: now)]
+        if let f = entries[0].flight {
+            for d in [f.departure, f.arrival.addingTimeInterval(30 * 60)] where d > now { entries.append(entry(at: d.addingTimeInterval(1))) }
+        }
+        completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(30 * 60))))
     }
 
-    private func entry() -> NextFlightEntry {
-        let next = SharedStore.read().filter { $0.arrival > .now }.sorted { $0.departure < $1.departure }.first
-        return NextFlightEntry(date: .now, flight: next)
+    private func entry(at date: Date = .now) -> NextFlightEntry {
+        let next = SharedStore.read().filter { $0.arrival.addingTimeInterval(30 * 60) > date }.sorted { $0.departure < $1.departure }.first
+        return NextFlightEntry(date: date, flight: next)
     }
 }
 
@@ -127,8 +133,9 @@ struct FlightLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.center) {
                     VStack(spacing: 2) {
                         Text(context.attributes.flightNumber).font(.caption.bold())
-                        Text(context.state.delayMinutes >= 5 ? "+\(context.state.delayMinutes) Min" : context.state.status)
-                            .font(.caption2).foregroundStyle(context.state.delayMinutes >= 5 ? .orange : accent)
+                        let late = context.state.delayMinutes >= 5 && !context.state.inAir && context.state.status != "Gelandet"
+                        Text(late ? "+\(context.state.delayMinutes) Min" : context.state.status)
+                            .font(.caption2).foregroundStyle(late ? .orange : accent)
                     }
                 }
                 DynamicIslandExpandedRegion(.bottom) {

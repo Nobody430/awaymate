@@ -27,37 +27,57 @@ enum FlightData {
         }
     }
 
-    static func search(number: String, date: Date) async throws -> [Flight] {
+    static func search(number: String, date: Date, stored: Flight? = nil) async throws -> [Flight] {
         switch FlightProvider.current {
         case .flightaware: return try await FlightAware.search(number: number, date: date)
-        case .aerodatabox: return try await AeroDataBox.search(number: number, date: date)
-        case .both: return try await combined(number: number, date: date)
+        case .aerodatabox: return try await adb(number: number, date: date)
+        case .both: return try await combined(number: number, date: date, stored: stored)
         }
     }
 
-    /// FlightAware for the next ~2 days (best live data), AeroDataBox for flights further ahead.
-    /// Each falls back to the other; close to departure / after landing, missing fields are filled from AeroDataBox.
-    private static func combined(number: String, date: Date) async throws -> [Flight] {
-        let near = date.timeIntervalSinceNow < 2 * 86400 && date.timeIntervalSinceNow > -2 * 86400
-        let useFA = near && FlightAware.hasKey
-        var results: [Flight]
-        do {
-            results = useFA || !Settings.hasKey
-                ? try await FlightAware.search(number: number, date: date)
-                : try await AeroDataBox.search(number: number, date: date)
-        } catch {
-            // fallback to the other service
-            if useFA || !Settings.hasKey, Settings.hasKey {
-                results = try await AeroDataBox.search(number: number, date: date)
-            } else if FlightAware.hasKey {
-                results = try await FlightAware.search(number: number, date: date)
-            } else {
-                throw error
-            }
-            return results
+    /// AeroDataBox is usable: key present and its quota not known to be used up.
+    static var adbAvailable: Bool {
+        Settings.hasKey && Date() > (UserDefaults.standard.object(forKey: "adbPausedUntil") as? Date ?? .distantPast)
+    }
+
+    static func pauseADB() { UserDefaults.standard.set(Date().addingTimeInterval(6 * 3600), forKey: "adbPausedUntil") }
+
+    /// AeroDataBox query; remembers an exhausted quota so we stop asking for 6 h.
+    private static func adb(number: String, date: Date) async throws -> [Flight] {
+        do { return try await AeroDataBox.search(number: number, date: date) } catch {
+            if case APIError.quota = error { pauseADB() }
+            throw error
         }
-        guard useFA, Settings.hasKey, let first = results.first, needsEnrichment(first) else { return results }
-        if let extra = try? await AeroDataBox.search(number: number, date: date) {
+    }
+
+    private static var lastEnrich: [String: Date] = [:]
+
+    /// FlightAware for the next ~2 days (best live data), AeroDataBox for flights further ahead.
+    /// Each falls back to the other; close to departure / after landing, missing fields are filled from AeroDataBox
+    /// (at most every 30 min per flight, and only if the stored flight doesn't have them yet).
+    private static func combined(number: String, date: Date, stored: Flight?) async throws -> [Flight] {
+        let near = abs(date.timeIntervalSinceNow) < 2 * 86400
+        let faFirst = FlightAware.hasKey && (near || !adbAvailable)
+        var results: [Flight]
+        if faFirst {
+            do { results = try await FlightAware.search(number: number, date: date) } catch {
+                if case APIError.rateLimited = error { throw error }
+                guard adbAvailable else { throw error }
+                return try await adb(number: number, date: date)
+            }
+        } else {
+            guard adbAvailable else { throw Settings.hasKey ? APIError.quota : APIError.noKey }
+            do { return try await adb(number: number, date: date) } catch {
+                guard FlightAware.hasKey else { throw error }
+                return try await FlightAware.search(number: number, date: date)
+            }
+        }
+        guard adbAvailable, let first = results.first else { return results }
+        let known = stored.map { merge(first, with: $0) } ?? first
+        let key = FlightStore.normalizedNumber(number) + "|" + Fmt.apiDate.string(from: date)
+        guard needsEnrichment(known), Date().timeIntervalSince(lastEnrich[key] ?? .distantPast) > 30 * 60 else { return results }
+        lastEnrich[key] = Date()
+        if let extra = try? await adb(number: number, date: date) {
             results = results.map { f in
                 guard let other = extra.first(where: { $0.departure.code == f.departure.code }) ?? extra.first else { return f }
                 return merge(f, with: other)
@@ -71,7 +91,7 @@ enum FlightData {
         let now = Date()
         if f.icao24 == nil && f.isInAir { return true }
         if let dep = f.departure.best, dep.timeIntervalSince(now) < 3 * 3600, dep > now.addingTimeInterval(-30 * 60),
-           f.departure.gate == nil || f.departure.terminal == nil || f.departure.checkInDesk == nil { return true }
+           f.departure.runway == nil, f.departure.gate == nil || f.departure.terminal == nil { return true }
         if f.normalizedStatus == .arrived, f.arrival.baggageBelt == nil,
            let arr = f.arrival.best, now.timeIntervalSince(arr) < 2 * 3600 { return true }
         return false
@@ -91,7 +111,6 @@ enum FlightData {
             e.lat = e.lat ?? o.lat
             e.lon = e.lon ?? o.lon
             e.timeZone = e.timeZone ?? o.timeZone
-            e.predicted = e.predicted ?? o.predicted
         }
         fill(&f.departure, b.departure)
         fill(&f.arrival, b.arrival)
@@ -100,6 +119,8 @@ enum FlightData {
         f.aircraftModel = f.aircraftModel ?? b.aircraftModel
         f.airlineName = f.airlineName ?? b.airlineName
         f.airlineIata = f.airlineIata ?? b.airlineIata
+        f.airlineIcao = f.airlineIcao ?? b.airlineIcao
+        f.faFlightID = f.faFlightID ?? b.faFlightID
         f.callSign = f.callSign ?? b.callSign
         f.distanceKm = f.distanceKm ?? b.distanceKm
         f.lastPosition = f.lastPosition ?? b.lastPosition
@@ -115,19 +136,22 @@ enum FlightData {
         if let id = f.inboundFAID, FlightAware.hasKey, FlightProvider.current != .aerodatabox {
             if let i = try? await FlightAware.inbound(id) { return i }
         }
-        guard Settings.hasKey, let reg = f.aircraftReg, !reg.isEmpty,
+        guard FlightProvider.current != .flightaware, adbAvailable, let reg = f.aircraftReg, !reg.isEmpty,
               let ourDep = f.departure.scheduled ?? f.departure.best else { return nil }
         var legs: [Flight] = []
         let local = Fmt.apiDate.date(from: f.date) ?? ourDep
+        func isCandidate(_ l: Flight) -> Bool {
+            l.arrival.code == f.departure.code && FlightStore.normalizedNumber(l.number) != FlightStore.normalizedNumber(f.number)
+                && (l.arrival.scheduled ?? .distantFuture) < ourDep
+        }
         for day in [local, local.addingTimeInterval(-86400)] {
-            if let l = try? await AeroDataBox.flights(registration: reg, date: day) { legs += l }
-            if legs.contains(where: { $0.arrival.code == f.departure.code }) { break }
+            do { legs += try await AeroDataBox.flights(registration: reg, date: day) } catch {
+                if case APIError.quota = error { pauseADB(); break }
+            }
+            if legs.contains(where: isCandidate) { break }
         }
         // latest leg that arrives at our departure airport before we leave
-        let candidates = legs.filter {
-            $0.arrival.code == f.departure.code && $0.number != f.number
-                && ($0.arrival.scheduled ?? .distantFuture) < ourDep
-        }
+        let candidates = legs.filter(isCandidate)
         guard let leg = candidates.max(by: { ($0.arrival.scheduled ?? .distantPast) < ($1.arrival.scheduled ?? .distantPast) })
         else { return nil }
         let st = leg.normalizedStatus
@@ -164,7 +188,7 @@ enum FlightAware {
         case 200..<300: return data
         case 400, 404: throw APIError.notFound
         case 401, 403: throw APIError.http(code)
-        case 429: throw APIError.quota
+        case 429: throw APIError.rateLimited   // AeroAPI: per-minute limit, not a monthly quota
         default: throw APIError.http(code)
         }
     }
@@ -220,7 +244,11 @@ enum FlightAware {
 
     // MARK: Airports (cached – each airport costs one query only once)
 
-    static func airport(_ code: String) async -> AirportInfo? {
+    static func airport(_ code: String, iata: String? = nil) async -> AirportInfo? {
+        // the bundled database is free – only ask FlightAware for airports it doesn't know
+        if let b = AirportLookup.bundledInfo(iata ?? code), b.lat != nil {
+            return AirportInfo(latitude: b.lat, longitude: b.lon, country_code: b.countryCode, timezone: b.timeZone, name: b.name, city: b.city)
+        }
         let key = "fa-airport-\(code)"
         if let data = UserDefaults.standard.data(forKey: key), let a = try? JSONDecoder().decode(AirportInfo.self, from: data) { return a }
         guard let data = try? await get("/airports/\(code)"),
@@ -264,7 +292,7 @@ enum FlightAware {
         func endpoint(_ a: FAAirport?, scheduled: String?, estimated: String?, actual: String?,
                       gate: String?, terminal: String?, belt: String?) async -> FlightEndpoint {
             var info: AirportInfo?
-            if let code = a?.code ?? a?.code_icao { info = await airport(code) }
+            if let code = a?.code ?? a?.code_icao ?? a?.code_iata { info = await airport(code, iata: a?.code_iata) }
             return FlightEndpoint(
                 iata: a?.code_iata, icao: a?.code_icao, name: a?.name ?? info?.name, city: a?.city ?? info?.city,
                 countryCode: info?.country_code?.uppercased(), lat: info?.latitude, lon: info?.longitude,

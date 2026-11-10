@@ -23,6 +23,7 @@ struct SkylogApp: App {
                     PushClient.register()
                     LiveFlight.observeExistingTokens()
                     TravelMode.shared.evaluate(store)
+                    BackgroundRefresh.schedule()
                 }
         }
         .onChange(of: scenePhase) { _, phase in
@@ -41,9 +42,10 @@ struct SkylogApp: App {
         }
         .backgroundTask(.appRefresh(BackgroundRefresh.identifier)) {
             BackgroundRefresh.schedule()
+            // flights first – the background budget is only ~30 s
+            await TravelMode.shared.evaluate(FlightStore.shared)
             await FlightStore.shared.refreshActive(notify: true)
             await MailWatcher.check(store: FlightStore.shared)
-            await TravelMode.shared.evaluate(FlightStore.shared)
         }
     }
 }
@@ -53,7 +55,7 @@ enum BackgroundRefresh {
 
     static func schedule() {
         let request = BGAppRefreshTaskRequest(identifier: identifier)
-        request.earliestBeginDate = Date().addingTimeInterval(20 * 60)
+        request.earliestBeginDate = Date().addingTimeInterval(15 * 60)
         try? BGTaskScheduler.shared.submit(request)
     }
 }

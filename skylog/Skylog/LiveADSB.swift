@@ -22,6 +22,13 @@ enum LiveADSB {
         "RO": "ROT", "HU": "CHH", "ZF": "AZV",
     ]
 
+    /// The real ATC callsign if the data source gave us one (many airlines use alphanumeric ones), else derived.
+    static func callsign(for f: Flight) -> String? {
+        if let cs = f.callSign?.replacingOccurrences(of: " ", with: "").uppercased(), cs.count >= 4, cs.count <= 8,
+           cs.prefix(3).allSatisfy(\.isLetter), cs.dropFirst(3).allSatisfy({ $0.isLetter || $0.isNumber }) { return cs }
+        return callsign(for: f.number)
+    }
+
     static func callsign(for flightNumber: String) -> String? {
         let n = flightNumber.replacingOccurrences(of: " ", with: "").uppercased()
         guard n.count >= 3 else { return nil }
@@ -90,7 +97,10 @@ enum LiveADSB {
         let distToDest = f.arrival.coordinate.map { Geo.distanceKm(p, $0) } ?? .infinity
         let distToOrigin = f.departure.coordinate.map { Geo.distanceKm(p, $0) } ?? .infinity
 
-        if !fix.onGround && !status.isAirborne && !status.isFinal && distToOrigin < 2500 {
+        // Takeoff: only around/after our departure time and on our route (not yesterday's rotation or an earlier leg)
+        let route = f.computedDistanceKm ?? 2500
+        let timeOK = f.departure.best.map { now > $0.addingTimeInterval(-15 * 60) } ?? true
+        if !fix.onGround && !status.isAirborne && !status.isFinal && timeOK && distToOrigin < max(300, route * 1.1) {
             f.status = "EnRoute"
             if f.departure.runway == nil { f.departure.runway = now }
             notes.append(("\(f.number) ist gestartet", "Unterwegs nach \(f.arrival.displayCity)."))

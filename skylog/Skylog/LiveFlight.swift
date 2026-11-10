@@ -5,6 +5,8 @@ import WidgetKit
 /// Live Activities (lock screen + Dynamic Island) and widget data.
 @MainActor
 enum LiveFlight {
+    private static var lastPublished: Data?
+
     static var autoStart: Bool { UserDefaults.standard.object(forKey: "liveActivities") as? Bool ?? true }
 
     static func state(for f: Flight) -> FlightActivityAttributes.ContentState? {
@@ -32,8 +34,31 @@ enum LiveFlight {
         return "\(i.headline) · Landung \(Fmt.time(i.arrival, f.departure.tz))"
     }
 
+    /// Running (not yet ended) activity of a flight.
     static func activity(for f: Flight) -> Activity<FlightActivityAttributes>? {
-        Activity<FlightActivityAttributes>.activities.first { $0.attributes.flightID == f.id.uuidString }
+        Activity<FlightActivityAttributes>.activities.first {
+            $0.attributes.flightID == f.id.uuidString && ($0.activityState == .active || $0.activityState == .stale)
+        }
+    }
+
+    /// The system only redraws a Live Activity on an update or when it goes stale – so let it go stale
+    /// at the next phase change (departure, then landing). That makes the countdown switch on its own.
+    private static func staleDate(_ s: FlightActivityAttributes.ContentState) -> Date {
+        let now = Date()
+        if !s.inAir && s.departure > now { return s.departure.addingTimeInterval(30) }
+        return max(now.addingTimeInterval(60), s.arrival.addingTimeInterval(5 * 60))
+    }
+
+    /// Flights whose activity was started once – a card the user swiped away is not brought back.
+    private static var started: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: "liveStarted") ?? []) }
+        set { UserDefaults.standard.set(Array(newValue.suffix(200)), forKey: "liveStarted") }
+    }
+
+    /// Shows the final state and lets the system remove the card 30 min after landing – even if the app never runs again.
+    private static func finish(_ a: Activity<FlightActivityAttributes>, _ s: FlightActivityAttributes.ContentState, cancelled: Bool) async {
+        let until = cancelled ? Date().addingTimeInterval(30 * 60) : max(Date().addingTimeInterval(5 * 60), s.arrival.addingTimeInterval(30 * 60))
+        await a.end(ActivityContent(state: s, staleDate: nil), dismissalPolicy: .after(until))
     }
 
     static func isRunning(_ f: Flight) -> Bool { activity(for: f) != nil }
@@ -44,7 +69,8 @@ enum LiveFlight {
                                                   from: f.departure.code, to: f.arrival.code,
                                                   fromCity: f.departure.displayCity, toCity: f.arrival.displayCity,
                                                   fromTZ: f.departure.tz.identifier, toTZ: f.arrival.tz.identifier)
-        let content = ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(3600))
+        let content = ActivityContent(state: s, staleDate: staleDate(s))
+        started.insert(f.id.uuidString)
         // With a push server, the Live Activity is updated remotely in real time
         if PushClient.isConfigured, let activity = try? Activity.request(attributes: attributes, content: content, pushType: .token) {
             observe(activity)
@@ -73,11 +99,10 @@ enum LiveFlight {
 
     static func update(_ f: Flight) async {
         guard let a = activity(for: f), let s = state(for: f) else { return }
-        let content = ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(30 * 60))
-        if f.normalizedStatus == .canceled || (f.normalizedStatus == .arrived && Date() > s.arrival.addingTimeInterval(45 * 60)) {
-            await a.end(content, dismissalPolicy: .after(Date().addingTimeInterval(15 * 60)))
+        if f.normalizedStatus == .canceled || f.normalizedStatus == .arrived {
+            await finish(a, s, cancelled: f.normalizedStatus == .canceled)
         } else {
-            await a.update(content)
+            await a.update(ActivityContent(state: s, staleDate: staleDate(s)))
         }
     }
 
@@ -85,21 +110,19 @@ enum LiveFlight {
     /// updates them, ends finished ones and removes orphans (e.g. after duplicates were merged).
     static func syncAll(_ flights: [Flight]) async {
         let now = Date()
-        for a in Activity<FlightActivityAttributes>.activities {
+        for a in Activity<FlightActivityAttributes>.activities where a.activityState == .active || a.activityState == .stale {
             let f = flights.first { $0.id.uuidString == a.attributes.flightID }
                 ?? flights.first { $0.number == a.attributes.flightNumber && $0.departure.code == a.attributes.from && !$0.isPast }
             guard let f, let s = state(for: f) else {
                 await a.end(nil, dismissalPolicy: .immediate)
                 continue
             }
-            let finished = f.normalizedStatus == .canceled || f.isPast
-                || (f.normalizedStatus == .arrived && now > s.arrival.addingTimeInterval(45 * 60))
-                || now > s.arrival.addingTimeInterval(3 * 3600)
-            let content = ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(30 * 60))
-            if finished {
-                await a.end(content, dismissalPolicy: .immediate)
+            if f.isPast || now > s.arrival.addingTimeInterval(3 * 3600) {
+                await a.end(nil, dismissalPolicy: .immediate)
+            } else if f.normalizedStatus == .canceled || f.normalizedStatus == .arrived {
+                await finish(a, s, cancelled: f.normalizedStatus == .canceled)
             } else {
-                await a.update(content)
+                await a.update(ActivityContent(state: s, staleDate: staleDate(s)))
             }
         }
     }
@@ -110,7 +133,7 @@ enum LiveFlight {
         let now = Date()
         for f in flights where !f.isPast && !f.normalizedStatus.isFinal {
             guard let dep = f.departure.best, dep.timeIntervalSince(now) < 4 * 3600,
-                  (f.arrival.best ?? dep) > now else { continue }
+                  (f.arrival.best ?? dep) > now, !started.contains(f.id.uuidString) else { continue }
             start(f)
         }
     }
@@ -124,6 +147,10 @@ enum LiveFlight {
                                 departure: dep, arrival: arr, gate: f.departure.gate, terminal: f.departure.terminal,
                                 status: f.normalizedStatus.label, delayMinutes: max(0, f.departure.delayMinutes ?? 0))
         }
+        // Widget reloads are budgeted by iOS – only reload when something visible changed
+        let data = try? JSONEncoder().encode(Array(list))
+        guard data != lastPublished else { return }
+        lastPublished = data
         SharedStore.write(Array(list))
         WidgetCenter.shared.reloadAllTimelines()
     }

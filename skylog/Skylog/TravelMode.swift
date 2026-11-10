@@ -40,6 +40,12 @@ final class TravelMode: NSObject, CLLocationManagerDelegate {
         let soon = store.upcoming.contains { ($0.departure.best ?? .distantFuture).timeIntervalSinceNow < 30 * 3600 }
         if soon && manager.authorizationStatus == .notDetermined { manager.requestWhenInUseAuthorization() }
         if soon && manager.authorizationStatus == .authorizedWhenInUse { manager.requestAlwaysAuthorization() }
+        // Significant-change monitoring relaunches the app on travel days even if it was never opened
+        if soon && manager.authorizationStatus == .authorizedAlways {
+            manager.startMonitoringSignificantLocationChanges()
+        } else {
+            manager.stopMonitoringSignificantLocationChanges()
+        }
         inWindow ? start(store) : stop()
     }
 
@@ -54,7 +60,6 @@ final class TravelMode: NSObject, CLLocationManagerDelegate {
         loop = Task { [weak self] in
             while !Task.isCancelled {
                 await store.refreshActive(notify: true)
-                await store.updateLivePositions()
                 guard let self, !self.flightsInWindow(store).isEmpty else { break }
                 try? await Task.sleep(for: .seconds(60))
             }
@@ -96,8 +101,7 @@ final class TravelMode: NSObject, CLLocationManagerDelegate {
     nonisolated func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         Task { @MainActor in
             let store = FlightStore.shared
-            await store.refreshActive(force: true, notify: true)
-            await store.updateLivePositions()
+            await store.refreshActive(notify: true)
             self.evaluate(store)
         }
     }
@@ -106,6 +110,12 @@ final class TravelMode: NSObject, CLLocationManagerDelegate {
         Task { @MainActor in self.evaluate(FlightStore.shared) }
     }
 
-    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {}
+    nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        Task { @MainActor in
+            guard !self.active else { return }
+            self.evaluate(FlightStore.shared)
+            await FlightStore.shared.refreshActive(notify: true)
+        }
+    }
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {}
 }

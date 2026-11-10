@@ -192,10 +192,18 @@ struct Flight: Identifiable, Codable, Hashable {
     var inboundFAID: String? = nil
     /// The aircraft's previous leg arriving at our departure airport
     var inbound: InboundFlight? = nil
+    /// Departure time the user was last told about (so creeping delays are noticed)
+    var lastNotifiedDeparture: Date? = nil
     var notes: String = ""
     var seat: String = ""
 
     var normalizedStatus: FlightStatus { FlightStatus(raw: status) }
+
+    /// Status for display: an old flight whose status was never updated counts as landed.
+    var displayStatus: FlightStatus {
+        let s = normalizedStatus
+        return isPast && !s.isFinal ? .arrived : s
+    }
 
     var sortDate: Date {
         departure.scheduled ?? departure.best ?? Fmt.apiDate.date(from: date) ?? .distantPast
@@ -219,6 +227,7 @@ struct Flight: Identifiable, Codable, Hashable {
     }
 
     var isInAir: Bool {
+        if isPast { return false }
         if normalizedStatus.isAirborne { return true }
         if normalizedStatus.isFinal { return false }
         if [.scheduled, .delayed, .checkIn, .boarding, .gateClosed].contains(normalizedStatus),
@@ -229,10 +238,12 @@ struct Flight: Identifiable, Codable, Hashable {
 
     var isPast: Bool {
         let now = Date()
-        let arrivalRef = arrival.best ?? sortDate.addingTimeInterval(4 * 3600)
+        // Without times: past only once the day is over (not at 04:00 on the day itself)
+        let arrivalRef = arrival.best ?? (departure.best == nil ? sortDate.addingTimeInterval(28 * 3600) : sortDate.addingTimeInterval(4 * 3600))
         switch normalizedStatus {
-        case .arrived: return arrivalRef < now.addingTimeInterval(-30 * 60)
-        case .canceled, .diverted: return sortDate < now
+        case .arrived: return arrivalRef < now.addingTimeInterval(-75 * 60)
+        case .canceled: return (departure.best == nil ? arrivalRef : sortDate) < now
+        case .diverted: return arrivalRef < now
         default: return arrivalRef < now.addingTimeInterval(-2 * 3600)
         }
     }
