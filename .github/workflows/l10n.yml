@@ -18,19 +18,27 @@ jobs:
         run: |
           brew install xcodegen >/dev/null
           xcodegen generate
-          xcodebuild -exportLocalizations -project Skylog.xcodeproj -localizationPath l10n -exportLanguage en \
-            CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE_SPECIFIER="" 2>&1 | tail -40
+          # Let the Swift compiler emit every localizable string with its exact runtime key (format specifiers included)
+          xcodebuild build -project Skylog.xcodeproj -scheme Skylog -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' -derivedDataPath dd \
+            SWIFT_EMIT_LOC_STRINGS=YES CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE_SPECIFIER="" 2>&1 | tail -15
           python3 - <<'PY'
-          import glob, json, base64, xml.etree.ElementTree as ET
+          import glob, json, base64, re
           out = {}
-          for path in glob.glob("l10n/**/*.xliff", recursive=True):
-              ns = {"x": "urn:oasis:names:tc:xliff:document:1.2"}
-              for f in ET.parse(path).getroot().findall("x:file", ns):
-                  name = f.get("original")
-                  units = [{"id": u.get("id"), "source": (u.find("x:source", ns).text or "")} for u in f.iter("{urn:oasis:names:tc:xliff:document:1.2}trans-unit")]
-                  out[name] = units
-                  print("FILE", name, len(units))
-          data = base64.b64encode(json.dumps(out, ensure_ascii=False).encode()).decode()
+          for path in glob.glob("dd/**/*.stringsdata", recursive=True):
+              target = "SkylogWidgets" if "SkylogWidgets.build" in path else "Skylog"
+              try:
+                  data = json.load(open(path))
+              except Exception as e:
+                  print("SKIP", path, e); continue
+              for table, entries in (data.get("tables") or {}).items():
+                  for e in entries:
+                      out.setdefault(target, {}).setdefault(table, set()).add(e.get("key", ""))
+          res = {t: {tb: sorted(k) for tb, k in tabs.items()} for t, tabs in out.items()}
+          for t, tabs in res.items():
+              for tb, keys in tabs.items():
+                  print("TABLE", t, tb, len(keys))
+          data = base64.b64encode(json.dumps(res, ensure_ascii=False).encode()).decode()
           for i in range(0, len(data), 3000):
               print("L10N:" + data[i:i+3000])
           print("L10N-END")
