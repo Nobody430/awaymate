@@ -65,7 +65,7 @@ struct NextFlightView: View {
                     Text(f.departure, style: .relative).font(.headline.monospacedDigit())
                 } else {
                     Text("Landung").font(.caption2).foregroundStyle(.secondary)
-                    ProgressView(timerInterval: f.departure...f.arrival, countsDown: false) { EmptyView() } currentValueLabel: { EmptyView() }
+                    ProgressView(timerInterval: f.departure...max(f.departure.addingTimeInterval(60), f.arrival), countsDown: false) { EmptyView() } currentValueLabel: { EmptyView() }
                         .tint(accent)
                 }
                 if family != .systemSmall {
@@ -127,7 +127,8 @@ struct FlightLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.center) {
                     VStack(spacing: 2) {
                         Text(context.attributes.flightNumber).font(.caption.bold())
-                        Text(context.state.status).font(.caption2).foregroundStyle(accent)
+                        Text(context.state.delayMinutes >= 5 ? "+\(context.state.delayMinutes) Min" : context.state.status)
+                            .font(.caption2).foregroundStyle(context.state.delayMinutes >= 5 ? .orange : accent)
                     }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
@@ -139,7 +140,7 @@ struct FlightLiveActivity: Widget {
                     Text(context.attributes.to).font(.caption.bold())
                 }
             } compactTrailing: {
-                Text(timerInterval: Date.now...(context.state.inAir ? context.state.arrival : context.state.departure), countsDown: true)
+                Countdown(target: context.state.inAir ? context.state.arrival : context.state.departure, overdue: "jetzt")
                     .monospacedDigit()
                     .frame(maxWidth: 52)
                     .font(.caption)
@@ -159,9 +160,9 @@ struct LockScreenFlightView: View {
             HStack {
                 Text(context.attributes.flightNumber).font(.subheadline.bold())
                 Spacer()
-                Text(s.delayMinutes >= 15 ? "\(s.status) · +\(s.delayMinutes) Min" : s.status)
+                Text(s.delayMinutes >= 5 ? "Verspätet · +\(s.delayMinutes) Min" : s.status)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(s.delayMinutes >= 15 ? .orange : accent)
+                    .foregroundStyle(s.delayMinutes >= 15 ? .red : s.delayMinutes >= 5 ? .orange : accent)
             }
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading) {
@@ -170,12 +171,13 @@ struct LockScreenFlightView: View {
                 }
                 Spacer()
                 VStack {
-                    if s.inAir {
-                        Text("Landung in").font(.caption2).foregroundStyle(.secondary)
-                        Text(timerInterval: Date.now...max(Date.now, s.arrival), countsDown: true).font(.headline.monospacedDigit())
+                    let target = s.inAir ? s.arrival : s.departure
+                    if target > Date() {
+                        Text(s.inAir ? "Landung in" : "Abflug in").font(.caption2).foregroundStyle(.secondary)
+                        Countdown(target: target, overdue: "jetzt").font(.headline.monospacedDigit())
                     } else {
-                        Text("Abflug in").font(.caption2).foregroundStyle(.secondary)
-                        Text(timerInterval: Date.now...max(Date.now, s.departure), countsDown: true).font(.headline.monospacedDigit())
+                        Text(s.inAir ? "Landung" : "Abflug").font(.caption2).foregroundStyle(.secondary)
+                        Text(s.inAir ? "jeden Moment" : "steht an").font(.headline)
                     }
                 }
                 .multilineTextAlignment(.center)
@@ -215,9 +217,25 @@ struct FlightProgressRow: View {
                 if let t = state.terminal { Text("Terminal \(t)") }
                 if let g = state.gate { Text("Gate \(g)").bold() }
                 Spacer()
-                if let b = state.belt { Label("Band \(b)", systemImage: "suitcase.rolling") }
+                // airlines publish early guesses – show the belt only once airborne / landed
+                if let b = state.belt, state.inAir || state.status == "Gelandet" { Label("Band \(b)", systemImage: "suitcase.rolling") }
             }
             .font(.caption)
+        }
+    }
+}
+
+/// Countdown that never builds an invalid time range (a past target crashed the Live Activity).
+struct Countdown: View {
+    let target: Date
+    var overdue: String
+
+    var body: some View {
+        let now = Date()
+        if target > now {
+            Text(timerInterval: now...target, countsDown: true)
+        } else {
+            Text(overdue)
         }
     }
 }
