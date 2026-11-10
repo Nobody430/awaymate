@@ -77,16 +77,16 @@ struct AircraftSeatCard: View {
     }
 }
 
-// MARK: - Family
+// MARK: - Share with family & friends
 
 struct FamilyCard: View {
     let flight: Flight
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Familie informieren", systemImage: "person.2.wave.2").font(.headline)
+            Label("Familie & Freunde informieren", systemImage: "person.2.wave.2").font(.headline)
             if !flight.isPast {
-                Text("Diese Links funktionieren im Browser – deine Eltern brauchen keine App:")
+                Text("Diese Links funktionieren im Browser – niemand braucht dafür eine App:")
                     .font(.caption).foregroundStyle(.secondary)
                 ForEach(FamilyShare.trackingLinks(flight), id: \.0) { name, url in
                     HStack {
