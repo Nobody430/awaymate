@@ -367,7 +367,7 @@ struct TripDetailView: View {
                     let list = store.flights(for: trip, in: flights)
                     if list.isEmpty { Text("Keine Flüge in diesem Zeitraum.").foregroundStyle(.secondary) }
                     ForEach(list) { f in
-                        NavigationLink(value: f.id) { FlightCard(flight: f) }
+                        NavigationLink { FlightDetailView(flightID: f.id) } label: { FlightCard(flight: f) }
                             .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
                             .listRowBackground(Color.clear)
                     }
