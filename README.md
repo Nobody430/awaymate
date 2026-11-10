@@ -26,4 +26,4 @@ Schritt-für-Schritt-Anleitung: in der App unter Einstellungen → Echtzeit-Push
 Apple nimmt Mitteilungen für eine App nur vom Herausgeber an. Darum gibt es ein kleines Relay (`relay/`), das
 fertige Mitteilungen von den Servern der Nutzer an Apple weiterreicht. Es sieht weder Flugdaten-Keys noch Fluglisten.
 
-**Adresse des Relays (`RELAY_URL`):** _wird nach dem ersten Deployment hier eingetragen_
+**Adresse des Relays (`RELAY_URL`):** `https://skylog-relay.ranobody.workers.dev`
