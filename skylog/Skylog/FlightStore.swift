@@ -207,6 +207,11 @@ final class FlightStore {
         new.date = cur.date
         new.inbound = cur.inbound
         new.lastUpdated = Date()
+        // No fresh airport data this time: keep the airport's gate instead of flipping back to the other source's
+        if picked.adbGate == nil, let g = cur.adbGate, new.departure.runway == nil {
+            new.gateConflict = (picked.departure.gate != nil && picked.departure.gate != g) ? picked.departure.gate : nil
+            new.departure.gate = g
+        }
 
         // Never fall back behind what live data already detected (takeoff / landing)
         let curStatus = cur.normalizedStatus, newStatus = new.normalizedStatus

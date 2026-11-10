@@ -216,6 +216,12 @@ struct FlightDetailView: View {
                     InfoTile(title: "Gate", value: f.departure.gate)
                     InfoTile(title: "Check-in", value: f.departure.checkInDesk)
                 }
+                if let other = f.gateConflict, !f.isPast, f.departure.runway == nil {
+                    Label("Eine andere Quelle meldet Gate \(other). Bitte auf den Anzeigen am Flughafen prüfen.", systemImage: "exclamationmark.triangle")
+                        .font(.caption).foregroundStyle(.orange)
+                } else if f.departure.gate != nil, !f.isPast, f.departure.runway == nil {
+                    Text("Gates können kurzfristig wechseln – die Anzeige am Flughafen gilt.").font(.caption2).foregroundStyle(.secondary)
+                }
             }
             if hasArr {
                 Text("Ankunft · \(f.arrival.name ?? f.arrival.code)").font(.caption).foregroundStyle(.secondary).padding(.top, 4)

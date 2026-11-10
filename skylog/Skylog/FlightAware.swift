@@ -82,7 +82,19 @@ enum FlightData {
         if let extra = try? await adb(number: number, date: date) {
             results = results.map { f in
                 guard let other = extra.first(where: { $0.departure.code == f.departure.code }) ?? extra.first else { return f }
-                return merge(f, with: other)
+                var m = merge(f, with: other)
+                // Gates, terminals, desks and belts are airport data: AeroDataBox gets them from the airports,
+                // FlightAware's are often outdated outside North America. Prefer AeroDataBox, remember the difference.
+                if let g = other.departure.gate, !g.isEmpty {
+                    m.adbGate = g
+                    m.gateConflict = (f.departure.gate != nil && f.departure.gate != g) ? f.departure.gate : nil
+                    m.departure.gate = g
+                }
+                if let t = other.departure.terminal, !t.isEmpty { m.departure.terminal = t }
+                if let t = other.arrival.terminal, !t.isEmpty { m.arrival.terminal = t }
+                if let g = other.arrival.gate, !g.isEmpty { m.arrival.gate = g }
+                if let b = other.arrival.baggageBelt, !b.isEmpty { m.arrival.baggageBelt = b }
+                return m
             }
         }
         return results
@@ -94,6 +106,9 @@ enum FlightData {
         if f.icao24 == nil && f.isInAir { return true }
         if let dep = f.departure.best, dep.timeIntervalSince(now) < 3 * 3600, dep > now.addingTimeInterval(-30 * 60),
            f.departure.runway == nil, f.departure.gate == nil || f.departure.terminal == nil { return true }
+        // Cross-check the gate with the airport data in the last 2 h (and keep checking while the sources disagree)
+        if let dep = f.departure.best, dep.timeIntervalSince(now) < 2 * 3600, dep > now, f.departure.runway == nil,
+           f.adbGate == nil || f.gateConflict != nil { return true }
         if f.normalizedStatus == .arrived, f.arrival.baggageBelt == nil,
            let arr = f.arrival.best, now.timeIntervalSince(arr) < 2 * 3600 { return true }
         return false
@@ -124,6 +139,7 @@ enum FlightData {
         f.airlineIcao = f.airlineIcao ?? b.airlineIcao
         f.faFlightID = f.faFlightID ?? b.faFlightID
         f.timetable = f.timetable ?? b.timetable
+        f.adbGate = f.adbGate ?? b.adbGate
         f.updates = f.updates ?? b.updates
         f.planeLegs = f.planeLegs ?? b.planeLegs
         f.callSign = f.callSign ?? b.callSign

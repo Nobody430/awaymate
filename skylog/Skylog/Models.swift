@@ -217,6 +217,10 @@ struct Flight: Identifiable, Codable, Hashable {
     var inbound: InboundFlight? = nil
     /// Departure time the user was last told about (so creeping delays are noticed)
     var lastNotifiedDeparture: Date? = nil
+    /// Departure gate as reported by AeroDataBox (airport data) – preferred over FlightAware's
+    var adbGate: String? = nil
+    /// A different departure gate reported by the other source (shown as a hint)
+    var gateConflict: String? = nil
     /// Gate / runway times in detail (FlightAware)
     var timetable: Timetable? = nil
     /// What changed and when (gate, times, status …), newest last
