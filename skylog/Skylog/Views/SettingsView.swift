@@ -174,10 +174,13 @@ struct SettingsView: View {
                     }
                     .disabled(pushServerURL.isEmpty || pushServerToken.isEmpty)
                     if let s = pushStatus ?? PushClient.lastStatus { Text(s).font(.caption).foregroundStyle(.secondary) }
+                    NavigationLink { KeyGuideView(guide: .pushServer) } label: {
+                        Label("So richtest du den Server ein", systemImage: "questionmark.circle")
+                    }
                 } header: {
                     Text("Echtzeit-Pushs (eigener Server)")
                 } footer: {
-                    Text("Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit.")
+                    Text("Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Kostet ca. 2–3 $ pro Monat bei Fly.io.")
                 }
 
                 Section {
