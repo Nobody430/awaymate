@@ -106,7 +106,10 @@ enum Notifier {
             result.append(Change(title: "\(n): Neue Ankunftszeit", body: "Ankunft jetzt \(Fmt.time(newTime, new.arrival.tz))."))
         }
 
-        if let b = new.arrival.baggageBelt, b != old.arrival.baggageBelt, newStatus != .arrived {
+        // Baggage belt only makes sense shortly before / after landing (airlines publish early guesses)
+        let nearArrival = new.arrival.best.map { $0.timeIntervalSinceNow < 45 * 60 } ?? false
+        let beltRelevant = (newStatus.isAirborne && nearArrival) || (newStatus == .arrived && oldStatus == .arrived)
+        if let b = new.arrival.baggageBelt, b != old.arrival.baggageBelt, beltRelevant {
             result.append(Change(title: "\(n): Gepäckband \(b)", body: "Dein Gepäck kommt auf Band \(b)."))
         }
         return result

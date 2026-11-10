@@ -178,7 +178,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Automatik")
                 } footer: {
-                    Text("Sparsam: ab 24 h vor Abflug alle 4 h, ab 4 h vor Abflug bis zur Landung alle 20 Min., nach der Landung einmal (Gepäckband). Ca. 20 Abfragen pro Flug. Im Hintergrund entscheidet iOS, wie oft die App laufen darf.")
+                    Text("24–4 h vor Abflug alle 2 h, danach alle 15 Min., ab 75 Min. vor Abflug bis zum Start alle 5 Min. (auch über die geplante Zeit hinaus, damit Verspätungen sofort auftauchen). In der Luft alle 15 Min., kurz vor Landung alle 5 Min., danach bis zum Gepäckband. Ca. 40 Abfragen pro Flug. Mit Reisemodus läuft das auch im Hintergrund.")
                 }
 
                 Section("Daten") {

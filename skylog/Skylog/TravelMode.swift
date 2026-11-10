@@ -56,7 +56,7 @@ final class TravelMode: NSObject, CLLocationManagerDelegate {
                 await store.refreshActive(notify: true)
                 await store.updateLivePositions()
                 guard let self, !self.flightsInWindow(store).isEmpty else { break }
-                try? await Task.sleep(for: .seconds(180))
+                try? await Task.sleep(for: .seconds(60))
             }
             self?.stop()
         }

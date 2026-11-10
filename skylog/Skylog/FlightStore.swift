@@ -182,16 +182,27 @@ final class FlightStore {
         HotelRoute.scheduleReminders(for: new, flights: flights)
     }
 
-    /// Smart refresh interval to save API queries:
-    /// 24–4 h before departure every 4 h, then every 20 min until landing, after landing once (baggage belt).
+    /// Refresh interval depending on the flight phase:
+    /// >24 h: 12 h · 24–4 h: 2 h · 4 h–75 min: 15 min · from 75 min before departure until takeoff: 5 min
+    /// (also past the planned time, so delays show up right away) · in the air: 15 min, last 40 min 5 min
+    /// · after landing every 10 min until the baggage belt is known (max. 1 h).
     static func refreshInterval(departure dep: Date, arrival arr: Date, now: Date, flight f: Flight) -> TimeInterval {
-        if f.normalizedStatus == .arrived {
-            // one more update after landing, then stop
-            if let last = f.lastUpdated, last > arr { return .infinity }
-            return 0
+        let status = f.normalizedStatus
+        if status == .canceled || status == .diverted { return 2 * 3600 }
+        if status == .arrived || f.arrival.runway != nil {
+            if now.timeIntervalSince(arr) > 3600 { return .infinity }
+            if f.arrival.baggageBelt != nil, let last = f.lastUpdated, last > arr { return .infinity }
+            return 10 * 60
         }
-        if dep.timeIntervalSince(now) > 4 * 3600 { return 4 * 3600 }
-        return 20 * 60
+        if f.isInAir || f.departure.runway != nil {
+            return arr.timeIntervalSince(now) < 40 * 60 ? 5 * 60 : 15 * 60
+        }
+        let toDep = dep.timeIntervalSince(now)
+        if toDep > 24 * 3600 { return 12 * 3600 }
+        if toDep > 4 * 3600 { return 2 * 3600 }
+        if toDep > 75 * 60 { return 15 * 60 }
+        if toDep < -3 * 3600 { return 30 * 60 }
+        return 5 * 60
     }
 
     /// Refreshes flights departing within the next 24 h or currently in the air.
