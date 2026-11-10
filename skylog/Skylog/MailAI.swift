@@ -112,7 +112,7 @@ enum MailAI {
         return e.passengers.contains { p in
             let tokens = tokens(p)
             return variants.contains { parts in
-                // surname as a whole word ("Meier" must not match "Obermeier"), or glued ticket style "MUSTERRAFFAELMR"
+                // surname as a whole word ("Meier" must not match "Obermeier"), or glued ticket style "MUSTERMAXMR"
                 guard let surname = parts.last else { return false }
                 let glued = tokens.count == 1 && tokens[0].hasPrefix(surname) && tokens[0].count > surname.count
                 guard tokens.contains(surname) || glued else { return false }

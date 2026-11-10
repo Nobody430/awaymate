@@ -1,84 +1,177 @@
-# Skylog ✈️ – eigener Flug-Tracker fürs iPhone
+# Skylog ✈️
 
-Native SwiftUI-App (iOS 17+), komplett ohne Abo.
+Flug- und Reise-App fürs iPhone (SwiftUI, iOS 17+). Ohne Abo und ohne zentralen Dienst: Jede und jeder nutzt die
+eigenen API-Keys, die Daten bleiben auf dem Gerät. Wer will, betreibt zusätzlich einen eigenen kleinen Push-Server.
+
+*English summary: Skylog is a self-hosted-friendly flight and trip tracker for iPhone. You bring your own API keys
+(FlightAware and/or AeroDataBox, optionally Claude or OpenAI), everything is stored on the device, and an optional
+free push server (Cloudflare Workers) delivers real-time notifications and Live Activity updates.
+The app is available in German, English, French, Italian and Spanish.*
+
+- [Funktionen](#funktionen)
+- [Erste Schritte](#erste-schritte)
+- [Keys und Dienste](#keys-und-dienste)
+- [Eigener Push-Server](#eigener-push-server-optional)
+- [Wie aktuell sind die Daten?](#wie-aktuell-sind-die-daten)
+- [Datenschutz](#datenschutz)
+- [Selbst bauen](#selbst-bauen)
+- [Aufbau des Codes](#aufbau-des-codes)
+- [Grenzen](#grenzen)
 
 ## Funktionen
-- Flug per Flugnummer + Datum hinzufügen (auch vergangene Flüge → Flughistorie)
-- Status, Verspätung, geplante vs. erwartete/tatsächliche Zeiten (in Ortszeit des Flughafens)
-- Terminal, Gate, Check-in-Schalter, Gepäckband
-- Live-Position auf der Karte (OpenSky, gratis) inkl. Höhe, Speed, Kurs – sonst geschätzt entlang der Großkreisroute
-- Mitteilungen bei Gate-Wechsel, neuer Abflug-/Ankunftszeit, Boarding, Start, Landung, Annullierung, Gepäckband
-- Erinnerungen 3h vor Abflug, 45 Min vor Abflug, 20 Min vor Landung
-- Hintergrund-Aktualisierung
-- Weltkarte mit allen Flügen
-- Statistik: Flüge, km, Flugzeit, Flughäfen, Länder, Airlines, Strecken, Flugzeugtypen, Diagramm pro Monat, Jahresfilter
-- Sitzplatz & Notizen, Teilen, JSON-Export/-Import
 
-## 1. API-Key holen (gratis)
-1. Auf https://rapidapi.com registrieren
-2. API „AeroDataBox“ suchen → Plan **Basic (0 $)** abonnieren
-3. `X-RapidAPI-Key` kopieren → in der App unter *Einstellungen* einfügen
+**Flüge**
+- Hinzufügen per Flugnummer und Datum, von Hand oder aus E-Mails (Outlook-Postfach, eingefügter Text, PDF).
+- Status, Verspätung, geplante / erwartete / tatsächliche Zeiten – immer in der Ortszeit des Flughafens.
+- Terminal, Gate, Check-in-Schalter, Gepäckband. Gates werden kurz vor Abflug gegen eine zweite Quelle geprüft;
+  bei Widerspruch erscheint ein Hinweis.
+- „Zeiten im Detail“: Gate verlassen, Rollen, Start, Landung, am Gate, Flugzeit.
+- „Wo ist mein Flugzeug?“: der Zubringerflug und die Flüge davor, mit Einschätzung, ob die Zeit reicht.
+- Anschlussflug-Karte mit Umsteigezeit und Warnung, wenn es knapp wird.
+- Live-Position auf der Karte, voraussichtliche Ankunft aus Position und Geschwindigkeit.
+- Änderungsprotokoll pro Flug (Gate, Zeiten, Status).
 
-Das Gratis-Kontingent ist begrenzt, darum aktualisiert die App automatisch nur Flüge der nächsten 36 h.
+**Mitteilungen und Sperrbildschirm**
+- Gate-Wechsel, neue Abflugzeit (auch schleichende Verspätungen), Zubringer gestartet / gelandet / zu spät,
+  Start, Landung, Gepäckband, Annullierung.
+- Erinnerungen: 3 h und 45 Min. vor Abflug, 20 Min. vor Landung, „weiter zum Hotel“, „bald zum Flughafen“.
+- Live-Aktivität (Sperrbildschirm und Dynamic Island) mit Countdown, Gate, Verspätung pro Flughafen und Zubringer.
+- Widgets: Home-Bildschirm (klein, mittel) und Sperrbildschirm (Zeile über der Uhr, Block darunter).
 
-## 2. App bauen
-GitHub baut die App automatisch bei jedem Push (Actions → „Build Skylog iOS“).
-Unter dem Run bei *Artifacts* `Skylog-ipa` herunterladen und entpacken → `Skylog.ipa`.
+**Reisen**
+- Reisen werden aus den Flügen vorgeschlagen; Hotels, Mietwagen, Züge aus Mails werden zugeordnet.
+- Weg Flughafen ↔ Hotel mit ÖV- und Taxi-Zeit und „Losgehen spätestens …“.
+- Reisetag-Plan (am Flughafen sein, Gepäckaufgabe, Boarding, Abflug, Landung, Gepäck) mit automatischem Puffer.
+- Lage am Abflughafen: Wetter zur Abflugzeit, allgemeine Verspätungen.
+- Zielinfos: Ortszeit, Zeitverschiebung, Wetter bei Ankunft, Wechselkurs, Steckdosen.
+- Zug & Bus von und zur Heimat-Haltestelle (Schweiz).
+- KI-Reiseplan Tag für Tag und persönliche Packliste (optional mit Notizen aus einem Obsidian-Vault).
+- Dokumente pro Flug (Bordkarte, Buchung); am Reisetag als „Bordkarte öffnen“ zuoberst. PDFs, Bilder und
+  Wallet-Pässe lassen sich aus anderen Apps an Skylog teilen.
+- Kalender-Abgleich für Flüge und Hotels (einschaltbar).
+- Umbuchungen aus neuen Mails: „ersetzt Flug … – ersetzen?“.
 
-## 3. Aufs iPhone installieren (Windows, ohne Mac)
-1. **iTunes** (Apple-Version, nicht Store) und **Sideloadly** (sideloadly.io) installieren
-2. iPhone per USB anschließen, „Diesem Computer vertrauen“
-3. `Skylog.ipa` in Sideloadly ziehen, Apple-ID eingeben → Start
-4. iPhone: *Einstellungen → Allgemein → VPN & Geräteverwaltung* → Entwickler-App vertrauen
-5. *Einstellungen → Datenschutz & Sicherheit → Entwicklermodus* einschalten (Neustart)
+**Auswertung und Teilen**
+- Statistik: Flüge, Distanz, Flugzeit, Flughäfen, Länder (antippbar), Airlines, Strecken, Flugzeugtypen, pro Jahr.
+- Rückblick als Bild zum Teilen, Pünktlichkeit pro Airline, Flugzeug-Sammlung, „Meine Flüge auf dieser Strecke“.
+- Entschädigung nach EU 261/2004: Einschätzung und Antragstext (Deutsch / Englisch).
+- Familie & Freunde informieren: Live-Links und Statusnachricht; Flug oder Reiseplan als PDF.
+- Export und Import aller Flüge als JSON.
 
-Mit einer kostenlosen Apple-ID läuft die App **7 Tage**, danach in Sideloadly einfach erneut installieren
-(Daten bleiben erhalten; Sideloadly kann das auch automatisch per WLAN erneuern).
-Mit einem bezahlten Developer-Account (99 $/Jahr) hält sie 1 Jahr.
+**Sprachen:** Deutsch, Englisch, Französisch, Italienisch, Spanisch (folgt der Sprache des iPhones).
 
-## Mit Mac/Xcode
+## Erste Schritte
+
+1. App installieren (TestFlight-Einladung, oder [selbst bauen](#selbst-bauen)).
+2. **Einstellungen → Flugdaten:** Datenquelle wählen und Key eintragen. Empfohlen: „Beide kombiniert“.
+   Unter jedem Feld führt „So bekommst du den Key“ Schritt für Schritt durch die Anmeldung.
+3. **Einstellungen → Zuhause:** Heimat-Flughafen und Heimat-Haltestelle.
+4. **Einstellungen → Reisender:** Name wie auf dem Ticket (damit nur die eigenen Flüge aus Mails übernommen werden).
+5. Flug hinzufügen: in der Flugliste auf **+**.
+6. Optional: KI-Key für den Mail-Import, Outlook verbinden, Kalender einschalten, eigener Push-Server.
+
+Alle Anleitungen stehen auch in der App, jeweils direkt beim betreffenden Feld.
+
+## Keys und Dienste
+
+| Wofür | Dienst | Kosten | Nötig? |
+|---|---|---|---|
+| Flugstatus, Zeiten, Zubringer | [FlightAware AeroAPI](https://www.flightaware.com/aeroapi/portal/) („Personal“) | monatliches Gratis-Guthaben, danach pro Abfrage | eine der beiden Quellen |
+| Flugstatus, Gates, Flüge weit in der Zukunft | [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) über RapidAPI | Gratis-Plan mit wenigen Abfragen | eine der beiden Quellen |
+| Live-Position, Start, Landung | adsb.lol, airplanes.live, OpenSky | gratis, kein Key | automatisch |
+| Mail-Erkennung, Reiseplan, Packliste | Claude (Anthropic) oder OpenAI | pro Nutzung, meist Rappen | optional |
+| Postfach durchsuchen | Microsoft-Konto (eigene App-Registrierung) | gratis | optional |
+| Wetter, Wechselkurs, ÖV | Open-Meteo, Coinbase, transport.opendata.ch | gratis, kein Key | automatisch |
+
+**„Beide kombiniert“** nutzt FlightAware für die nächsten zwei Tage und den Live-Status, AeroDataBox für Flüge
+weiter in der Zukunft und für Gate, Terminal, Check-in und Gepäckband. Fällt eine Quelle aus, springt die andere ein.
+
+**Outlook einrichten** (einmalig, ca. 5 Min.): [entra.microsoft.com](https://entra.microsoft.com) →
+App-Registrierungen → Neue Registrierung → Kontotyp „persönliche Microsoft-Konten“ → Plattform „iOS/macOS“ mit
+Bundle-ID `com.nobody430.skylog` → Berechtigungen `Mail.Read`, `User.Read` → Client-ID in Skylog eintragen.
+Die ausführliche Fassung steht in der App.
+
+## Eigener Push-Server (optional)
+
+Ohne Server aktualisiert sich Skylog, wenn die App offen ist oder iOS sie im Hintergrund laufen lässt
+(„Reisemodus“). Mit einem eigenen Server kommen Mitteilungen sofort – auch bei gesperrtem iPhone – und die
+Live-Aktivität aktualisiert sich von selbst.
+
+- Läuft **gratis bei Cloudflare Workers** (oder als Docker-Container überall).
+- Nutzt den **eigenen** FlightAware-Key; ohne Key meldet er Start und Landung über ADS-B.
+- Mitteilungen gehen über ein **Relay** des App-Herausgebers an Apple (Apple nimmt sie nur vom Herausgeber an).
+  Das Relay sieht weder Keys noch Fluglisten.
+
+Kurzfassung: Projekt forken → Cloudflare-Konto → vier Secrets im Fork
+(`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SERVER_TOKEN`, `RELAY_URL`) → Workflow „Deploy push server“
+starten → Adresse und Passwort in Skylog unter *Einstellungen → Echtzeit-Pushs* eintragen.
+
+Schritt für Schritt: in der App unter *Einstellungen → Echtzeit-Pushs → So richtest du den Server ein*.
+Technik und Docker: [`../server/README.md`](../server/README.md). Relay-Adresse: siehe [Haupt-README](../README.md#relay).
+
+## Wie aktuell sind die Daten?
+
+| Phase | Abfrage der Flugdaten |
+|---|---|
+| 3 Tage bis 24 h vor Abflug | alle 12 h |
+| 24 h bis 4 h | alle 2 h |
+| 4 h bis 75 Min. | alle 15 Min. |
+| 75 Min. vor Abflug bis zum Start | alle 5 Min. (auch über die geplante Zeit hinaus) |
+| in der Luft | alle 15 Min., in den letzten 40 Min. alle 5 Min. |
+| nach der Landung | alle 10 Min., bis das Gepäckband bekannt ist (max. 1 h) |
+
+Dazu kommt die Gratis-Live-Position jede Minute, sobald der Flug in der Luft ist. Fehlgeschlagene Abfragen werden
+mit wachsendem Abstand wiederholt; ein aufgebrauchtes Kontingent pausiert nur die betroffene Quelle.
+Mit eigenem Push-Server prüft dieser jede Minute.
+
+## Datenschutz
+
+- Flüge, Reisen, Buchungen, Dokumente und alle Keys liegen **nur auf dem iPhone** (Keys im Schlüsselbund bzw. in
+  den App-Einstellungen). Es gibt kein Konto und keinen zentralen Server.
+- Abfragen gehen direkt vom Gerät an die Dienste, deren Keys eingetragen sind.
+- Für die KI-Erkennung werden die Texte der Reise-Mails an den gewählten KI-Anbieter geschickt.
+- Der eigene Push-Server bekommt die anstehenden Flüge und – falls eingetragen – den FlightAware-Key.
+- Die Daten sind im normalen iPhone-Backup enthalten; zusätzlich gibt es den JSON-Export.
+
+## Selbst bauen
+
+Mit Mac und Xcode:
+
 ```
 brew install xcodegen
 cd skylog && xcodegen generate && open Skylog.xcodeproj
 ```
-In Xcode unter *Signing & Capabilities* das eigene Team wählen und aufs iPhone spielen.
 
-## E-Mail-Import
-In der Flugliste auf **+ → Aus E-Mails importieren**:
+Unter *Signing & Capabilities* das eigene Team wählen. Wer eine eigene Bundle-ID nimmt, ändert sie in
+`project.yml` (App, Widget, App Group) – dann braucht der Push-Server den **eigenen** Apple-Push-Schlüssel statt
+des Relays (siehe `server/README.md`).
 
-- **Outlook/Hotmail/MSN durchsuchen** – einmalig einrichten (gratis, ~5 Min):
-  1. https://entra.microsoft.com → *App-Registrierungen* → *Neue Registrierung*
-  2. Name: `Skylog`, Kontotyp: **Konten in einem beliebigen Organisationsverzeichnis und persönliche Microsoft-Konten**
-  3. Nach dem Anlegen: *Authentifizierung* → *Plattform hinzufügen* → **iOS/macOS** → Bundle-ID `com.nobody430.skylog`
-     (ergibt Umleitungs-URI `msauth.com.nobody430.skylog://auth`)
-  4. *API-Berechtigungen*: `Mail.Read` und `User.Read` (delegiert) – sind ohne Admin-Zustimmung nutzbar
-  5. *Anwendungs-ID (Client-ID)* kopieren → in Skylog unter *Einstellungen → E-Mail-Import* einfügen
-- **Mail-Text einfügen** – funktioniert mit jedem Mail-Programm (Gmail, iCloud, …)
-- **PDF/Mail-Datei** – Ticket-PDF oder Bordkarte in Outlook/Mail teilen → *Skylog*
+Ohne Mac: Das Projekt baut per GitHub Actions und lädt zu TestFlight hoch (siehe [Haupt-README](../README.md#build)).
+Nötig ist ein Apple-Developer-Konto.
 
-Erkannt werden Flugnummern (z. B. `LX 1612`, `U2 5147`) mit Datum in vielen Formaten
-(`12.11.2026`, `12. November 2026`, `12NOV26`, `Nov 12, 2026`). Vor dem Import kannst du jeden Treffer abhaken.
+## Aufbau des Codes
 
-## Teilen
-- **Einzelner Flug:** Flugdetails → Teilen-Symbol → *Als PDF teilen* (mit Karte, Zeiten, Terminal/Gate, Sitzplatz) oder *Als Text*
-- **Ganzer Reiseplan:** In der Flugliste oben links das Teilen-Symbol → alle angezeigten Flüge als ein PDF
-- Booking.com, eDreams & Co.: Die Bestätigungsmails werden beim Outlook-Scan mit erkannt.
+| Ort | Inhalt |
+|---|---|
+| `Skylog/Models.swift` | Flug, Endpunkte, Status, Zubringer, Zeiten im Detail |
+| `Skylog/FlightStore.swift` | Speicher, Aktualisierung nach Flugphase, Dubletten, Anschlüsse, Zubringer |
+| `Skylog/FlightAware.swift`, `API.swift` | Datenquellen und die kombinierte Abfrage |
+| `Skylog/LiveADSB.swift` | Gratis-Live-Daten (Start, Position, Landung) |
+| `Skylog/MailAI.swift`, `OutlookMail.swift`, `MailWatcher.swift` | Mail-Import mit KI, Abgleich von Umbuchungen und Stornos |
+| `Skylog/LiveFlight.swift`, `SkylogWidgets/` | Live-Aktivität und Widgets |
+| `Skylog/PushClient.swift`, `../server/`, `../relay/` | eigener Push-Server und Relay |
+| `Skylog/Trips.swift`, `Bookings.swift`, `HotelRoute.swift`, `TripPlanner.swift` | Reisen, Buchungen, Weg zum Hotel, KI-Reiseplan |
+| `Skylog/Views/` | alle Ansichten; `KeyGuides.swift` enthält die Anleitungen in der App |
+| `Skylog/*.lproj/` | Übersetzungen (Schlüssel = deutscher Text) |
 
-## Reisen (neu)
-- **Entschädigung (EU 261/2004):** Bei ≥ 3 h Verspätung, Annullierung oder Umleitung zeigt Skylog den möglichen Betrag (250/400/600 €) und erstellt den Antrag (DE/EN) mit Name, IBAN und Buchungscode. Mitteilung direkt nach der Landung.
-- **Zug & Bus:** Für Abflüge/Ankünfte in Zürich und Genf zeigt Skylog Verbindungen von/zu deiner Heimat-Haltestelle (transport.opendata.ch), inkl. Puffer vor Abflug.
-- **Dokumente pro Flug:** Boardingpass, Buchung, Fotos ablegen – offline verfügbar, mit Vorschau.
-- **Reisen-Tab:** Reisen werden aus deinen Flügen vorgeschlagen, inkl. Packliste und Notizen.
-- **Live-Aktivität** (Sperrbildschirm + Dynamic Island): Countdown bis Abflug/Landung, Gate, Fortschritt – startet automatisch 4 h vor Abflug.
-- **Widget** „Nächster Flug“ für Homescreen und Sperrbildschirm.
-- **Zielinfo:** Ortszeit, Zeitverschiebung, Wetter bei Ankunft (Open-Meteo), Wechselkurs, Steckdosentyp/Spannung.
-- **Reisetag-Plan:** Flughafen → Gepäck → Boarding → Abflug → Landung → Gepäckband.
+Flughafen-Datenbank: [mwgg/Airports](https://github.com/mwgg/Airports) (MIT, siehe `Skylog/Resources/airports-LICENSE.txt`).
 
-Für TestFlight braucht Skylog zusätzlich die App Group `group.com.nobody430.skylog` und die Bundle-ID `com.nobody430.skylog.widgets`.
-- **Flugzeug & Sitz:** Alter, Typ, Sitze, Triebwerke (auf Knopfdruck), Sitzposition (Fenster/Mitte/Gang), Sonnenseite während des Flugs.
-- **Familie:** Live-Links (Flightradar24/FlightAware) zum Weitergeben, Status per WhatsApp mit einem Tipp.
-- **Flughafen:** Innenpläne in Apple Karten, Lounges/Essen/Apotheke/Geld aus Apple Maps, offizielle Seiten mit Wartezeiten (ZRH, GVA, BSL).
+## Grenzen
 
-Flughafen-Datenbank: [mwgg/Airports](https://github.com/mwgg/Airports) (MIT-Lizenz, siehe `Skylog/Resources/airports-LICENSE.txt`).
-
-Live-Daten (gestartet, Position, voraussichtliche Ankunft, gelandet): kostenlos über die Community-ADS-B-Netze [adsb.lol](https://adsb.lol) und [airplanes.live](https://airplanes.live).
+- **Boarding-Status** gibt es in offenen Daten nicht; „Boarding (ca.)“ ist eine Schätzung aus der Abflugzeit.
+- **Gates** stammen von den Datenquellen und können falsch oder veraltet sein – es gilt die Anzeige am Flughafen.
+- **Vorhersagen** (wie bei kommerziellen Apps) und Pünktlichkeits-Statistiken einzelner Flüge sind nicht enthalten;
+  dafür bräuchte es teure Datenverträge.
+- **Hintergrund ohne Server:** iOS entscheidet, wie oft die App laufen darf. Zuverlässig sofort geht es nur mit
+  dem eigenen Push-Server.
+- Die Gratis-Live-Daten sind für private, nicht-kommerzielle Nutzung gedacht.
