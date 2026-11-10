@@ -1,0 +1,26 @@
+/* Skylog widgets – es */
+" Kein Flug geplant" = " Sin vuelos programados";
+"%@" = "%@";
+"%@ · %@ → %@" = "%@ · %@ → %@";
+"%lld Min. früher" = "%lld min antes";
+"%lld Min. später" = "%lld min después";
+"+%lld Min" = "+%lld min";
+"Abflug %@" = "Salida %@";
+"Abflug in" = "Salida en";
+"Ankunft" = "Llegada";
+"Band %@" = "Cinta %@";
+"Countdown, Gate und Status deines nächsten Flugs." = "Cuenta atrás, puerta y estado de tu próximo vuelo.";
+"Gate %@" = "Puerta %@";
+"Gelandet" = "Aterrizado";
+"Kein Flug geplant" = "Sin vuelos programados";
+"Keine anstehenden Flüge" = "No hay próximos vuelos";
+"Landung" = "Aterrizaje";
+"Landung %@" = "Aterrizaje %@";
+"Landung in" = "Aterrizaje en";
+"Nächster Flug" = "Próximo vuelo";
+"Planmässig" = "Según horario";
+"Pünktlich" = "A tiempo";
+"T%@" = "T%@";
+"Terminal %@" = "Terminal %@";
+"Verspätet · +%lld Min" = "Retrasado · +%lld min";
+"jetzt" = "ahora";

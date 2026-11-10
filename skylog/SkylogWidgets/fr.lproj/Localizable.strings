@@ -1,0 +1,26 @@
+/* Skylog widgets – fr */
+" Kein Flug geplant" = " Aucun vol prévu";
+"%@" = "%@";
+"%@ · %@ → %@" = "%@ · %@ → %@";
+"%lld Min. früher" = "%lld min plus tôt";
+"%lld Min. später" = "%lld min plus tard";
+"+%lld Min" = "+%lld min";
+"Abflug %@" = "Départ %@";
+"Abflug in" = "Départ dans";
+"Ankunft" = "Arrivée";
+"Band %@" = "Tapis %@";
+"Countdown, Gate und Status deines nächsten Flugs." = "Compte à rebours, porte et statut de ton prochain vol.";
+"Gate %@" = "Porte %@";
+"Gelandet" = "Atterri";
+"Kein Flug geplant" = "Aucun vol prévu";
+"Keine anstehenden Flüge" = "Aucun vol à venir";
+"Landung" = "Atterrissage";
+"Landung %@" = "Atterrissage %@";
+"Landung in" = "Atterrissage dans";
+"Nächster Flug" = "Prochain vol";
+"Planmässig" = "Comme prévu";
+"Pünktlich" = "À l'heure";
+"T%@" = "T%@";
+"Terminal %@" = "Terminal %@";
+"Verspätet · +%lld Min" = "Retardé · +%lld min";
+"jetzt" = "maintenant";

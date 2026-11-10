@@ -1,0 +1,26 @@
+/* Skylog widgets – it */
+" Kein Flug geplant" = " Nessun volo in programma";
+"%@" = "%@";
+"%@ · %@ → %@" = "%@ · %@ → %@";
+"%lld Min. früher" = "%lld min in anticipo";
+"%lld Min. später" = "%lld min in ritardo";
+"+%lld Min" = "+%lld min";
+"Abflug %@" = "Partenza %@";
+"Abflug in" = "Partenza tra";
+"Ankunft" = "Arrivo";
+"Band %@" = "Nastro %@";
+"Countdown, Gate und Status deines nächsten Flugs." = "Conto alla rovescia, gate e stato del tuo prossimo volo.";
+"Gate %@" = "Gate %@";
+"Gelandet" = "Atterrato";
+"Kein Flug geplant" = "Nessun volo in programma";
+"Keine anstehenden Flüge" = "Nessun volo in programma";
+"Landung" = "Atterraggio";
+"Landung %@" = "Atterraggio %@";
+"Landung in" = "Atterraggio tra";
+"Nächster Flug" = "Prossimo volo";
+"Planmässig" = "In orario";
+"Pünktlich" = "Puntuale";
+"T%@" = "T%@";
+"Terminal %@" = "Terminal %@";
+"Verspätet · +%lld Min" = "In ritardo · +%lld min";
+"jetzt" = "ora";

@@ -1,0 +1,26 @@
+/* Skylog widgets – en */
+" Kein Flug geplant" = " No flight scheduled";
+"%@" = "%@";
+"%@ · %@ → %@" = "%@ · %@ → %@";
+"%lld Min. früher" = "%lld min earlier";
+"%lld Min. später" = "%lld min later";
+"+%lld Min" = "+%lld min";
+"Abflug %@" = "Departure %@";
+"Abflug in" = "Departure in";
+"Ankunft" = "Arrival";
+"Band %@" = "Belt %@";
+"Countdown, Gate und Status deines nächsten Flugs." = "Countdown, gate and status of your next flight.";
+"Gate %@" = "Gate %@";
+"Gelandet" = "Landed";
+"Kein Flug geplant" = "No flight scheduled";
+"Keine anstehenden Flüge" = "No upcoming flights";
+"Landung" = "Landing";
+"Landung %@" = "Landing %@";
+"Landung in" = "Landing in";
+"Nächster Flug" = "Next flight";
+"Planmässig" = "On schedule";
+"Pünktlich" = "On time";
+"T%@" = "T%@";
+"Terminal %@" = "Terminal %@";
+"Verspätet · +%lld Min" = "Delayed · +%lld min";
+"jetzt" = "now";

@@ -1,0 +1,4 @@
+/* Permission texts – en */
+"NSCalendarsFullAccessUsageDescription" = "Skylog adds your flights and hotels to the calendar and keeps times and gates up to date there.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "On the travel day, Skylog uses your approximate location to keep the app awake and updates gate, delays and landing – even when the app is closed. At the airport it updates automatically.";
+"NSLocationWhenInUseUsageDescription" = "Skylog uses your approximate location on the travel day to keep flight data up to date in the background.";
