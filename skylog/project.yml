@@ -1,6 +1,7 @@
 name: Skylog
 options:
   bundleIdPrefix: com.nobody430
+  developmentLanguage: de
   deploymentTarget:
     iOS: "17.0"
 targets:
@@ -32,6 +33,8 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleDisplayName: Skylog
+        CFBundleDevelopmentRegion: de
+        CFBundleLocalizations: [de, en, fr, it, es]
         UILaunchScreen: {}
         UIBackgroundModes: [fetch, remote-notification, location]
         NSLocationWhenInUseUsageDescription: Skylog nutzt deinen ungefähren Standort am Reisetag, um Flugdaten im Hintergrund aktuell zu halten.
