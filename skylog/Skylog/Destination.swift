@@ -42,6 +42,8 @@ enum Weather {
         let temperature: Double
         let precipitationChance: Int?
         let code: Int
+        /// Thunderstorm, snow, freezing rain or fog – weather that often delays flights
+        var isRough: Bool { [45, 48, 56, 57, 66, 67].contains(code) || (71...77).contains(code) || code >= 85 }
         var symbol: String {
             switch code {
             case 0: "sun.max.fill"

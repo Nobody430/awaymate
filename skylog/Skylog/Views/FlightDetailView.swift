@@ -42,6 +42,7 @@ struct FlightDetailView: View {
                 gates(f)
                 if let i = f.inbound, !f.isInAir, !f.normalizedStatus.isFinal { inbound(i, f) }
                 PlaneHistoryCard(flight: f)
+                DepartureConditionsCard(flight: f)
                 TimetableCard(flight: f)
                 if f.isInAir, let p = f.lastPosition { live(p) }
                 if f.isPast || f.normalizedStatus.isFinal || (f.arrival.delayMinutes ?? 0) >= 120 {

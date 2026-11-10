@@ -220,3 +220,74 @@ enum Alliance {
         return nil
     }
 }
+
+// MARK: - Conditions at the departure airport
+
+/// Weather at departure time (free) and the airport's current general delay (FlightAware, last 3 h before departure).
+struct DepartureConditionsCard: View {
+    let flight: Flight
+    @State private var weather: Weather.Forecast?
+    @State private var delay: FlightAware.AirportDelay?
+    @State private var delayChecked = false
+
+    private var dep: Date? { flight.departure.best }
+    private var relevant: Bool {
+        guard let dep, !flight.isPast, flight.departure.runway == nil, flight.normalizedStatus != .canceled else { return false }
+        return dep.timeIntervalSinceNow < 3 * 86400 && dep.timeIntervalSinceNow > -3 * 3600
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if relevant, weather != nil || delayChecked {
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("Lage in \(flight.departure.displayCity)", systemImage: "airplane.departure").font(.headline)
+                    if let w = weather {
+                        HStack(spacing: 10) {
+                            Image(systemName: w.symbol).font(.title3).frame(width: 28)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Wetter beim Abflug").font(.caption).foregroundStyle(.secondary)
+                                Text("\(Int(w.temperature.rounded()))°" + (w.precipitationChance.map { " · \($0)% Regen" } ?? "") + (w.isRough ? " · kann Verspätungen bringen" : ""))
+                                    .font(.subheadline.weight(.medium))
+                            }
+                        }
+                    }
+                    if delayChecked {
+                        HStack(spacing: 10) {
+                            Image(systemName: delay == nil ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
+                                .font(.title3).frame(width: 28)
+                                .foregroundStyle(delay == nil ? .green : .orange)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text("Betrieb am Flughafen").font(.caption).foregroundStyle(.secondary)
+                                if let d = delay {
+                                    Text("Flüge starten im Schnitt ca. \(d.minutes) Min. später").font(.subheadline.weight(.medium))
+                                    if !d.reasons.isEmpty {
+                                        Text(d.reasons.prefix(2).joined(separator: " · ")).font(.caption).foregroundStyle(.secondary)
+                                    }
+                                } else {
+                                    Text("Keine allgemeinen Verspätungen gemeldet").font(.subheadline.weight(.medium))
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+        }
+        .task(id: "\(flight.id)-\(Int((dep?.timeIntervalSince1970 ?? 0) / 900))") { await load() }
+    }
+
+    private func load() async {
+        guard relevant, let dep else { return }
+        if weather == nil, let lat = flight.departure.lat, let lon = flight.departure.lon {
+            weather = try? await Weather.forecast(lat: lat, lon: lon, at: max(dep, Date()))
+        }
+        // paid query: only close to departure
+        if FlightAware.hasKey, FlightProvider.current != .aerodatabox, dep.timeIntervalSinceNow < 3 * 3600,
+           let code = flight.departure.icao ?? flight.departure.iata {
+            delay = await FlightAware.airportDelay(code)
+            delayChecked = true
+        }
+    }
+}

@@ -363,6 +363,35 @@ enum FlightAware {
         return flight
     }
 
+    // MARK: Airport delays
+
+    struct AirportDelay {
+        var minutes: Int
+        var reasons: [String]
+    }
+
+    private struct DelayResponse: Decodable {
+        struct Reason: Decodable { let reason: String?; let category: String?; let delay_secs: Double? }
+        let delay_secs: Double?
+        let category: String?
+        let reasons: [Reason]?
+    }
+
+    private static var delayCache: [String: (at: Date, value: AirportDelay?)] = [:]
+
+    /// Current general delay at an airport (nil = none reported). One query per airport every 30 min at most.
+    static func airportDelay(_ code: String) async -> AirportDelay? {
+        if let c = delayCache[code], Date().timeIntervalSince(c.at) < 30 * 60 { return c.value }
+        var value: AirportDelay? = nil
+        if let data = try? await get("/airports/\(code)/delays"),
+           let r = try? JSONDecoder().decode(DelayResponse.self, from: data), let secs = r.delay_secs, secs >= 300 {
+            let reasons = (r.reasons ?? []).compactMap { $0.reason ?? $0.category }
+            value = AirportDelay(minutes: Int(secs / 60), reasons: Array(Set(reasons)).sorted())
+        }
+        delayCache[code] = (Date(), value)
+        return value
+    }
+
     // MARK: Inbound aircraft
 
     /// Status of the inbound flight (one query, no airport lookups).
