@@ -238,6 +238,7 @@ final class FlightStore {
         }
         await updateInbounds(force: force, notify: notify)
         await updateLivePositions()
+        await LiveFlight.syncAll(flights)
         LiveFlight.autoStartIfNeeded(upcoming)
     }
 

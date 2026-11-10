@@ -140,7 +140,8 @@ struct FlightLiveActivity: Widget {
                     Text(context.attributes.to).font(.caption.bold())
                 }
             } compactTrailing: {
-                Countdown(target: context.state.inAir ? context.state.arrival : context.state.departure, overdue: "jetzt")
+                Countdown(target: context.state.inAir || context.state.departure < Date() ? context.state.arrival : context.state.departure,
+                          overdue: context.state.status == "Gelandet" ? "✓" : "jetzt")
                     .monospacedDigit()
                     .frame(maxWidth: 52)
                     .font(.caption)
@@ -160,9 +161,10 @@ struct LockScreenFlightView: View {
             HStack {
                 Text(context.attributes.flightNumber).font(.subheadline.bold())
                 Spacer()
-                Text(s.delayMinutes >= 5 ? "Verspätet · +\(s.delayMinutes) Min" : s.status)
+                let showDelay = s.delayMinutes >= 5 && !s.inAir && s.status != "Gelandet"
+                Text(showDelay ? "Verspätet · +\(s.delayMinutes) Min" : s.status)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(s.delayMinutes >= 15 ? .red : s.delayMinutes >= 5 ? .orange : accent)
+                    .foregroundStyle(!showDelay ? (s.status == "Gelandet" ? .green : accent) : s.delayMinutes >= 15 ? .red : .orange)
             }
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading) {
@@ -171,13 +173,21 @@ struct LockScreenFlightView: View {
                 }
                 Spacer()
                 VStack {
-                    let target = s.inAir ? s.arrival : s.departure
-                    if target > Date() {
-                        Text(s.inAir ? "Landung in" : "Abflug in").font(.caption2).foregroundStyle(.secondary)
-                        Countdown(target: target, overdue: "jetzt").font(.headline.monospacedDigit())
+                    let now = Date()
+                    let landed = s.status == "Gelandet"
+                    if landed {
+                        Text("Gelandet").font(.caption2).foregroundStyle(.secondary)
+                        Text(airportTime(s.arrival, context.attributes.toTZ)).font(.headline)
+                    } else if s.departure > now && !s.inAir {
+                        Text("Abflug in").font(.caption2).foregroundStyle(.secondary)
+                        Countdown(target: s.departure, overdue: "jetzt").font(.headline.monospacedDigit())
+                    } else if s.arrival > now {
+                        // departed (or departure time passed without newer data): count down to landing
+                        Text("Landung in").font(.caption2).foregroundStyle(.secondary)
+                        Countdown(target: s.arrival, overdue: "jetzt").font(.headline.monospacedDigit())
                     } else {
-                        Text(s.inAir ? "Landung" : "Abflug").font(.caption2).foregroundStyle(.secondary)
-                        Text(s.inAir ? "jeden Moment" : "steht an").font(.headline)
+                        Text("Ankunft").font(.caption2).foregroundStyle(.secondary)
+                        Text(airportTime(s.arrival, context.attributes.toTZ)).font(.headline)
                     }
                 }
                 .multilineTextAlignment(.center)

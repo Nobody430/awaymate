@@ -73,11 +73,34 @@ enum LiveFlight {
 
     static func update(_ f: Flight) async {
         guard let a = activity(for: f), let s = state(for: f) else { return }
-        let content = ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(3600))
+        let content = ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(30 * 60))
         if f.normalizedStatus == .canceled || (f.normalizedStatus == .arrived && Date() > s.arrival.addingTimeInterval(45 * 60)) {
             await a.end(content, dismissalPolicy: .after(Date().addingTimeInterval(15 * 60)))
         } else {
             await a.update(content)
+        }
+    }
+
+    /// Brings every running Live Activity in line with the stored flights:
+    /// updates them, ends finished ones and removes orphans (e.g. after duplicates were merged).
+    static func syncAll(_ flights: [Flight]) async {
+        let now = Date()
+        for a in Activity<FlightActivityAttributes>.activities {
+            let f = flights.first { $0.id.uuidString == a.attributes.flightID }
+                ?? flights.first { $0.number == a.attributes.flightNumber && $0.departure.code == a.attributes.from && !$0.isPast }
+            guard let f, let s = state(for: f) else {
+                await a.end(nil, dismissalPolicy: .immediate)
+                continue
+            }
+            let finished = f.normalizedStatus == .canceled || f.isPast
+                || (f.normalizedStatus == .arrived && now > s.arrival.addingTimeInterval(45 * 60))
+                || now > s.arrival.addingTimeInterval(3 * 3600)
+            let content = ActivityContent(state: s, staleDate: s.arrival.addingTimeInterval(30 * 60))
+            if finished {
+                await a.end(content, dismissalPolicy: .immediate)
+            } else {
+                await a.update(content)
+            }
         }
     }
 
