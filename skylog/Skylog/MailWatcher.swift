@@ -45,13 +45,13 @@ enum MailWatcher {
             var candidates: [FlightCandidate]
             if AIClient.hasKey {
                 let result = try await MailAI.extractAll(relevant) { _ in }
-                guard result.failedMails == 0 else { throw AIClient.Failure(message: result.failure ?? "KI-Fehler") }
+                guard result.failedMails == 0 else { throw AIClient.Failure(message: result.failure ?? String(localized: "KI-Fehler")) }
                 markProcessed()
                 candidates = result.flights
                 for b in result.bookings where BookingStore.shared.upsert(b) {
-                    let title = b.cancelled ? "\(b.kind.label) storniert" : "Neue Buchung: \(b.kind.label)"
+                    let title = b.cancelled ? String(localized: "\(b.kind.label) storniert") : String(localized: "Neue Buchung: \(b.kind.label)")
                     Notifier.post(id: "mail-booking-\(b.key)", title: title,
-                                  body: "\(b.name), \(b.city) · \(Fmt.day(b.start))" + (b.kind == .hotel && b.nights > 0 ? " · \(b.nights) Nächte" : ""))
+                                  body: "\(b.name), \(b.city) · \(Fmt.day(b.start))" + (b.kind == .hotel && b.nights > 0 ? String(localized: " · \(b.nights) Nächte") : ""))
                 }
             } else {
                 candidates = relevant.flatMap { m in
@@ -70,25 +70,25 @@ enum MailWatcher {
                        existing.normalizedStatus != .canceled {
                         existing.status = "Canceled"
                         store.update(existing)
-                        Notifier.post(id: "mail-cancel-\(c.id)", title: "✈️ \(c.number) storniert",
-                                      body: "Laut einer neuen Mail wurde dein Flug am \(Fmt.day(c.date)) storniert.")
+                        Notifier.post(id: "mail-cancel-\(c.id)", title: String(localized: "✈️ \(c.number) storniert"),
+                                      body: String(localized: "Laut einer neuen Mail wurde dein Flug am \(Fmt.day(c.date)) storniert."))
                     }
                     continue
                 }
                 guard !store.contains(number: c.number, date: c.date),
                       var flight = await ImportView.manualFlight(c) else { continue }
-                let route = "\(flight.number) \(flight.departure.displayCity) → \(flight.arrival.displayCity) am \(Fmt.day(c.date))"
+                let route = String(localized: "\(flight.number) \(flight.departure.displayCity) → \(flight.arrival.displayCity) am \(Fmt.day(c.date))")
                 // Re-booking: same booking code, the old flight is no longer in the mail
                 if let old = store.rebookedFlight(for: flight, stillBooked: stillBooked) {
-                    let what = "\(old.number) am \(Fmt.day(old.sortDate, old.departure.tz)) wurde umgebucht auf \(route)"
+                    let what = String(localized: "\(old.number) am \(Fmt.day(old.sortDate, old.departure.tz)) wurde umgebucht auf \(route)")
                     if autoAdd {
                         store.delete([old.id])
                         store.add(flight)
-                        Notifier.post(id: "mail-rebook-\(c.id)", title: "✈️ Flug umgebucht", body: what + ". In Skylog ersetzt.")
+                        Notifier.post(id: "mail-rebook-\(c.id)", title: String(localized: "✈️ Flug umgebucht"), body: what + String(localized: ". In Skylog ersetzt."))
                     } else {
                         flight.replacesID = old.id
                         if store.suggest(flight) {
-                            Notifier.post(id: "mail-rebook-\(c.id)", title: "✈️ Flug umgebucht?", body: what + ". Ersetzen?",
+                            Notifier.post(id: "mail-rebook-\(c.id)", title: String(localized: "✈️ Flug umgebucht?"), body: what + String(localized: ". Ersetzen?"),
                                           category: NotificationDelegate.newFlightCategory,
                                           userInfo: ["pendingID": flight.id.uuidString])
                         }
@@ -97,10 +97,10 @@ enum MailWatcher {
                 }
                 if autoAdd {
                     store.add(flight)
-                    Notifier.post(id: "mail-new-\(c.id)", title: "✈️ Neuer Flug hinzugefügt", body: route + ".")
+                    Notifier.post(id: "mail-new-\(c.id)", title: String(localized: "✈️ Neuer Flug hinzugefügt"), body: route + ".")
                 } else if store.suggest(flight) {
-                    Notifier.post(id: "mail-new-\(c.id)", title: "✈️ Neuer Flug in deinen Mails",
-                                  body: route + ". Hinzufügen?",
+                    Notifier.post(id: "mail-new-\(c.id)", title: String(localized: "✈️ Neuer Flug in deinen Mails"),
+                                  body: route + String(localized: ". Hinzufügen?"),
                                   category: NotificationDelegate.newFlightCategory,
                                   userInfo: ["pendingID": flight.id.uuidString])
                 }

@@ -77,7 +77,7 @@ enum AirportBuffer {
         return max(setting == 0 ? recommended(f) : setting, minimum)
     }
 
-    static func label(_ m: Int) -> String { m == 0 ? "Automatisch" : m % 60 == 0 ? "\(m / 60) h" : "\(m / 60) h \(m % 60) Min" }
+    static func label(_ m: Int) -> String { m == 0 ? String(localized: "Automatisch") : m % 60 == 0 ? "\(m / 60) h" : String(localized: "\(m / 60) h \(m % 60) Min") }
 
     private static let Schengen: Set<String> = ["AT","BE","BG","CH","CZ","DE","DK","EE","ES","FI","FR","GR","HR","HU","IS","IT","LI","LT","LU","LV","MT","NL","NO","PL","PT","RO","SE","SI","SK"]
 }
@@ -133,20 +133,20 @@ struct InboundFlight: Codable, Hashable {
 
     /// Short line like Flighty: "Zubringer in der Luft aus ORD"
     var headline: String {
-        if isCanceled { return "Zubringer-Flug \(number) annulliert" }
-        if landed { return "Flugzeug ist gelandet (aus \(fromCode))" }
-        if departed { return "Zubringer in der Luft aus \(fromCode)" }
-        return "Zubringer noch in \(fromCode)"
+        if isCanceled { return String(localized: "Zubringer-Flug \(number) annulliert") }
+        if landed { return String(localized: "Flugzeug ist gelandet (aus \(fromCode))") }
+        if departed { return String(localized: "Zubringer in der Luft aus \(fromCode)") }
+        return String(localized: "Zubringer noch in \(fromCode)")
     }
 
     /// Arrival times are shown in local time of our departure airport (where the inbound lands).
     func detail(tz: TimeZone) -> String {
         let arr = Fmt.time(arrival, tz)
-        if isCanceled { return "Flugzeugwechsel oder Verspätung möglich" }
-        if landed { return "\(number) gelandet um \(arr)" }
-        if departed { return "\(number) · Landung ca. \(arr)" }
-        if let d = departure, d < Date() { return "\(number) · Abflug überfällig · Landung ca. \(arr)" }
-        return "\(number) · Abflug in \(Fmt.countdown(max(0, (departure ?? Date()).timeIntervalSinceNow))) · Landung \(arr)"
+        if isCanceled { return String(localized: "Flugzeugwechsel oder Verspätung möglich") }
+        if landed { return String(localized: "\(number) gelandet um \(arr)") }
+        if departed { return String(localized: "\(number) · Landung ca. \(arr)") }
+        if let d = departure, d < Date() { return String(localized: "\(number) · Abflug überfällig · Landung ca. \(arr)") }
+        return String(localized: "\(number) · Abflug in \(Fmt.countdown(max(0, (departure ?? Date()).timeIntervalSinceNow))) · Landung \(arr)")
     }
 }
 
@@ -172,18 +172,18 @@ enum FlightStatus: String {
 
     var label: String {
         switch self {
-        case .scheduled: "Planmässig"
-        case .delayed: "Verspätet"
-        case .checkIn: "Check-in"
-        case .boarding: "Boarding"
-        case .gateClosed: "Gate geschlossen"
-        case .departed: "Gestartet"
-        case .enRoute: "In der Luft"
-        case .approaching: "Im Anflug"
-        case .arrived: "Gelandet"
-        case .canceled: "Annulliert"
-        case .diverted: "Umgeleitet"
-        case .unknown: "Geplant"
+        case .scheduled: String(localized: "Planmässig")
+        case .delayed: String(localized: "Verspätet")
+        case .checkIn: String(localized: "Check-in")
+        case .boarding: String(localized: "Boarding")
+        case .gateClosed: String(localized: "Gate geschlossen")
+        case .departed: String(localized: "Gestartet")
+        case .enRoute: String(localized: "In der Luft")
+        case .approaching: String(localized: "Im Anflug")
+        case .arrived: String(localized: "Gelandet")
+        case .canceled: String(localized: "Annulliert")
+        case .diverted: String(localized: "Umgeleitet")
+        case .unknown: String(localized: "Geplant")
         }
     }
 

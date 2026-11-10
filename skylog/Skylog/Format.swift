@@ -57,9 +57,9 @@ enum Fmt {
     static func day(_ date: Date?, _ tz: TimeZone = .current) -> String {
         guard let date else { return "–" }
         let f = DateFormatter()
-        f.locale = Locale(identifier: "de_CH")
+        f.locale = .current
         f.timeZone = tz
-        f.dateFormat = "EE, d. MMM yyyy"
+        f.setLocalizedDateFormatFromTemplate("EEEdMMMyyyy")
         return f.string(from: date)
     }
 
@@ -75,7 +75,7 @@ enum Fmt {
     static func countdown(_ interval: TimeInterval) -> String {
         let total = Int(max(interval, 0) / 60)
         let d = total / 1440, h = (total % 1440) / 60, m = total % 60
-        if d > 0 { return "\(d)T \(h)h" }
+        if d > 0 { return String(localized: "\(d)T \(h)h") }
         if h > 0 { return "\(h)h \(m)m" }
         return "\(m)m"
     }
@@ -100,17 +100,17 @@ enum Fmt {
     static func summary(_ f: Flight) -> String {
         let now = Date()
         switch f.normalizedStatus {
-        case .canceled: return "Annulliert"
-        case .diverted: return "Umgeleitet"
+        case .canceled: return String(localized: "Annulliert")
+        case .diverted: return String(localized: "Umgeleitet")
         default: break
         }
         if f.isPast { return day(f.sortDate, f.departure.tz) }
-        if f.isInAir, let a = f.arrival.best { return "Landung in " + countdown(a.timeIntervalSince(now)) }
-        if f.normalizedStatus == .arrived { return "Gelandet" }
+        if f.isInAir, let a = f.arrival.best { return String(localized: "Landung in \(countdown(a.timeIntervalSince(now)))") }
+        if f.normalizedStatus == .arrived { return String(localized: "Gelandet") }
         if let d = f.departure.best {
             let diff = d.timeIntervalSince(now)
             if diff > 3 * 86400 { return day(d, f.departure.tz) }
-            return diff > 0 ? "Abflug in " + countdown(diff) : "Abflug fällig"
+            return diff > 0 ? String(localized: "Abflug in \(countdown(diff))") : String(localized: "Abflug fällig")
         }
         return f.date
     }
@@ -118,10 +118,10 @@ enum Fmt {
     static func shareText(_ f: Flight) -> String {
         var s = "✈️ \(f.number) \(f.departure.code) → \(f.arrival.code)\n"
         s += "\(f.normalizedStatus.label)\n"
-        s += "Abflug: \(time(f.departure.best, f.departure.tz)) (\(f.departure.displayCity))"
-        if let g = f.departure.gate { s += ", Gate \(g)" }
-        s += "\nAnkunft: \(time(f.arrival.best, f.arrival.tz)) (\(f.arrival.displayCity))"
-        if let b = f.arrival.baggageBelt { s += ", Gepäckband \(b)" }
+        s += String(localized: "Abflug: \(time(f.departure.best, f.departure.tz)) (\(f.departure.displayCity))")
+        if let g = f.departure.gate { s += String(localized: ", Gate \(g)") }
+        s += "\n" + String(localized: "Ankunft: \(time(f.arrival.best, f.arrival.tz)) (\(f.arrival.displayCity))")
+        if let b = f.arrival.baggageBelt { s += String(localized: ", Gepäckband \(b)") }
         return s
     }
 }

@@ -123,7 +123,7 @@ enum HotelRoute {
     static func airportItem(_ e: FlightEndpoint) -> MKMapItem? {
         guard let c = e.coordinate else { return nil }
         let item = MKMapItem(placemark: MKPlacemark(coordinate: c))
-        item.name = e.name ?? "\(e.code) Flughafen"
+        item.name = e.name ?? String(localized: "\(e.code) Flughafen")
         return item
     }
 
@@ -154,13 +154,13 @@ enum HotelRoute {
         center.removePendingNotificationRequests(withIdentifiers: ids)
         guard Settings.reminders, !f.isPast, !f.normalizedStatus.isFinal else { return }
         if let h = hotel(after: f, flights: flights), let arr = f.arrival.best {
-            schedule(ids[0], at: arr.addingTimeInterval(25 * 60), title: "Weiter zu \(h.name)",
-                     body: "Tippe in Skylog auf \(f.number) für den Weg vom Flughafen zum Hotel.")
+            schedule(ids[0], at: arr.addingTimeInterval(25 * 60), title: String(localized: "Weiter zu \(h.name)"),
+                     body: String(localized: "Tippe in Skylog auf \(f.number) für den Weg vom Flughafen zum Hotel."))
         }
         if let h = hotel(before: f, flights: flights), let dep = f.departure.best {
             let leave = dep.addingTimeInterval(-Double(AirportBuffer.minutes(for: f) + 60) * 60)
-            schedule(ids[1], at: leave.addingTimeInterval(-30 * 60), title: "\(f.number): Bald zum Flughafen",
-                     body: "Von \(h.name) zum Flughafen \(f.departure.code) – in Skylog siehst du, wann du los musst.")
+            schedule(ids[1], at: leave.addingTimeInterval(-30 * 60), title: String(localized: "\(f.number): Bald zum Flughafen"),
+                     body: String(localized: "Von \(h.name) zum Flughafen \(f.departure.code) – in Skylog siehst du, wann du los musst."))
         }
     }
 

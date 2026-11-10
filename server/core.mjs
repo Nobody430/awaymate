@@ -3,6 +3,42 @@
 
 const MIN = 60_000;
 
+// Texts in the language of the device (sent by the app with each sync). {0}, {1} … are placeholders.
+const TEXTS = {
+  de: {
+    scheduled: "Planmässig", cancelled: "Annulliert", diverted: "Umgeleitet", leftGate: "Gate verlassen", inAir: "In der Luft",
+    landed: "Gelandet", atGate: "Am Gate", boarding: "Boarding (ca.)",
+    leftGateTitle: "🛫 Gate verlassen", leftGateBody: "{0} rollt zur Startbahn.",
+    departedTitle: "{0} ist gestartet", departedEta: "Ankunft ca. {0}.", departedTo: "Unterwegs nach {0}.",
+    landedTitle: "{0} ist gelandet", landedBody: "Willkommen in {0}!",
+    gateChangeTitle: "{0}: Gate-Wechsel", gateTitle: "{0}: Gate {1}", gateChangeBody: "Neues Gate {0} (vorher {1}).",
+    gateBody: "Abflug von Gate {0}.", gateBodyTerminal: "Abflug von Gate {0}, Terminal {1}.",
+    newDepTitle: "{0}: neue Abflugzeit", newDepBody: "Abflug jetzt {0}.", newDepBodyDelay: "Abflug jetzt {0} (+{1} Min.).",
+    beltTitle: "{0}: Gepäckband {1}", beltBody: "Dein Gepäck kommt auf Band {0}.",
+    cancelledTitle: "{0} annulliert", cancelledBody: "Dein Flug wurde annulliert.",
+    boardingTitle: "{0}: Boarding beginnt", boardingBody: "Voraussichtlich jetzt. Abflug {0}.", boardingBodyGate: "Voraussichtlich jetzt an Gate {0}. Abflug {1}.",
+    testTitle: "Skylog-Server verbunden ✅", testBody: "Pushs funktionieren.",
+  },
+  en: {
+    scheduled: "On time", cancelled: "Cancelled", diverted: "Diverted", leftGate: "Left the gate", inAir: "In the air",
+    landed: "Landed", atGate: "At the gate", boarding: "Boarding (est.)",
+    leftGateTitle: "🛫 Left the gate", leftGateBody: "{0} is taxiing to the runway.",
+    departedTitle: "{0} has taken off", departedEta: "Arrival around {0}.", departedTo: "On the way to {0}.",
+    landedTitle: "{0} has landed", landedBody: "Welcome to {0}!",
+    gateChangeTitle: "{0}: gate change", gateTitle: "{0}: gate {1}", gateChangeBody: "New gate {0} (was {1}).",
+    gateBody: "Departing from gate {0}.", gateBodyTerminal: "Departing from gate {0}, terminal {1}.",
+    newDepTitle: "{0}: new departure time", newDepBody: "Now departing at {0}.", newDepBodyDelay: "Now departing at {0} (+{1} min).",
+    beltTitle: "{0}: baggage belt {1}", beltBody: "Your bags arrive on belt {0}.",
+    cancelledTitle: "{0} cancelled", cancelledBody: "Your flight has been cancelled.",
+    boardingTitle: "{0}: boarding starts", boardingBody: "Probably now. Departure {0}.", boardingBodyGate: "Probably now at gate {0}. Departure {1}.",
+    testTitle: "Skylog server connected ✅", testBody: "Push notifications work.",
+  },
+};
+function t(lang, key, ...args) {
+  const text = (TEXTS[lang] || TEXTS.de)[key] ?? TEXTS.de[key] ?? key;
+  return text.replace(/\{(\d)\}/g, (_, i) => String(args[Number(i)] ?? ""));
+}
+
 export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
   state.devices ||= {};
 
@@ -23,14 +59,14 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
 
   // Live Activity content-state must match FlightActivityAttributes.ContentState (dates = seconds since 2001-01-01).
   const refDate = (iso) => (iso ? (Date.parse(iso) - Date.UTC(2001, 0, 1)) / 1000 : null);
-  function liveUpdate(liveToken, snap) {
+  function liveUpdate(liveToken, snap, lang) {
     const aps = {
       timestamp: Math.floor(Date.now() / 1000),
       event: snap.final ? "end" : "update",
       "content-state": {
-        status: snap.statusLabel, departure: refDate(snap.dep), arrival: refDate(snap.arr),
+        status: snap.statusKey ? t(lang, snap.statusKey) : snap.statusLabel, departure: refDate(snap.dep), arrival: refDate(snap.arr),
         gate: snap.gate || null, terminal: snap.terminal || null, delayMinutes: Math.max(0, snap.delay || 0),
-        belt: snap.belt || null, inAir: !!snap.inAir,
+        belt: snap.belt || null, inAir: !!snap.inAir, landed: !!snap.landed,
       },
     };
     if (snap.final) aps["dismissal-date"] = Math.floor(Date.now() / 1000) + 30 * 60;
@@ -75,9 +111,9 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
     return 2 * R * Math.asin(Math.sqrt(h));
   }
 
-  function fmtTime(iso, tz) {
+  function fmtTime(iso, tz, lang) {
     if (!iso) return "–";
-    try { return new Date(iso).toLocaleTimeString("de-CH", { hour: "2-digit", minute: "2-digit", timeZone: tz || "Europe/Zurich" }); }
+    try { return new Date(iso).toLocaleTimeString(lang === "en" ? "en-GB" : "de-CH", { hour: "2-digit", minute: "2-digit", timeZone: tz || "Europe/Zurich" }); }
     catch { return new Date(iso).toISOString().slice(11, 16); }
   }
 
@@ -88,7 +124,10 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
     const dep = Date.parse(f.dep), arr = Date.parse(f.arr || f.dep) || dep + 3 * 3600_000;
     if (!dep || now < dep - 24 * 3600_000 || now > arr + 3 * 3600_000) return false;
 
-    const prev = dev.last[f.id] || { statusLabel: f.statusLabel || "Planmässig", dep: f.dep, arr: f.arr, gate: f.gate, terminal: f.terminal };
+    const lang = dev.lang || "de";
+    const L = (key, ...args) => t(lang, key, ...args);
+    // statusLabel = text from the app (already in the user's language); statusKey = set by this server
+    const prev = dev.last[f.id] || { statusLabel: f.statusLabel || L("scheduled"), dep: f.dep, arr: f.arr, gate: f.gate, terminal: f.terminal };
     const snap = { ...prev };
     const msgs = [];
     let fetched = false;
@@ -110,19 +149,19 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
         snap.arrGate = x.gate_destination || snap.arrGate;
         snap.belt = x.baggage_claim || snap.belt;
         snap.delay = x.departure_delay ? Math.round(x.departure_delay / 60) : snap.delay || 0;
-        if (x.cancelled) { snap.statusLabel = "Annulliert"; snap.final = true; }
-        if (x.diverted) snap.statusLabel = "Umgeleitet";
-        if (x.actual_out && !prev.leftGate) { snap.leftGate = true; snap.statusLabel = "Gate verlassen"; msgs.push(["🛫 Gate verlassen", `${f.number} rollt zur Startbahn.`]); }
-        if (x.actual_off && !prev.inAir && !prev.landed) { snap.inAir = true; snap.statusLabel = "In der Luft"; msgs.push([`${f.number} ist gestartet`, `Ankunft ca. ${fmtTime(snap.arr, f.arrTz)}.`]); }
-        if ((x.actual_on || x.actual_in) && !prev.landed) { snap.landed = true; snap.inAir = false; snap.statusLabel = "Gelandet"; msgs.push([`${f.number} ist gelandet`, `Willkommen in ${f.toCity || f.to}!`]); }
-        if (x.actual_in && !prev.atGate) { snap.atGate = true; snap.statusLabel = "Am Gate"; }
+        if (x.cancelled) { snap.statusKey = "cancelled"; snap.final = true; }
+        if (x.diverted) snap.statusKey = "diverted";
+        if (x.actual_out && !prev.leftGate) { snap.leftGate = true; snap.statusKey = "leftGate"; msgs.push([L("leftGateTitle"), L("leftGateBody", f.number)]); }
+        if (x.actual_off && !prev.inAir && !prev.landed) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", f.number), L("departedEta", fmtTime(snap.arr, f.arrTz, lang))]); }
+        if ((x.actual_on || x.actual_in) && !prev.landed) { snap.landed = true; snap.inAir = false; snap.statusKey = "landed"; msgs.push([L("landedTitle", f.number), L("landedBody", f.toCity || f.to)]); }
+        if (x.actual_in && !prev.atGate) { snap.atGate = true; snap.statusKey = "atGate"; }
       }
     }
 
     // Free ADS-B: from 15 min before departure while not landed (every loop = 1 min)
     if (f.callsign && now > dep - 15 * MIN && !snap.landed) {
       const p = await adsb(f.callsign);
-      if (p && !p.onGround && !snap.inAir) { snap.inAir = true; snap.statusLabel = "In der Luft"; msgs.push([`${f.number} ist gestartet`, `Unterwegs nach ${f.toCity || f.to}.`]); }
+      if (p && !p.onGround && !snap.inAir) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", f.number), L("departedTo", f.toCity || f.to)]); }
       if (p && !p.onGround && f.toLat != null && p.gs > 100) {
         const km = distKm(p, { lat: f.toLat, lon: f.toLon });
         const eta = now + (km / (p.gs * 1.852)) * 3600_000 + 10 * MIN;
@@ -130,40 +169,46 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
         if (Math.abs(eta - Date.parse(snap.arr || 0)) >= 3 * MIN) snap.arr = new Date(eta).toISOString();
       }
       if (p && p.onGround && snap.inAir && f.toLat != null && distKm(p, { lat: f.toLat, lon: f.toLon }) < 15) {
-        snap.inAir = false; snap.landed = true; snap.statusLabel = "Gelandet";
-        msgs.push([`${f.number} ist gelandet`, `Willkommen in ${f.toCity || f.to}!`]);
+        snap.inAir = false; snap.landed = true; snap.statusKey = "landed";
+        msgs.push([L("landedTitle", f.number), L("landedBody", f.toCity || f.to)]);
       }
     }
 
     // Change notifications
-    if (snap.gate && snap.gate !== prev.gate) msgs.push([prev.gate ? `${f.number}: Gate-Wechsel` : `${f.number}: Gate ${snap.gate}`, prev.gate ? `Neues Gate ${snap.gate} (vorher ${prev.gate}).` : `Abflug von Gate ${snap.gate}${snap.terminal ? `, Terminal ${snap.terminal}` : ""}.`]);
+    if (snap.gate && snap.gate !== prev.gate) {
+      msgs.push(prev.gate
+        ? [L("gateChangeTitle", f.number), L("gateChangeBody", snap.gate, prev.gate)]
+        : [L("gateTitle", f.number, snap.gate), snap.terminal ? L("gateBodyTerminal", snap.gate, snap.terminal) : L("gateBody", snap.gate)]);
+    }
     // compare with the time the user was last told about, so creeping delays are noticed
     const told = Date.parse(prev.toldDep || prev.dep || snap.dep);
     if (!snap.inAir && !snap.landed && Math.abs(Date.parse(snap.dep) - told) >= 5 * MIN) {
       snap.toldDep = snap.dep;
-      msgs.push([`${f.number}: neue Abflugzeit`, `Abflug jetzt ${fmtTime(snap.dep, f.depTz)}${snap.delay > 0 ? ` (+${snap.delay} Min.)` : ""}.`]);
+      const when = fmtTime(snap.dep, f.depTz, lang);
+      msgs.push([L("newDepTitle", f.number), snap.delay > 0 ? L("newDepBodyDelay", when, snap.delay) : L("newDepBody", when)]);
     }
     // the belt only matters once the plane is on its way down
     if (snap.belt && snap.belt !== prev.belt && (snap.landed || (snap.inAir && Date.parse(snap.arr) - now < 45 * MIN))) {
-      msgs.push([`${f.number}: Gepäckband ${snap.belt}`, `Dein Gepäck kommt auf Band ${snap.belt}.`]);
+      msgs.push([L("beltTitle", f.number, snap.belt), L("beltBody", snap.belt)]);
     }
-    if (snap.statusLabel === "Annulliert" && prev.statusLabel !== "Annulliert") msgs.push([`${f.number} annulliert`, "Dein Flug wurde annulliert."]);
+    if (snap.statusKey === "cancelled" && prev.statusKey !== "cancelled") msgs.push([L("cancelledTitle", f.number), L("cancelledBody")]);
 
     // Estimated boarding (airlines don't publish boarding status in open data)
     const boardingAt = Date.parse(snap.dep) - (f.longHaul ? 50 : 35) * MIN;
     if (!prev.boardingNotified && now >= boardingAt && now < Date.parse(snap.dep) && !snap.inAir) {
       snap.boardingNotified = true;
-      if (!snap.leftGate) snap.statusLabel = "Boarding (ca.)";
-      msgs.push([`${f.number}: Boarding beginnt`, `Voraussichtlich jetzt${snap.gate ? ` an Gate ${snap.gate}` : ""}. Abflug ${fmtTime(snap.dep, f.depTz)}.`]);
+      if (!snap.leftGate) snap.statusKey = "boarding";
+      const when = fmtTime(snap.dep, f.depTz, lang);
+      msgs.push([L("boardingTitle", f.number), snap.gate ? L("boardingBodyGate", snap.gate, when) : L("boardingBody", when)]);
     }
 
     dev.last[f.id] = snap;
-    const visible = ["statusLabel", "dep", "arr", "gate", "terminal", "belt", "delay", "inAir", "landed", "final"];
+    const visible = ["statusKey", "statusLabel", "dep", "arr", "gate", "terminal", "belt", "delay", "inAir", "landed", "final"];
     const changed = msgs.length > 0 || visible.some((k) => snap[k] !== prev[k]);
     if (!changed) return fetched;
     for (const [title, body] of msgs) await alert(deviceToken, title, body, f.id);
     const live = dev.live?.[f.id];
-    if (live) await liveUpdate(live, { ...snap, final: snap.final || snap.landed });
+    if (live) await liveUpdate(live, { ...snap, final: snap.final || snap.landed }, lang);
     return true;
   }
 
@@ -204,6 +249,7 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
       dev.flights = (body.flights || []).slice(0, 50);
       dev.live = { ...dev.live, ...(body.liveTokens || {}) };
       if (typeof body.flightawareKey === "string") dev.faKey = body.flightawareKey || undefined;
+      if (typeof body.lang === "string") dev.lang = body.lang.slice(0, 2).toLowerCase();
       const ids = new Set(dev.flights.map((f) => f.id));
       for (const k of Object.keys(dev.last || {})) if (!ids.has(k)) delete dev.last[k];
       for (const k of Object.keys(dev.live || {})) if (!ids.has(k)) delete dev.live[k];
@@ -214,7 +260,8 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
     }
     if (req.method === "POST" && req.path === "/test") {
       if (!body.deviceToken) return { status: 400, json: { error: "deviceToken" } };
-      const r = await sendPush(body.deviceToken, { aps: { alert: { title: "Skylog-Server verbunden ✅", body: "Pushs funktionieren." }, sound: "default" } }, { type: "alert" });
+      const lang = (typeof body.lang === "string" ? body.lang : state.devices[body.deviceToken]?.lang || "de").slice(0, 2).toLowerCase();
+      const r = await sendPush(body.deviceToken, { aps: { alert: { title: t(lang, "testTitle"), body: t(lang, "testBody") }, sound: "default" } }, { type: "alert" });
       return { status: r.ok ? 200 : 502, json: { ok: r.ok, status: r.status, reason: r.reason || undefined } };
     }
     return { status: 404, json: { error: "not found" } };

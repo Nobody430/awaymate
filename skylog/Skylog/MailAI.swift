@@ -322,7 +322,7 @@ enum MailAI {
                     failedMails += r.failed
                     if let e = r.error { lastError = e }
                     done += 1
-                    await progress("KI liest Mails … \(min(done * mailsPerRequest, mails.count))/\(mails.count) · \(found.count) Flugabschnitte")
+                    await progress(String(localized: "KI liest Mails … \(min(done * mailsPerRequest, mails.count))/\(mails.count) · \(found.count) Flugabschnitte"))
                 }
             }
         }

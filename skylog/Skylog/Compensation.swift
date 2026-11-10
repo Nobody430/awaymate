@@ -48,45 +48,45 @@ enum Compensation {
         let intraEurope = coveredCountries.contains(dep) && coveredCountries.contains(arr)
 
         guard !dep.isEmpty, !arr.isEmpty else {
-            return Result(status: .unknown, amountEUR: 0, headline: "Nicht prüfbar", details: ["Länder der Flughäfen unbekannt – Flug aktualisieren."])
+            return Result(status: .unknown, amountEUR: 0, headline: String(localized: "Nicht prüfbar"), details: [String(localized: "Länder der Flughäfen unbekannt – Flug aktualisieren.")])
         }
         guard fromEurope || intoEuropeWithEUCarrier else {
-            var details = ["Die EU-Fluggastrechte gelten für Abflüge aus EU/EWR/Schweiz und für Flüge dorthin mit einer europäischen Airline."]
-            if dep == "GB" || arr == "GB" { details.append("Für Grossbritannien gelten ähnliche Regeln (UK261) – prüfe diese separat.") }
-            return Result(status: .notEligible, amountEUR: 0, headline: "Nicht abgedeckt", details: details)
+            var details = [String(localized: "Die EU-Fluggastrechte gelten für Abflüge aus EU/EWR/Schweiz und für Flüge dorthin mit einer europäischen Airline.")]
+            if dep == "GB" || arr == "GB" { details.append(String(localized: "Für Grossbritannien gelten ähnliche Regeln (UK261) – prüfe diese separat.")) }
+            return Result(status: .notEligible, amountEUR: 0, headline: String(localized: "Nicht abgedeckt"), details: details)
         }
 
         let km = f.computedDistanceKm ?? 0
         let delay = arrivalDelayMinutes(f)
         let money = amount(distance: km, intraEurope: intraEurope, delayMinutes: delay)
-        let caveat = "Kein Anspruch bei aussergewöhnlichen Umständen (z.B. Unwetter, Fluglotsenstreik, Sicherheitsrisiko). Streiks des eigenen Airline-Personals zählen in der Regel nicht dazu."
+        let caveat = String(localized: "Kein Anspruch bei aussergewöhnlichen Umständen (z.B. Unwetter, Fluglotsenstreik, Sicherheitsrisiko). Streiks des eigenen Airline-Personals zählen in der Regel nicht dazu.")
 
         switch f.normalizedStatus {
         case .canceled:
-            return Result(status: .possible, amountEUR: money, headline: "Annullierung: bis zu \(money) €",
-                          details: ["Anspruch, wenn die Annullierung weniger als 14 Tage vor Abflug mitgeteilt wurde und die Ersatzbeförderung zu spät ankam.",
-                                    "Zusätzlich: Recht auf Erstattung des Tickets oder Ersatzflug sowie Verpflegung/Hotel.", caveat])
+            return Result(status: .possible, amountEUR: money, headline: String(localized: "Annullierung: bis zu \(money) €"),
+                          details: [String(localized: "Anspruch, wenn die Annullierung weniger als 14 Tage vor Abflug mitgeteilt wurde und die Ersatzbeförderung zu spät ankam."),
+                                    String(localized: "Zusätzlich: Recht auf Erstattung des Tickets oder Ersatzflug sowie Verpflegung/Hotel."), caveat])
         case .diverted:
-            return Result(status: .possible, amountEUR: money, headline: "Umleitung: evtl. bis zu \(money) €",
-                          details: ["Massgeblich ist die Verspätung am ursprünglichen Ziel.", caveat])
+            return Result(status: .possible, amountEUR: money, headline: String(localized: "Umleitung: evtl. bis zu \(money) €"),
+                          details: [String(localized: "Massgeblich ist die Verspätung am ursprünglichen Ziel."), caveat])
         default:
             break
         }
 
         guard let delay else {
-            return Result(status: .unknown, amountEUR: money, headline: "Ankunftszeit unbekannt",
-                          details: ["Sobald die tatsächliche Ankunftszeit bekannt ist, wird erneut geprüft."])
+            return Result(status: .unknown, amountEUR: money, headline: String(localized: "Ankunftszeit unbekannt"),
+                          details: [String(localized: "Sobald die tatsächliche Ankunftszeit bekannt ist, wird erneut geprüft.")])
         }
         if delay >= 180 {
             return Result(status: .eligible, amountEUR: money,
-                          headline: "Anspruch wahrscheinlich: \(money) € pro Person",
-                          details: ["Ankunft \(Fmt.duration(delay)) zu spät (ab 3 Stunden besteht Anspruch).",
-                                    "Distanz \(Fmt.km(km)) → \(money) €.", caveat,
-                                    "Frist: in der Schweiz und Deutschland meist bis 3 Jahre, je nach Land unterschiedlich."])
+                          headline: String(localized: "Anspruch wahrscheinlich: \(money) € pro Person"),
+                          details: [String(localized: "Ankunft \(Fmt.duration(delay)) zu spät (ab 3 Stunden besteht Anspruch)."),
+                                    String(localized: "Distanz \(Fmt.km(km)) → \(money) €."), caveat,
+                                    String(localized: "Frist: in der Schweiz und Deutschland meist bis 3 Jahre, je nach Land unterschiedlich.")])
         }
         return Result(status: .notEligible, amountEUR: 0,
-                      headline: delay > 0 ? "Verspätung \(Fmt.duration(delay)) – unter 3 h" : "Pünktlich",
-                      details: ["Entschädigung gibt es erst ab 3 Stunden Verspätung bei Ankunft."])
+                      headline: delay > 0 ? String(localized: "Verspätung \(Fmt.duration(delay)) – unter 3 h") : String(localized: "Pünktlich"),
+                      details: [String(localized: "Entschädigung gibt es erst ab 3 Stunden Verspätung bei Ankunft.")])
     }
 
     // MARK: Claim letter

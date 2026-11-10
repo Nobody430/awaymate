@@ -5,11 +5,11 @@ enum APIError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noKey: "Kein API-Key hinterlegt. Bitte in den Einstellungen eintragen."
-        case .notFound: "Kein Flug gefunden. Flugnummer und Datum prüfen."
-        case .quota: "API-Kontingent aufgebraucht (Gratis-Limit erreicht)."
-        case .rateLimited: "Zu viele Abfragen in kurzer Zeit – gleich nochmal versuchen."
-        case .http(let code): "Serverfehler (\(code))."
+        case .noKey: String(localized: "Kein API-Key hinterlegt. Bitte in den Einstellungen eintragen.")
+        case .notFound: String(localized: "Kein Flug gefunden. Flugnummer und Datum prüfen.")
+        case .quota: String(localized: "API-Kontingent aufgebraucht (Gratis-Limit erreicht).")
+        case .rateLimited: String(localized: "Zu viele Abfragen in kurzer Zeit – gleich nochmal versuchen.")
+        case .http(let code): String(localized: "Serverfehler (\(code)).")
         }
     }
 }

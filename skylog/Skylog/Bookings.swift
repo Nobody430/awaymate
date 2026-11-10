@@ -7,13 +7,13 @@ struct TravelBooking: Identifiable, Codable, Hashable {
         case hotel, car, train, bus, ferry, activity, other
         var label: String {
             switch self {
-            case .hotel: "Unterkunft"
-            case .car: "Mietwagen"
-            case .train: "Zug"
-            case .bus: "Bus"
-            case .ferry: "Fähre"
-            case .activity: "Aktivität"
-            case .other: "Buchung"
+            case .hotel: String(localized: "Unterkunft")
+            case .car: String(localized: "Mietwagen")
+            case .train: String(localized: "Zug")
+            case .bus: String(localized: "Bus")
+            case .ferry: String(localized: "Fähre")
+            case .activity: String(localized: "Aktivität")
+            case .other: String(localized: "Buchung")
             }
         }
         var icon: String {

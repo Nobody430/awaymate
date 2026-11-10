@@ -38,7 +38,7 @@ enum ObsidianVault {
 
     enum VaultError: LocalizedError {
         case notConnected
-        var errorDescription: String? { "Kein Obsidian-Vault verbunden (Einstellungen → Persönliches Profil)." }
+        var errorDescription: String? { String(localized: "Kein Obsidian-Vault verbunden (Einstellungen → Persönliches Profil).") }
     }
 
 
@@ -147,20 +147,20 @@ enum PackingAI {
     }
 
     static func markdown(trip: Trip) -> String {
-        var md = "# Packliste – \(trip.name)\n\n"
-        md += "_\(trip.start.formatted(date: .long, time: .omitted)) – \(trip.end.formatted(date: .long, time: .omitted)) · erstellt mit Skylog_\n\n"
+        var md = "# " + String(localized: "Packliste – \(trip.name)") + "\n\n"
+        md += "_\(trip.start.formatted(date: .long, time: .omitted)) – \(trip.end.formatted(date: .long, time: .omitted)) · " + String(localized: "erstellt mit Skylog") + "_\n\n"
         for item in trip.packing { md += "- [\(item.done ? "x" : " ")] \(item.name)\n" }
         return md
     }
 
     static func planMarkdown(trip: Trip, plan: TripPlan) -> String {
-        var md = "# Reiseplan – \(trip.name)\n\n\(plan.summary)\n"
+        var md = "# " + String(localized: "Reiseplan – \(trip.name)") + "\n\n\(plan.summary)\n"
         for d in plan.days {
             md += "\n## \(d.date) · \(d.title)\n"
             for i in d.items { md += "- **\(i.time)** \(i.title) – \(i.description)\n" }
         }
-        md += "\n## Tipps\n" + plan.tips.map { "- \($0)" }.joined(separator: "\n")
-        md += "\n\n## Budget\n\(plan.budget)\n"
+        md += "\n## " + String(localized: "Tipps") + "\n" + plan.tips.map { "- \($0)" }.joined(separator: "\n")
+        md += "\n\n## " + String(localized: "Budget") + "\n\(plan.budget)\n"
         return md
     }
 }

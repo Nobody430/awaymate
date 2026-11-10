@@ -24,7 +24,7 @@ struct NextFlightProvider: TimelineProvider {
         NextFlightEntry(date: .now, flight: WidgetFlight(id: "x", number: "LX 1612", from: "ZRH", to: "LIS", fromCity: "Zürich",
                                                         toCity: "Lissabon", departure: .now.addingTimeInterval(7200),
                                                         arrival: .now.addingTimeInterval(18000), gate: "E42", terminal: "2",
-                                                        status: "Planmässig", delayMinutes: 0))
+                                                        status: String(localized: "Planmässig"), delayMinutes: 0))
     }
 
     func getSnapshot(in context: Context, completion: @escaping (NextFlightEntry) -> Void) {
@@ -70,7 +70,7 @@ struct NextFlightView: View {
                     } else {
                         Text("Landung \(f.arrival.formatted(date: .omitted, time: .shortened))").font(.caption)
                     }
-                    Text([f.delayMinutes >= 5 ? "+\(f.delayMinutes) Min" : f.status, f.terminal.map { "T\($0)" }, f.gate.map { "Gate \($0)" }]
+                    Text([f.delayMinutes >= 5 ? String(localized: "+\(f.delayMinutes) Min") : f.status, f.terminal.map { String(localized: "T\($0)") }, f.gate.map { String(localized: "Gate \($0)") }]
                         .compactMap { $0 }.joined(separator: " · "))
                         .font(.caption2).lineLimit(1)
                 }
@@ -85,7 +85,7 @@ struct NextFlightView: View {
                 HStack {
                     Text(f.number).font(.caption.weight(.semibold))
                     Spacer()
-                    Text(f.delayMinutes >= 15 ? "+\(f.delayMinutes) Min" : f.status)
+                    Text(f.delayMinutes >= 15 ? String(localized: "+\(f.delayMinutes) Min") : f.status)
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(f.delayMinutes >= 15 ? .orange : accent)
                 }
@@ -161,8 +161,8 @@ struct FlightLiveActivity: Widget {
                 DynamicIslandExpandedRegion(.center) {
                     VStack(spacing: 2) {
                         Text(context.attributes.flightNumber).font(.caption.bold())
-                        let late = context.state.delayMinutes >= 5 && !context.state.inAir && context.state.status != "Gelandet"
-                        Text(late ? "+\(context.state.delayMinutes) Min" : context.state.status)
+                        let late = context.state.delayMinutes >= 5 && !context.state.inAir && !context.state.isLanded
+                        Text(late ? String(localized: "+\(context.state.delayMinutes) Min") : context.state.status)
                             .font(.caption2).foregroundStyle(late ? .orange : accent)
                     }
                 }
@@ -176,7 +176,7 @@ struct FlightLiveActivity: Widget {
                 }
             } compactTrailing: {
                 Countdown(target: context.state.inAir || context.state.departure < Date() ? context.state.arrival : context.state.departure,
-                          overdue: context.state.status == "Gelandet" ? "✓" : "jetzt")
+                          overdue: context.state.isLanded ? "✓" : String(localized: "jetzt"))
                     .monospacedDigit()
                     .frame(maxWidth: 52)
                     .font(.caption)
@@ -196,10 +196,10 @@ struct LockScreenFlightView: View {
             HStack {
                 Text(context.attributes.flightNumber).font(.subheadline.bold())
                 Spacer()
-                let showDelay = s.delayMinutes >= 5 && !s.inAir && s.status != "Gelandet"
-                Text(showDelay ? "Verspätet · +\(s.delayMinutes) Min" : s.status)
+                let showDelay = s.delayMinutes >= 5 && !s.inAir && !s.isLanded
+                Text(showDelay ? String(localized: "Verspätet · +\(s.delayMinutes) Min") : s.status)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(!showDelay ? (s.status == "Gelandet" ? .green : accent) : s.delayMinutes >= 15 ? .red : .orange)
+                    .foregroundStyle(!showDelay ? (s.isLanded ? .green : accent) : s.delayMinutes >= 15 ? .red : .orange)
             }
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 1) {
@@ -212,17 +212,17 @@ struct LockScreenFlightView: View {
                 Spacer()
                 VStack {
                     let now = Date()
-                    let landed = s.status == "Gelandet"
+                    let landed = s.isLanded
                     if landed {
                         Text("Gelandet").font(.caption2).foregroundStyle(.secondary)
                         Text(airportTime(s.arrival, context.attributes.toTZ)).font(.headline)
                     } else if s.departure > now && !s.inAir {
                         Text("Abflug in").font(.caption2).foregroundStyle(.secondary)
-                        Countdown(target: s.departure, overdue: "jetzt").font(.headline.monospacedDigit())
+                        Countdown(target: s.departure, overdue: String(localized: "jetzt")).font(.headline.monospacedDigit())
                     } else if s.arrival > now {
                         // departed (or departure time passed without newer data): count down to landing
                         Text("Landung in").font(.caption2).foregroundStyle(.secondary)
-                        Countdown(target: s.arrival, overdue: "jetzt").font(.headline.monospacedDigit())
+                        Countdown(target: s.arrival, overdue: String(localized: "jetzt")).font(.headline.monospacedDigit())
                     } else {
                         Text("Ankunft").font(.caption2).foregroundStyle(.secondary)
                         Text(airportTime(s.arrival, context.attributes.toTZ)).font(.headline)
@@ -257,9 +257,14 @@ struct LockScreenFlightView: View {
 
 /// "Pünktlich" / "49 Min. später" / "16 Min. früher"
 func delayText(_ minutes: Int) -> String {
-    if minutes >= 5 { return "\(minutes) Min. später" }
-    if minutes <= -5 { return "\(-minutes) Min. früher" }
-    return "Pünktlich"
+    if minutes >= 5 { return String(localized: "\(minutes) Min. später") }
+    if minutes <= -5 { return String(localized: "\(-minutes) Min. früher") }
+    return String(localized: "Pünktlich")
+}
+
+extension FlightActivityAttributes.ContentState {
+    /// Landed flag; falls back to the German status label because a server may still send only that.
+    var isLanded: Bool { landed ?? (status == "Gelandet") }
 }
 
 func delayColor(_ minutes: Int) -> Color {
@@ -282,7 +287,7 @@ struct FlightProgressRow: View {
                 if let g = state.gate { Text("Gate \(g)").bold() }
                 Spacer()
                 // airlines publish early guesses – show the belt only once airborne / landed
-                if let b = state.belt, state.inAir || state.status == "Gelandet" { Label("Band \(b)", systemImage: "suitcase.rolling") }
+                if let b = state.belt, state.inAir || state.isLanded { Label("Band \(b)", systemImage: "suitcase.rolling") }
             }
             .font(.caption)
         }

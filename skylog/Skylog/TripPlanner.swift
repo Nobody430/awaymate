@@ -88,6 +88,6 @@ enum TripPlanner {
             lastText = text
             if let plan = try? JSONDecoder().decode(TripPlan.self, from: Data(text.utf8)), plan.isUsable { return plan }
         }
-        throw AIClient.Failure(message: "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " + String(lastText.prefix(200)))
+        throw AIClient.Failure(message: String(localized: "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: ") + String(lastText.prefix(200)))
     }
 }

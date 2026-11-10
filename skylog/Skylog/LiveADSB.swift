@@ -79,8 +79,8 @@ enum LiveADSB {
     }
 
     /// Applies an ADS-B fix to a flight: departure/landing detection and a live ETA. Returns notification texts.
-    static func apply(_ fix: Fix?, to f: inout Flight, now: Date = Date()) -> [(title: String, body: String)] {
-        var notes: [(title: String, body: String)] = []
+    static func apply(_ fix: Fix?, to f: inout Flight, now: Date = Date()) -> [(title: String, body: String, takeoff: Bool)] {
+        var notes: [(title: String, body: String, takeoff: Bool)] = []
         let status = f.normalizedStatus
         guard let fix else {
             // Was airborne and is no longer seen well after the expected arrival → landed
@@ -88,7 +88,7 @@ enum LiveADSB {
                let last = f.lastPosition, now.timeIntervalSince(last.timestamp) > 15 * 60 {
                 f.status = "Arrived"
                 if f.arrival.runway == nil { f.arrival.runway = last.timestamp }
-                notes.append(("\(f.number) ist gelandet", "Willkommen in \(f.arrival.displayCity)!"))
+                notes.append((String(localized: "\(f.number) ist gelandet"), String(localized: "Willkommen in \(f.arrival.displayCity)!"), false))
             }
             return notes
         }
@@ -103,11 +103,11 @@ enum LiveADSB {
         if !fix.onGround && !status.isAirborne && !status.isFinal && timeOK && distToOrigin < max(300, route * 1.1) {
             f.status = "EnRoute"
             if f.departure.runway == nil { f.departure.runway = now }
-            notes.append(("\(f.number) ist gestartet", "Unterwegs nach \(f.arrival.displayCity)."))
+            notes.append((String(localized: "\(f.number) ist gestartet"), String(localized: "Unterwegs nach \(f.arrival.displayCity)."), true))
         } else if fix.onGround && status.isAirborne && distToDest < 15 {
             f.status = "Arrived"
             if f.arrival.runway == nil { f.arrival.runway = now }
-            notes.append(("\(f.number) ist gelandet", "Willkommen in \(f.arrival.displayCity)!" + (f.arrival.baggageBelt.map { " Gepäckband \($0)." } ?? "")))
+            notes.append((String(localized: "\(f.number) ist gelandet"), String(localized: "Willkommen in \(f.arrival.displayCity)!") + (f.arrival.baggageBelt.map { String(localized: " Gepäckband \($0).") } ?? ""), false))
         }
 
         // Live ETA from remaining distance and ground speed (+10 min for approach and taxi)

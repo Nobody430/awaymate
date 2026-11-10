@@ -20,10 +20,10 @@ struct AircraftDetails: Codable {
     let serial: String?
 
     var ageText: String? {
-        if let a = ageYears { return a.formatted(.number.precision(.fractionLength(1))) + " Jahre" }
+        if let a = ageYears { return String(localized: "\(a.formatted(.number.precision(.fractionLength(1)))) Jahre") }
         guard let s = firstFlightDate ?? deliveryDate ?? rolloutDate,
               let d = Fmt.parse(s) ?? Fmt.apiDate.date(from: String(s.prefix(10))) else { return nil }
-        return (Date().timeIntervalSince(d) / (365.25 * 86400)).formatted(.number.precision(.fractionLength(1))) + " Jahre"
+        return String(localized: "\((Date().timeIntervalSince(d) / (365.25 * 86400)).formatted(.number.precision(.fractionLength(1)))) Jahre")
     }
 }
 
@@ -86,16 +86,24 @@ enum SeatInfo {
         let (row, letter) = parsed
         let blocks = layout(for: model)
         guard let blockIndex = blocks.firstIndex(where: { $0.contains(letter) }) else {
-            return "Reihe \(row), Platz \(letter)"
+            return String(localized: "Reihe \(row), Platz \(String(letter))")
         }
         let block = Array(blocks[blockIndex])
         let pos = block.firstIndex(of: letter)!
-        let side = blockIndex == 0 ? "links" : blockIndex == blocks.count - 1 ? "rechts" : "Mitte"
+        let middleBlock = blockIndex != 0 && blockIndex != blocks.count - 1
+        let side = blockIndex == 0 ? String(localized: "links") : String(localized: "rechts")
         let kind: Kind
         if (blockIndex == 0 && pos == 0) || (blockIndex == blocks.count - 1 && pos == block.count - 1) { kind = .window }
         else if pos == 0 || pos == block.count - 1 { kind = .aisle }
         else { kind = .middle }
-        return "Reihe \(row) · \(kind.rawValue), \(side == "Mitte" ? "mittlerer Block" : "Seite \(side)") (typische Bestuhlung)"
+        let kindLabel: String
+        switch kind {
+        case .window: kindLabel = String(localized: "Fenster")
+        case .middle: kindLabel = String(localized: "Mitte")
+        case .aisle: kindLabel = String(localized: "Gang")
+        }
+        let place = middleBlock ? String(localized: "mittlerer Block") : String(localized: "Seite \(side)")
+        return String(localized: "Reihe \(row) · \(kindLabel), \(place) (typische Bestuhlung)")
     }
 
     static func side(of seat: String, model: String?) -> String? {
@@ -138,10 +146,10 @@ enum SunSide {
         let darkMinutes: Int
         var summary: String {
             let total = max(1, leftMinutes + rightMinutes + darkMinutes)
-            if darkMinutes * 10 >= total * 9 { return "Fast nur im Dunkeln – Seite egal 🌙" }
-            if leftMinutes > rightMinutes * 2 { return "Sonne meist LINKS ☀️ – für Aussicht ohne Blendung rechts sitzen" }
-            if rightMinutes > leftMinutes * 2 { return "Sonne meist RECHTS ☀️ – für Aussicht ohne Blendung links sitzen" }
-            return "Sonne wechselt die Seite – beide Seiten ähnlich"
+            if darkMinutes * 10 >= total * 9 { return String(localized: "Fast nur im Dunkeln – Seite egal 🌙") }
+            if leftMinutes > rightMinutes * 2 { return String(localized: "Sonne meist LINKS ☀️ – für Aussicht ohne Blendung rechts sitzen") }
+            if rightMinutes > leftMinutes * 2 { return String(localized: "Sonne meist RECHTS ☀️ – für Aussicht ohne Blendung links sitzen") }
+            return String(localized: "Sonne wechselt die Seite – beide Seiten ähnlich")
         }
     }
 
@@ -180,18 +188,18 @@ enum FamilyShare {
     static func statusMessage(_ f: Flight) -> String {
         var s: String
         switch f.normalizedStatus {
-        case .arrived: s = "Bin gut in \(f.arrival.displayCity) gelandet ✈️😊"
-        case .canceled: s = "Mein Flug \(f.number) wurde leider annulliert – melde mich gleich."
+        case .arrived: s = String(localized: "Bin gut in \(f.arrival.displayCity) gelandet ✈️😊")
+        case .canceled: s = String(localized: "Mein Flug \(f.number) wurde leider annulliert – melde mich gleich.")
         default:
             if f.isInAir {
-                s = "Bin in der Luft ✈️ \(f.number) nach \(f.arrival.displayCity), Landung ca. \(Fmt.time(f.arrival.best, f.arrival.tz)) Ortszeit."
+                s = String(localized: "Bin in der Luft ✈️ \(f.number) nach \(f.arrival.displayCity), Landung ca. \(Fmt.time(f.arrival.best, f.arrival.tz)) Ortszeit.")
             } else {
-                s = "Mein Flug \(f.number) nach \(f.arrival.displayCity) startet um \(Fmt.time(f.departure.best, f.departure.tz))"
-                if let d = Fmt.delay(f.departure.delayMinutes) { s += " (\(d) verspätet)" }
-                s += ", Landung ca. \(Fmt.time(f.arrival.best, f.arrival.tz)) Ortszeit."
+                s = String(localized: "Mein Flug \(f.number) nach \(f.arrival.displayCity) startet um \(Fmt.time(f.departure.best, f.departure.tz))")
+                if let d = Fmt.delay(f.departure.delayMinutes) { s += String(localized: " (\(d) verspätet)") }
+                s += String(localized: ", Landung ca. \(Fmt.time(f.arrival.best, f.arrival.tz)) Ortszeit.")
             }
         }
-        if let link = trackingLinks(f).first?.1, !f.isPast { s += "\nLive verfolgen: \(link.absoluteString)" }
+        if let link = trackingLinks(f).first?.1, !f.isPast { s += "\n" + String(localized: "Live verfolgen: \(link.absoluteString)") }
         return s
     }
 }

@@ -29,10 +29,10 @@ enum CalendarSync {
             alive.insert(key)
             let event = ids[key].flatMap { store.event(withIdentifier: $0) } ?? EKEvent(eventStore: store)
             let title = "✈️ \(f.number) \(f.departure.code) → \(f.arrival.code)"
-            var notes = ["Abflug \(Fmt.time(dep, f.departure.tz)) (\(f.departure.displayCity)), Ankunft \(Fmt.time(arr, f.arrival.tz)) (\(f.arrival.displayCity)) – Ortszeiten"]
-            if let t = f.departure.terminal { notes.append("Terminal \(t)") }
-            if let g = f.departure.gate { notes.append("Gate \(g)") }
-            if !f.seat.isEmpty { notes.append("Sitz \(f.seat)") }
+            var notes = [String(localized: "Abflug \(Fmt.time(dep, f.departure.tz)) (\(f.departure.displayCity)), Ankunft \(Fmt.time(arr, f.arrival.tz)) (\(f.arrival.displayCity)) – Ortszeiten")]
+            if let t = f.departure.terminal { notes.append(String(localized: "Terminal \(t)")) }
+            if let g = f.departure.gate { notes.append(String(localized: "Gate \(g)")) }
+            if !f.seat.isEmpty { notes.append(String(localized: "Sitz \(f.seat)")) }
             if !f.notes.isEmpty { notes.append(f.notes) }
             let text = notes.joined(separator: "\n")
             if event.title == title, event.startDate == dep, event.endDate == arr, event.notes == text { continue }
@@ -58,7 +58,7 @@ enum CalendarSync {
             event.startDate = b.start
             event.endDate = b.end
             event.location = b.address.isEmpty ? b.city : b.address
-            event.notes = b.bookingReference.isEmpty ? nil : "Buchung \(b.bookingReference)"
+            event.notes = b.bookingReference.isEmpty ? nil : String(localized: "Buchung \(b.bookingReference)")
             if (try? store.save(event, span: .thisEvent)) != nil { ids[key] = event.eventIdentifier }
         }
 

@@ -8,7 +8,7 @@ enum FlightProvider: String, CaseIterable, Identifiable {
         switch self {
         case .aerodatabox: "AeroDataBox (RapidAPI)"
         case .flightaware: "FlightAware AeroAPI"
-        case .both: "Beide kombiniert (empfohlen)"
+        case .both: String(localized: "Beide kombiniert (empfohlen)")
         }
     }
 

@@ -8,6 +8,9 @@ enum PushClient {
     static var serverToken: String { (UserDefaults.standard.string(forKey: "pushServerToken") ?? "").trimmingCharacters(in: .whitespacesAndNewlines) }
     static var isConfigured: Bool { !serverURL.isEmpty && !serverToken.isEmpty }
 
+    /// Language the app is shown in ("de", "en" …) – the server writes its notifications in it.
+    static var appLanguage: String { String((Bundle.main.preferredLocalizations.first ?? "de").prefix(2)) }
+
     static var deviceToken: String? {
         get { UserDefaults.standard.string(forKey: "apnsDeviceToken") }
         set { UserDefaults.standard.set(newValue, forKey: "apnsDeviceToken") }
@@ -79,7 +82,7 @@ enum PushClient {
         let flights = FlightStore.shared.upcoming
             .filter { !$0.normalizedStatus.isFinal && ($0.departure.best ?? .distantFuture) < horizon }
             .compactMap(payload(for:))
-        var body: [String: Any] = ["deviceToken": token, "flights": flights, "liveTokens": liveTokens]
+        var body: [String: Any] = ["deviceToken": token, "flights": flights, "liveTokens": liveTokens, "lang": appLanguage]
         // Your own server uses your own FlightAware key (sent only to the server you entered, over HTTPS)
         if FlightAware.hasKey, FlightProvider.current != .aerodatabox { body["flightawareKey"] = FlightAware.apiKey }
         var request = URLRequest(url: url)
@@ -91,28 +94,28 @@ enum PushClient {
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             let code = (response as? HTTPURLResponse)?.statusCode ?? 0
-            lastStatus = code == 200 ? "Verbunden · \(flights.count) Flüge beobachtet" : "Fehler \(code): \(String(data: data, encoding: .utf8) ?? "")"
+            lastStatus = code == 200 ? String(localized: "Verbunden · \(flights.count) Flüge beobachtet") : String(localized: "Fehler \(code): \(String(data: data, encoding: .utf8) ?? "")")
         } catch {
-            lastStatus = "Server nicht erreichbar"
+            lastStatus = String(localized: "Server nicht erreichbar")
         }
     }
 
     /// Sends a test push via the server.
     static func test() async -> String {
-        guard isConfigured else { return "Server-Adresse und Token eintragen." }
-        guard let token = deviceToken else { return "Noch kein Push-Token – Mitteilungen erlauben und App neu öffnen." }
+        guard isConfigured else { return String(localized: "Server-Adresse und Token eintragen.") }
+        guard let token = deviceToken else { return String(localized: "Noch kein Push-Token – Mitteilungen erlauben und App neu öffnen.") }
         await sync()
-        guard let url = endpoint("/test") else { return "Ungültige Adresse." }
+        guard let url = endpoint("/test") else { return String(localized: "Ungültige Adresse.") }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("Bearer \(serverToken)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: ["deviceToken": token])
-        guard let (_, response) = try? await URLSession.shared.data(for: request) else { return "Server nicht erreichbar." }
+        request.httpBody = try? JSONSerialization.data(withJSONObject: ["deviceToken": token, "lang": appLanguage])
+        guard let (_, response) = try? await URLSession.shared.data(for: request) else { return String(localized: "Server nicht erreichbar.") }
         switch (response as? HTTPURLResponse)?.statusCode ?? 0 {
-        case 200: return "Test-Push gesendet – sollte gleich erscheinen."
-        case 401: return "Token falsch."
-        case 502: return "Server erreicht, aber Apple lehnt den Push ab (APNs-Schlüssel prüfen)."
-        default: return "Unerwartete Antwort vom Server."
+        case 200: return String(localized: "Test-Push gesendet – sollte gleich erscheinen.")
+        case 401: return String(localized: "Token falsch.")
+        case 502: return String(localized: "Server erreicht, aber Apple lehnt den Push ab (APNs-Schlüssel prüfen).")
+        default: return String(localized: "Unerwartete Antwort vom Server.")
         }
     }
 }
@@ -123,6 +126,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        Task { @MainActor in PushClient.lastStatus = "Push-Registrierung fehlgeschlagen: \(error.localizedDescription)" }
+        Task { @MainActor in PushClient.lastStatus = String(localized: "Push-Registrierung fehlgeschlagen: \(error.localizedDescription)") }
     }
 }

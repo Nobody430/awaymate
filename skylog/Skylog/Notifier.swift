@@ -8,8 +8,8 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     static let ignoreAction = "IGNORE_FLIGHT"
 
     static func registerCategories() {
-        let add = UNNotificationAction(identifier: addAction, title: "Hinzufügen", options: [])
-        let ignore = UNNotificationAction(identifier: ignoreAction, title: "Ignorieren", options: [.destructive])
+        let add = UNNotificationAction(identifier: addAction, title: String(localized: "Hinzufügen"), options: [])
+        let ignore = UNNotificationAction(identifier: ignoreAction, title: String(localized: "Ignorieren"), options: [.destructive])
         let category = UNNotificationCategory(identifier: newFlightCategory, actions: [add, ignore], intentIdentifiers: [])
         UNUserNotificationCenter.current().setNotificationCategories([category])
     }
@@ -70,51 +70,51 @@ enum Notifier {
         if oldStatus != newStatus && !stale {
             switch newStatus {
             case .boarding:
-                result.append(Change(title: "\(n): Boarding", body: "Boarding hat begonnen" + (new.departure.gate.map { " an Gate \($0)" } ?? "") + "."))
+                result.append(Change(title: String(localized: "\(n): Boarding"), body: String(localized: "Boarding hat begonnen") + (new.departure.gate.map { String(localized: " an Gate \($0)") } ?? "") + "."))
             case .departed, .enRoute:
                 if !oldStatus.isAirborne {
-                    result.append(Change(title: "\(n) ist gestartet", body: "Ankunft in \(new.arrival.displayCity) um \(Fmt.time(new.arrival.best, new.arrival.tz))."))
+                    result.append(Change(title: String(localized: "\(n) ist gestartet"), body: String(localized: "Ankunft in \(new.arrival.displayCity) um \(Fmt.time(new.arrival.best, new.arrival.tz)).")))
                 }
             case .arrived:
-                result.append(Change(title: "\(n) ist gelandet", body: "Willkommen in \(new.arrival.displayCity)!" + (new.arrival.baggageBelt.map { " Gepäckband \($0)." } ?? "")))
+                result.append(Change(title: String(localized: "\(n) ist gelandet"), body: String(localized: "Willkommen in \(new.arrival.displayCity)!") + (new.arrival.baggageBelt.map { String(localized: " Gepäckband \($0).") } ?? "")))
                 let comp = Compensation.check(new)
                 if comp.status == .eligible {
-                    result.append(Change(title: "\(n): \(comp.amountEUR) € Entschädigung möglich", body: "Ankunft über 3 Stunden zu spät – in Skylog den Antrag erstellen."))
+                    result.append(Change(title: String(localized: "\(n): \(comp.amountEUR) € Entschädigung möglich"), body: String(localized: "Ankunft über 3 Stunden zu spät – in Skylog den Antrag erstellen.")))
                 }
             case .canceled:
-                result.append(Change(title: "\(n) annulliert", body: "Dein Flug nach \(new.arrival.displayCity) wurde annulliert."))
+                result.append(Change(title: String(localized: "\(n) annulliert"), body: String(localized: "Dein Flug nach \(new.arrival.displayCity) wurde annulliert.")))
             case .diverted:
-                result.append(Change(title: "\(n) umgeleitet", body: "Der Flug wurde umgeleitet."))
+                result.append(Change(title: String(localized: "\(n) umgeleitet"), body: String(localized: "Der Flug wurde umgeleitet.")))
             default:
                 break
             }
         }
 
         if let g = new.departure.gate, g != old.departure.gate {
-            let title = old.departure.gate == nil ? "\(n): Gate \(g)" : "\(n): Gate-Wechsel"
-            let body = old.departure.gate.map { "Neues Gate \(g) (vorher \($0))." } ?? "Abflug von Gate \(g)."
-            result.append(Change(title: title, body: body + (new.departure.terminal.map { " Terminal \($0)." } ?? "")))
+            let title = old.departure.gate == nil ? String(localized: "\(n): Gate \(g)") : String(localized: "\(n): Gate-Wechsel")
+            let body = old.departure.gate.map { String(localized: "Neues Gate \(g) (vorher \($0)).") } ?? String(localized: "Abflug von Gate \(g).")
+            result.append(Change(title: title, body: body + (new.departure.terminal.map { String(localized: " Terminal \($0).") } ?? "")))
         } else if let t = new.departure.terminal, t != old.departure.terminal, old.departure.terminal != nil {
-            result.append(Change(title: "\(n): Terminal-Wechsel", body: "Abflug jetzt von Terminal \(t)."))
+            result.append(Change(title: String(localized: "\(n): Terminal-Wechsel"), body: String(localized: "Abflug jetzt von Terminal \(t).")))
         }
 
         if !newStatus.isAirborne && !newStatus.isFinal,
            let oldTime = old.lastNotifiedDeparture ?? old.departure.best, let newTime = new.departure.best,
            abs(newTime.timeIntervalSince(oldTime)) >= 5 * 60 {
             let delay = Fmt.delay(new.departure.delayMinutes).map { " (\($0))" } ?? ""
-            result.append(Change(title: "\(n): Neue Abflugzeit", body: "Abflug jetzt \(Fmt.time(newTime, new.departure.tz))\(delay)."))
+            result.append(Change(title: String(localized: "\(n): Neue Abflugzeit"), body: String(localized: "Abflug jetzt \(Fmt.time(newTime, new.departure.tz))\(delay).")))
         }
 
         if newStatus.isAirborne, let oldTime = old.arrival.best, let newTime = new.arrival.best,
            abs(newTime.timeIntervalSince(oldTime)) >= 10 * 60 {
-            result.append(Change(title: "\(n): Neue Ankunftszeit", body: "Ankunft jetzt \(Fmt.time(newTime, new.arrival.tz))."))
+            result.append(Change(title: String(localized: "\(n): Neue Ankunftszeit"), body: String(localized: "Ankunft jetzt \(Fmt.time(newTime, new.arrival.tz)).")))
         }
 
         // Baggage belt only makes sense shortly before / after landing (airlines publish early guesses)
         let nearArrival = new.arrival.best.map { $0.timeIntervalSinceNow < 45 * 60 } ?? false
         let beltRelevant = (newStatus.isAirborne && nearArrival) || (newStatus == .arrived && oldStatus == .arrived)
         if let b = new.arrival.baggageBelt, b != old.arrival.baggageBelt, beltRelevant {
-            result.append(Change(title: "\(n): Gepäckband \(b)", body: "Dein Gepäck kommt auf Band \(b)."))
+            result.append(Change(title: String(localized: "\(n): Gepäckband \(b)"), body: String(localized: "Dein Gepäck kommt auf Band \(b).")))
         }
         return result
     }
@@ -136,16 +136,16 @@ enum Notifier {
 
         if let dep = f.departure.best {
             schedule(id: ids[0], at: dep.addingTimeInterval(-3 * 3600),
-                     title: "\(f.number) nach \(f.arrival.displayCity)",
-                     body: "Abflug in 3 Stunden um \(Fmt.time(dep, f.departure.tz))" + (f.departure.terminal.map { ", Terminal \($0)" } ?? "") + ".")
+                     title: String(localized: "\(f.number) nach \(f.arrival.displayCity)"),
+                     body: String(localized: "Abflug in 3 Stunden um \(Fmt.time(dep, f.departure.tz))") + (f.departure.terminal.map { String(localized: ", Terminal \($0)") } ?? "") + ".")
             schedule(id: ids[1], at: dep.addingTimeInterval(-45 * 60),
-                     title: "\(f.number): Boarding bald",
-                     body: (f.departure.gate.map { "Gate \($0) · " } ?? "") + "Abflug \(Fmt.time(dep, f.departure.tz)).")
+                     title: String(localized: "\(f.number): Boarding bald"),
+                     body: (f.departure.gate.map { String(localized: "Gate \($0) · ") } ?? "") + String(localized: "Abflug \(Fmt.time(dep, f.departure.tz))."))
         }
         if let arr = f.arrival.best {
             schedule(id: ids[2], at: arr.addingTimeInterval(-20 * 60),
-                     title: "\(f.number): Landung in ca. 20 Min.",
-                     body: "Ankunft \(Fmt.time(arr, f.arrival.tz)) in \(f.arrival.displayCity)" + (f.arrival.baggageBelt.map { ", Gepäckband \($0)" } ?? "") + ".")
+                     title: String(localized: "\(f.number): Landung in ca. 20 Min."),
+                     body: String(localized: "Ankunft \(Fmt.time(arr, f.arrival.tz)) in \(f.arrival.displayCity)") + (f.arrival.baggageBelt.map { String(localized: ", Gepäckband \($0)") } ?? "") + ".")
         }
     }
 

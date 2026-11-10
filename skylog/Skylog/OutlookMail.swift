@@ -9,10 +9,10 @@ enum MailError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .noClientID: "Keine Outlook-Client-ID hinterlegt (Einstellungen)."
-        case .cancelled: "Anmeldung abgebrochen."
-        case .auth(let msg): "Anmeldung fehlgeschlagen: \(msg)"
-        case .http(let code): "Outlook-Fehler (\(code)). Evtl. neu verbinden."
+        case .noClientID: String(localized: "Keine Outlook-Client-ID hinterlegt (Einstellungen).")
+        case .cancelled: String(localized: "Anmeldung abgebrochen.")
+        case .auth(let msg): String(localized: "Anmeldung fehlgeschlagen: \(msg)")
+        case .http(let code): String(localized: "Outlook-Fehler (\(code)). Evtl. neu verbinden.")
         }
     }
 }
@@ -107,7 +107,7 @@ final class OutlookAuth: NSObject, ASWebAuthenticationPresentationContextProvidi
         if let err = items.first(where: { $0.name == "error_description" })?.value ?? items.first(where: { $0.name == "error" })?.value {
             throw MailError.auth(err.replacingOccurrences(of: "+", with: " "))
         }
-        guard let code = items.first(where: { $0.name == "code" })?.value else { throw MailError.auth("kein Code") }
+        guard let code = items.first(where: { $0.name == "code" })?.value else { throw MailError.auth(String(localized: "kein Code")) }
         try await token([
             "client_id": clientID,
             "grant_type": "authorization_code",
@@ -120,14 +120,14 @@ final class OutlookAuth: NSObject, ASWebAuthenticationPresentationContextProvidi
 
     func validToken() async throws -> String {
         if let accessToken, expiry > Date().addingTimeInterval(60) { return accessToken }
-        guard let refresh = Keychain.get(Self.refreshKey) else { throw MailError.auth("nicht verbunden") }
+        guard let refresh = Keychain.get(Self.refreshKey) else { throw MailError.auth(String(localized: "nicht verbunden")) }
         try await token([
             "client_id": clientID,
             "grant_type": "refresh_token",
             "refresh_token": refresh,
             "scope": Self.scope,
         ])
-        guard let accessToken else { throw MailError.auth("kein Token") }
+        guard let accessToken else { throw MailError.auth(String(localized: "kein Token")) }
         return accessToken
     }
 
@@ -154,7 +154,7 @@ final class OutlookAuth: NSObject, ASWebAuthenticationPresentationContextProvidi
         guard let access = response.access_token else {
             // Only a really invalid login signs out – not a temporary server problem
             if form["grant_type"] == "refresh_token", ["invalid_grant", "interaction_required"].contains(response.error ?? "") { signOut() }
-            throw MailError.auth(response.error_description ?? "unbekannt")
+            throw MailError.auth(response.error_description ?? String(localized: "unbekannt"))
         }
         accessToken = access
         expiry = Date().addingTimeInterval(response.expires_in ?? 3600)
@@ -258,7 +258,7 @@ enum OutlookMail {
         var mails: [MailItem] = []
         let iso = ISO8601DateFormatter()
         for query in queries {
-            await progress("Suche „\(query)“ … (\(seen.count) Mails)")
+            await progress(String(localized: "Suche „\(query)“ … (\(seen.count) Mails)"))
             var comps = URLComponents(string: "https://graph.microsoft.com/v1.0/me/messages")!
             comps.queryItems = [
                 URLQueryItem(name: "$search", value: "\"\(query)\""),
@@ -297,7 +297,7 @@ enum OutlookMail {
         let iso = ISO8601DateFormatter()
 
         for query in queries {
-            await progress("Suche „\(query)“ … (\(seen.count) Mails geprüft)")
+            await progress(String(localized: "Suche „\(query)“ … (\(seen.count) Mails geprüft)"))
             var comps = URLComponents(string: "https://graph.microsoft.com/v1.0/me/messages")!
             comps.queryItems = [
                 URLQueryItem(name: "$search", value: "\"\(query)\""),
@@ -318,7 +318,7 @@ enum OutlookMail {
                     seen.insert(msg.id)
                     let text = (msg.subject ?? "") + "\n" + DocumentText.stripHTML(msg.body?.content ?? "")
                     let ref = msg.receivedDateTime.flatMap { iso.date(from: $0) } ?? Date()
-                    for c in FlightTextParser.parse(text, source: msg.subject ?? "E-Mail", reference: ref)
+                    for c in FlightTextParser.parse(text, source: msg.subject ?? String(localized: "E-Mail"), reference: ref)
                     where result[c.id] == nil {
                         result[c.id] = c
                     }
@@ -327,7 +327,7 @@ enum OutlookMail {
                 pages += 1
             }
         }
-        await progress("\(seen.count) Mails geprüft, \(result.count) Flüge gefunden.")
+        await progress(String(localized: "\(seen.count) Mails geprüft, \(result.count) Flüge gefunden."))
         return result.values.sorted { $0.date > $1.date }
     }
 }

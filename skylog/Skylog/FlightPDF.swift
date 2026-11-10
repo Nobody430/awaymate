@@ -96,7 +96,7 @@ private struct ItineraryPDFView: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(flights.count == 1 ? "Flugdetails" : "Reiseplan").font(.system(size: 26, weight: .bold))
+                    Text(flights.count == 1 ? String(localized: "Flugdetails") : String(localized: "Reiseplan")).font(.system(size: 26, weight: .bold))
                     Text(subtitle).font(.system(size: 12)).foregroundStyle(.gray)
                 }
                 Spacer()
@@ -138,7 +138,7 @@ private struct FlightPDFCard: View {
             Text(Fmt.day(f.departure.scheduled ?? f.sortDate, f.departure.tz)).font(.system(size: 12)).foregroundStyle(.gray)
 
             HStack(alignment: .top) {
-                endpoint("Abflug", f.departure, leading: true)
+                endpoint(String(localized: "Abflug"), f.departure, leading: true)
                 Spacer()
                 VStack(spacing: 2) {
                     Image(systemName: "airplane").foregroundStyle(.blue)
@@ -147,7 +147,7 @@ private struct FlightPDFCard: View {
                 }
                 .padding(.top, 18)
                 Spacer()
-                endpoint("Ankunft", f.arrival, leading: false)
+                endpoint(String(localized: "Ankunft"), f.arrival, leading: false)
             }
 
             if let map {
@@ -155,8 +155,8 @@ private struct FlightPDFCard: View {
             }
 
             let extras: [(String, String?)] = [
-                ("Flugzeug", f.aircraftModel), ("Kennzeichen", f.aircraftReg),
-                ("Sitzplatz", f.seat.isEmpty ? nil : f.seat), ("Gepäckband", f.arrival.baggageBelt),
+                (String(localized: "Flugzeug"), f.aircraftModel), (String(localized: "Kennzeichen"), f.aircraftReg),
+                (String(localized: "Sitzplatz"), f.seat.isEmpty ? nil : f.seat), (String(localized: "Gepäckband"), f.arrival.baggageBelt),
             ]
             let shown = extras.filter { $0.1 != nil }
             if !shown.isEmpty {
@@ -192,7 +192,7 @@ private struct FlightPDFCard: View {
                 }
             }
             Text(Fmt.tzAbbrev(e.tz, at: e.best)).font(.system(size: 9)).foregroundStyle(.gray)
-            let gate = [e.terminal.map { "Terminal \($0)" }, e.gate.map { "Gate \($0)" }].compactMap { $0 }
+            let gate = [e.terminal.map { String(localized: "Terminal \($0)") }, e.gate.map { String(localized: "Gate \($0)") }].compactMap { $0 }
             if !gate.isEmpty { Text(gate.joined(separator: " · ")).font(.system(size: 11, weight: .medium)) }
         }
     }

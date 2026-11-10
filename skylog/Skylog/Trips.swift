@@ -40,8 +40,10 @@ struct Trip: Identifiable, Codable, Hashable {
     var plan: TripPlan? = nil
 
     static func defaultPacking() -> [PackItem] {
-        ["Pass / ID", "Handy-Ladekabel", "Powerbank", "Kopfhörer", "Reiseadapter", "Medikamente", "Zahnbürste & Kulturbeutel",
-         "Kleider", "Kreditkarte & etwas Bargeld", "eSIM / Roaming geprüft", "Reiseversicherung", "Online eingecheckt"]
+        [String(localized: "Pass / ID"), String(localized: "Handy-Ladekabel"), String(localized: "Powerbank"), String(localized: "Kopfhörer"),
+         String(localized: "Reiseadapter"), String(localized: "Medikamente"), String(localized: "Zahnbürste & Kulturbeutel"),
+         String(localized: "Kleider"), String(localized: "Kreditkarte & etwas Bargeld"), String(localized: "eSIM / Roaming geprüft"),
+         String(localized: "Reiseversicherung"), String(localized: "Online eingecheckt")]
             .map { PackItem(name: $0) }
     }
 }

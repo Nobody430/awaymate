@@ -23,16 +23,17 @@ enum LiveFlight {
             inAir: f.isInAir,
             inbound: inboundLine(f),
             inboundWarn: f.inbound.map { $0.isCanceled || $0.expectedDelay(ourDeparture: f.departure.best) >= 15 },
-            arrivalDelay: f.arrival.delayMinutes
+            arrivalDelay: f.arrival.delayMinutes,
+            landed: status == .arrived
         )
     }
 
     private static func inboundLine(_ f: Flight) -> String? {
         guard let i = f.inbound, !f.isInAir, !f.normalizedStatus.isFinal, f.departure.runway == nil else { return nil }
         let delay = i.expectedDelay(ourDeparture: f.departure.best)
-        if delay >= 15 { return "\(i.headline) · ca. +\(delay) Min" }
+        if delay >= 15 { return String(localized: "\(i.headline) · ca. +\(delay) Min") }
         if i.landed { return i.headline }
-        return "\(i.headline) · Landung \(Fmt.time(i.arrival, f.departure.tz))"
+        return String(localized: "\(i.headline) · Landung \(Fmt.time(i.arrival, f.departure.tz))")
     }
 
     /// Running (not yet ended) activity of a flight.

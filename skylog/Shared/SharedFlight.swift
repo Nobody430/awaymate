@@ -64,6 +64,8 @@ struct FlightActivityAttributes: ActivityAttributes {
         var inboundWarn: Bool? = nil
         /// Arrival delay in minutes (negative = early); nil when unknown
         var arrivalDelay: Int? = nil
+        /// true once the flight has landed (optional, may be missing in server pushes – then `status` is checked)
+        var landed: Bool? = nil
     }
 
     var flightID: String

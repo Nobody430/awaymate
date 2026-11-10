@@ -85,13 +85,13 @@ final class FlightStore {
                   next.departure.scheduled.map { Int($0.timeIntervalSince(s) / 60) } }) else { return }
         guard layover < 75, layover <= planned - 15, layover <= (f.warnedLayover ?? Int.max) - 15 else { return }
         f.warnedLayover = layover
-        let text = layover < 0 ? "Anschluss \(next.number) wird voraussichtlich verpasst"
-            : "Nur noch \(layover) Min. zum Umsteigen auf \(next.number) in \(f.arrival.code)"
+        let text = layover < 0 ? String(localized: "Anschluss \(next.number) wird voraussichtlich verpasst")
+            : String(localized: "Nur noch \(layover) Min. zum Umsteigen auf \(next.number) in \(f.arrival.code)")
         f.log(text)
         update(f)
         if notify && Settings.notifyChanges {
-            Notifier.post(id: "\(id)-connection", title: "\(f.number): Anschluss wird knapp",
-                          body: text + " (geplant waren \(planned) Min.). Sprich früh mit der Crew oder dem Transfer-Schalter.")
+            Notifier.post(id: "\(id)-connection", title: String(localized: "\(f.number): Anschluss wird knapp"),
+                          body: text + String(localized: " (geplant waren \(planned) Min.). Sprich früh mit der Crew oder dem Transfer-Schalter."))
         }
     }
 
@@ -374,7 +374,7 @@ final class FlightStore {
                     if case APIError.quota = error {
                         // Stop hammering the API when the monthly quota is used up
                         UserDefaults.standard.set(Date().addingTimeInterval(6 * 3600), forKey: "quotaPausedUntil")
-                        lastError = "API-Kontingent aufgebraucht – automatische Aktualisierung pausiert 6 h. Tipp: in den Einstellungen „Beide kombiniert“ oder FlightAware wählen."
+                        lastError = String(localized: "API-Kontingent aufgebraucht – automatische Aktualisierung pausiert 6 h. Tipp: in den Einstellungen „Beide kombiniert“ oder FlightAware wählen.")
                         break
                     }
                 }
@@ -411,8 +411,8 @@ final class FlightStore {
         let old = current.inbound
         current.inbound = new
         if let legs = FlightData.lastLegs[id] { current.planeLegs = legs }
-        if new.departed && old?.departed != true { current.log("Dein Flugzeug ist in \(new.fromCode) gestartet (\(new.number))") }
-        if new.landed && old?.landed != true { current.log("Dein Flugzeug ist aus \(new.fromCode) gelandet") }
+        if new.departed && old?.departed != true { current.log(String(localized: "Dein Flugzeug ist in \(new.fromCode) gestartet (\(new.number))")) }
+        if new.landed && old?.landed != true { current.log(String(localized: "Dein Flugzeug ist aus \(new.fromCode) gelandet")) }
         update(current)
         guard notify, Settings.notifyChanges else { return }
         let ourDep = current.departure.best
@@ -420,17 +420,17 @@ final class FlightStore {
         let oldDelay = old?.expectedDelay(ourDeparture: ourDep) ?? 0
         let tag = "\(id)-inbound"
         if new.isCanceled && old?.isCanceled != true {
-            Notifier.post(id: "\(tag)-cancel", title: "\(current.number): Zubringer annulliert",
-                          body: "Der Flug \(new.number), der dein Flugzeug bringen sollte, ist annulliert. Mögliche Verspätung oder Flugzeugwechsel.")
+            Notifier.post(id: "\(tag)-cancel", title: String(localized: "\(current.number): Zubringer annulliert"),
+                          body: String(localized: "Der Flug \(new.number), der dein Flugzeug bringen sollte, ist annulliert. Mögliche Verspätung oder Flugzeugwechsel."))
         } else if delay >= 15 && delay >= oldDelay + 15 {
-            Notifier.post(id: "\(tag)-delay-\(delay)", title: "\(current.number): Flugzeug kommt spät",
-                          body: "Dein Flugzeug (\(new.number) aus \(new.fromCode)) landet erst \(Fmt.time(new.arrival, current.departure.tz)). Abflug wohl ca. \(delay) Min. später.")
+            Notifier.post(id: "\(tag)-delay-\(delay)", title: String(localized: "\(current.number): Flugzeug kommt spät"),
+                          body: String(localized: "Dein Flugzeug (\(new.number) aus \(new.fromCode)) landet erst \(Fmt.time(new.arrival, current.departure.tz)). Abflug wohl ca. \(delay) Min. später."))
         } else if new.departed && old?.departed == false {
-            Notifier.post(id: "\(tag)-dep", title: "\(current.number): Flugzeug ist unterwegs",
-                          body: "Dein Flugzeug ist als \(new.number) in \(new.fromCode) gestartet. Landung ca. \(Fmt.time(new.arrival, current.departure.tz)).")
+            Notifier.post(id: "\(tag)-dep", title: String(localized: "\(current.number): Flugzeug ist unterwegs"),
+                          body: String(localized: "Dein Flugzeug ist als \(new.number) in \(new.fromCode) gestartet. Landung ca. \(Fmt.time(new.arrival, current.departure.tz))."))
         } else if new.landed && old?.landed == false {
-            Notifier.post(id: "\(tag)-land", title: "\(current.number): Flugzeug ist da",
-                          body: "Dein Flugzeug ist aus \(new.fromCode) gelandet.")
+            Notifier.post(id: "\(tag)-land", title: String(localized: "\(current.number): Flugzeug ist da"),
+                          body: String(localized: "Dein Flugzeug ist aus \(new.fromCode) gelandet."))
         }
     }
 
@@ -442,7 +442,7 @@ final class FlightStore {
             guard var current = flight(id) else { return }
             let notes = LiveADSB.apply(fix, to: &current)
             if fix != nil || !notes.isEmpty {
-                for n in notes { current.log(n.title.contains("gestartet") ? "Gestartet (Live-Position)" : "Gelandet (Live-Position)") }
+                for n in notes { current.log(n.takeoff ? String(localized: "Gestartet (Live-Position)") : String(localized: "Gelandet (Live-Position)")) }
                 update(current)
                 if Settings.notifyChanges && !PushClient.isConfigured {
                     for n in notes { Notifier.post(id: "\(id)-\(n.title)", title: n.title, body: n.body) }
