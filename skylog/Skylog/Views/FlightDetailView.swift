@@ -41,6 +41,8 @@ struct FlightDetailView: View {
                 times(f)
                 gates(f)
                 if let i = f.inbound, !f.isInAir, !f.normalizedStatus.isFinal { inbound(i, f) }
+                PlaneHistoryCard(flight: f)
+                TimetableCard(flight: f)
                 if f.isInAir, let p = f.lastPosition { live(p) }
                 if f.isPast || f.normalizedStatus.isFinal || (f.arrival.delayMinutes ?? 0) >= 120 {
                     CompensationCard(flight: f)
@@ -56,6 +58,8 @@ struct FlightDetailView: View {
                 }
                 AirportCard(endpoint: f.arrival, title: "Ankunft")
                 DocumentsCard(flightID: f.id)
+                UpdatesCard(flight: f)
+                RouteHistoryCard(flight: f)
                 aircraft(f)
                 personal
 
@@ -271,7 +275,8 @@ struct FlightDetailView: View {
             row("Rufzeichen", f.callSign)
             row("Transponder", f.icao24?.uppercased())
             row("Distanz", f.computedDistanceKm.map(Fmt.km))
-            row("Airline", [f.airlineName, f.airlineIata].compactMap { $0 }.joined(separator: " · "))
+            row("Airline", [f.airlineName, f.airlineIata, f.airlineIcao].compactMap { $0 }.joined(separator: " · "))
+            row("Allianz", Alliance.name(f.airlineIata ?? String(f.number.prefix(2))))
         }
         .padding(.horizontal)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

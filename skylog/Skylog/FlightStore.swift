@@ -226,8 +226,13 @@ final class FlightStore {
             new.lastNotifiedDeparture = n
         }
 
+        let changes = Notifier.changes(old: cur, new: new)
+        for change in changes {
+            let title = change.title.replacingOccurrences(of: "\(new.number): ", with: "").replacingOccurrences(of: "\(new.number) ", with: "")
+            new.log(title.prefix(1).uppercased() + String(title.dropFirst()) + " – " + change.body)
+        }
         if notify && Settings.notifyChanges {
-            for change in Notifier.changes(old: cur, new: new) {
+            for change in changes {
                 Notifier.post(id: "\(new.id)-\(change.title)", title: change.title, body: change.body)
             }
         }
@@ -344,6 +349,9 @@ final class FlightStore {
         guard var current = flight(id) else { return }
         let old = current.inbound
         current.inbound = new
+        if let legs = FlightData.lastLegs[id] { current.planeLegs = legs }
+        if new.departed && old?.departed != true { current.log("Dein Flugzeug ist in \(new.fromCode) gestartet (\(new.number))") }
+        if new.landed && old?.landed != true { current.log("Dein Flugzeug ist aus \(new.fromCode) gelandet") }
         update(current)
         guard notify, Settings.notifyChanges else { return }
         let ourDep = current.departure.best
@@ -373,6 +381,7 @@ final class FlightStore {
             guard var current = flight(id) else { return }
             let notes = LiveADSB.apply(fix, to: &current)
             if fix != nil || !notes.isEmpty {
+                for n in notes { current.log(n.title.contains("gestartet") ? "Gestartet (Live-Position)" : "Gelandet (Live-Position)") }
                 update(current)
                 if Settings.notifyChanges {
                     for n in notes { Notifier.post(id: "\(id)-\(n.title)", title: n.title, body: n.body) }

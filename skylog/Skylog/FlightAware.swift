@@ -51,6 +51,8 @@ enum FlightData {
     }
 
     private static var lastEnrich: [String: Date] = [:]
+    /// Previous legs of the aircraft found by the last inbound lookup (picked up by the store)
+    static var lastLegs: [UUID: [InboundFlight]] = [:]
 
     /// FlightAware for the next ~2 days (best live data), AeroDataBox for flights further ahead.
     /// Each falls back to the other; close to departure / after landing, missing fields are filled from AeroDataBox
@@ -121,6 +123,9 @@ enum FlightData {
         f.airlineIata = f.airlineIata ?? b.airlineIata
         f.airlineIcao = f.airlineIcao ?? b.airlineIcao
         f.faFlightID = f.faFlightID ?? b.faFlightID
+        f.timetable = f.timetable ?? b.timetable
+        f.updates = f.updates ?? b.updates
+        f.planeLegs = f.planeLegs ?? b.planeLegs
         f.callSign = f.callSign ?? b.callSign
         f.distanceKm = f.distanceKm ?? b.distanceKm
         f.lastPosition = f.lastPosition ?? b.lastPosition
@@ -134,9 +139,14 @@ enum FlightData {
     /// AeroDataBox via the aircraft registration's flights of the day.
     static func inbound(for f: Flight) async throws -> InboundFlight? {
         if FlightAware.hasKey, FlightProvider.current != .aerodatabox {
-            if let id = f.inboundFAID, let i = try? await FlightAware.inbound(id) { return i }
+            // With the registration, one query gives the inbound leg and the legs before it
             if let reg = f.aircraftReg, !reg.isEmpty, let dep = f.departure.scheduled ?? f.departure.best,
-               let i = try? await FlightAware.inbound(registration: reg, arrivingAt: f.departure.code, before: dep) { return i }
+               let legs = try? await FlightAware.planeLegs(registration: reg, before: dep),
+               let i = legs.first(where: { $0.toCode == f.departure.code && ($0.scheduledArrival ?? .distantPast) > dep.addingTimeInterval(-18 * 3600) }) {
+                lastLegs[f.id] = Array(legs.prefix(4))
+                return i
+            }
+            if let id = f.inboundFAID, let i = try? await FlightAware.inbound(id) { return i }
         }
         guard FlightProvider.current != .flightaware, adbAvailable, let reg = f.aircraftReg, !reg.isEmpty,
               let ourDep = f.departure.scheduled ?? f.departure.best else { return nil }
@@ -326,6 +336,12 @@ enum FlightAware {
         flight.aircraftReg = fa.registration
         flight.faFlightID = fa.fa_flight_id
         flight.inboundFAID = fa.inbound_fa_flight_id
+        let tt = Timetable(
+            outScheduled: Self.date(fa.scheduled_out), outEstimated: Self.date(fa.estimated_out), outActual: Self.date(fa.actual_out),
+            offScheduled: Self.date(fa.scheduled_off), offEstimated: Self.date(fa.estimated_off), offActual: Self.date(fa.actual_off),
+            onScheduled: Self.date(fa.scheduled_on), onEstimated: Self.date(fa.estimated_on), onActual: Self.date(fa.actual_on),
+            inScheduled: Self.date(fa.scheduled_in), inEstimated: Self.date(fa.estimated_in), inActual: Self.date(fa.actual_in))
+        if !tt.isEmpty { flight.timetable = tt }
         flight.distanceKm = fa.route_distance.map { $0 * 1.60934 }
         flight.lastUpdated = Date()
         return flight
@@ -343,15 +359,19 @@ enum FlightAware {
     /// Fallback when FlightAware gives no inbound id: the aircraft's recent legs by registration –
     /// the latest one that arrives at our departure airport before we leave.
     static func inbound(registration: String, arrivingAt code: String, before dep: Date) async throws -> InboundFlight? {
+        try await planeLegs(registration: registration, before: dep).first {
+            $0.toCode == code && ($0.scheduledArrival ?? .distantPast) > dep.addingTimeInterval(-18 * 3600)
+        }
+    }
+
+    /// The aircraft's legs before `dep`, newest first (one query).
+    static func planeLegs(registration: String, before dep: Date) async throws -> [InboundFlight] {
         let reg = registration.replacingOccurrences(of: " ", with: "").uppercased()
         let data = try await get("/flights/\(reg)", query: [URLQueryItem(name: "ident_type", value: "registration")])
-        let legs = try JSONDecoder().decode(FlightsResponse.self, from: data).flights.filter { fa in
-            guard fa.destination?.code_iata == code || fa.destination?.code_icao == code || fa.destination?.code == code,
-                  let arr = date(fa.scheduled_in ?? fa.scheduled_on) else { return false }
-            return arr < dep && arr > dep.addingTimeInterval(-18 * 3600)
-        }
-        let latest = legs.max { (date($0.scheduled_in ?? $0.scheduled_on) ?? .distantPast) < (date($1.scheduled_in ?? $1.scheduled_on) ?? .distantPast) }
-        return latest.map(inbound(from:))
+        return try JSONDecoder().decode(FlightsResponse.self, from: data).flights
+            .filter { fa in (date(fa.scheduled_in ?? fa.scheduled_on)).map { $0 < dep } ?? false }
+            .map(inbound(from:))
+            .sorted { ($0.scheduledArrival ?? .distantPast) > ($1.scheduledArrival ?? .distantPast) }
     }
 
     private static func inbound(from fa: FAFlight) -> InboundFlight {
@@ -366,7 +386,8 @@ enum FlightAware {
             arrival: date(fa.actual_in ?? fa.actual_on ?? fa.estimated_in ?? fa.estimated_on ?? fa.scheduled_in ?? fa.scheduled_on),
             scheduledArrival: date(fa.scheduled_in ?? fa.scheduled_on),
             landed: landed,
-            updated: Date())
+            updated: Date(),
+            toCode: fa.destination?.code_iata ?? fa.destination?.code)
     }
 
     // MARK: Live position

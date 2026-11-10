@@ -82,6 +82,22 @@ enum AirportBuffer {
     private static let Schengen: Set<String> = ["AT","BE","BG","CH","CZ","DE","DK","EE","ES","FI","FR","GR","HR","HU","IS","IT","LI","LT","LU","LV","MT","NL","NO","PL","PT","RO","SE","SI","SK"]
 }
 
+/// Scheduled / estimated / actual times at the gate and on the runway.
+struct Timetable: Codable, Hashable {
+    var outScheduled: Date?, outEstimated: Date?, outActual: Date?     // leaves the gate
+    var offScheduled: Date?, offEstimated: Date?, offActual: Date?     // takes off
+    var onScheduled: Date?, onEstimated: Date?, onActual: Date?        // lands
+    var inScheduled: Date?, inEstimated: Date?, inActual: Date?        // arrives at the gate
+
+    var isEmpty: Bool { outScheduled == nil && offScheduled == nil && onScheduled == nil && inScheduled == nil }
+}
+
+struct FlightUpdate: Codable, Hashable, Identifiable {
+    var id = UUID()
+    var date: Date
+    var text: String
+}
+
 /// The plane that will operate our flight, on its previous leg.
 struct InboundFlight: Codable, Hashable {
     var number: String
@@ -94,6 +110,13 @@ struct InboundFlight: Codable, Hashable {
     var scheduledArrival: Date?
     var landed: Bool
     var updated: Date
+    var toCode: String? = nil
+
+    /// Arrival delay of this leg in minutes (negative = early)
+    var arrivalDelay: Int? {
+        guard let a = arrival, let s = scheduledArrival else { return nil }
+        return Int((a.timeIntervalSince(s) / 60).rounded())
+    }
 
     var normalizedStatus: FlightStatus { FlightStatus(raw: status) }
     var isCanceled: Bool { normalizedStatus == .canceled }
@@ -194,6 +217,19 @@ struct Flight: Identifiable, Codable, Hashable {
     var inbound: InboundFlight? = nil
     /// Departure time the user was last told about (so creeping delays are noticed)
     var lastNotifiedDeparture: Date? = nil
+    /// Gate / runway times in detail (FlightAware)
+    var timetable: Timetable? = nil
+    /// What changed and when (gate, times, status …), newest last
+    var updates: [FlightUpdate]? = nil
+    /// The aircraft's previous legs, newest first ("Wo ist mein Flugzeug?")
+    var planeLegs: [InboundFlight]? = nil
+
+    mutating func log(_ text: String, at date: Date = Date()) {
+        var list = updates ?? []
+        if list.last?.text == text { return }
+        list.append(FlightUpdate(date: date, text: text))
+        updates = Array(list.suffix(40))
+    }
     var notes: String = ""
     var seat: String = ""
 
