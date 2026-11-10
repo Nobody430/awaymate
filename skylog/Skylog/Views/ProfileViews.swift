@@ -22,7 +22,7 @@ struct ProfileSettingsView: View {
                 if connected {
                     LabeledContent("Vault", value: ObsidianVault.vaultName)
                     NavigationLink { ObsidianNotePicker() } label: {
-                        LabeledContent("Notizen für die KI", value: "\(ObsidianVault.selectedNotes.count) ausgewählt")
+                        LabeledContent("Notizen für die KI", value: String(localized: "\(ObsidianVault.selectedNotes.count) ausgewählt"))
                     }
                     Button("Vault trennen", role: .destructive) {
                         ObsidianVault.disconnect()

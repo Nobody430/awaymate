@@ -16,10 +16,10 @@ struct AircraftSeatCard: View {
 
             if let d = details {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                    InfoTile(title: "Typ", value: d.typeName ?? d.model ?? flight.aircraftModel, icon: "airplane")
-                    InfoTile(title: "Alter", value: d.ageText, icon: "calendar")
-                    InfoTile(title: "Sitze", value: d.numSeats.map { "\($0)" }, icon: "carseat.right")
-                    InfoTile(title: "Triebwerke", value: [d.numEngines.map { "\($0)×" }, d.engineType].compactMap { $0 }.joined(separator: " "), icon: "fanblades")
+                    InfoTile(title: String(localized: "Typ"), value: d.typeName ?? d.model ?? flight.aircraftModel, icon: "airplane")
+                    InfoTile(title: String(localized: "Alter"), value: d.ageText, icon: "calendar")
+                    InfoTile(title: String(localized: "Sitze"), value: d.numSeats.map { "\($0)" }, icon: "carseat.right")
+                    InfoTile(title: String(localized: "Triebwerke"), value: [d.numEngines.map { "\($0)×" }, d.engineType].compactMap { $0 }.joined(separator: " "), icon: "fanblades")
                 }
                 if let ff = d.firstFlightDate ?? d.deliveryDate {
                     Text("Erstflug/Auslieferung: \(String(ff.prefix(10))) · Seriennr. \(d.serial ?? "–")")
@@ -54,7 +54,7 @@ struct AircraftSeatCard: View {
                    max(sun.leftMinutes, sun.rightMinutes) > 2 * min(sun.leftMinutes, sun.rightMinutes),
                    max(sun.leftMinutes, sun.rightMinutes) >= 20 {
                     let sunny = sun.leftMinutes > sun.rightMinutes ? "links" : "rechts"
-                    Text(side == sunny ? "Dein Platz ist auf der Sonnenseite – Sonnenbrille einpacken 😎" : "Dein Platz ist auf der Schattenseite 👍")
+                    Text(side == sunny ? String(localized: "Dein Platz ist auf der Sonnenseite – Sonnenbrille einpacken 😎") : String(localized: "Dein Platz ist auf der Schattenseite 👍"))
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
@@ -136,9 +136,9 @@ struct AirportCard: View {
 
     /// Official pages with live security waiting times / terminal maps.
     static let officialLinks: [String: [(String, String)]] = [
-        "ZRH": [("Wartezeiten & Infos", "https://www.flughafen-zuerich.ch/de/passagiere/abflug"), ("Terminal-Pläne", "https://www.flughafen-zuerich.ch/de/passagiere/flughafen-entdecken/flughafen-karte")],
-        "GVA": [("Wartezeiten & Infos", "https://www.gva.ch/de/Site/Passagiere"), ("Terminal-Plan", "https://www.gva.ch/de/Site/Passagiere/Am-Flughafen/Karten")],
-        "BSL": [("Infos", "https://www.euroairport.com/de/")],
+        "ZRH": [(String(localized: "Wartezeiten & Infos"), "https://www.flughafen-zuerich.ch/de/passagiere/abflug"), (String(localized: "Terminal-Pläne"), "https://www.flughafen-zuerich.ch/de/passagiere/flughafen-entdecken/flughafen-karte")],
+        "GVA": [(String(localized: "Wartezeiten & Infos"), "https://www.gva.ch/de/Site/Passagiere"), (String(localized: "Terminal-Plan"), "https://www.gva.ch/de/Site/Passagiere/Am-Flughafen/Karten")],
+        "BSL": [(String(localized: "Infos"), "https://www.euroairport.com/de/")],
     ]
 
     var body: some View {
@@ -146,7 +146,7 @@ struct AirportCard: View {
             HStack {
                 Label("\(title): \(endpoint.name ?? endpoint.code)", systemImage: "building.2").font(.headline).lineLimit(1)
                 Spacer()
-                Button(expanded ? "Weniger" : "Mehr") { expanded.toggle() }.font(.caption)
+                Button(expanded ? String(localized: "Weniger") : String(localized: "Mehr")) { expanded.toggle() }.font(.caption)
             }
             HStack {
                 if let c = endpoint.coordinate {
@@ -170,7 +170,7 @@ struct AirportCard: View {
                 ForEach(["Lounges", "Essen & Kaffee", "Apotheke", "Geld & Wechsel", "Shopping"], id: \.self) { group in
                     let items = pois.filter { $0.group == group }
                     if !items.isEmpty {
-                        Text(group).font(.subheadline.weight(.semibold)).padding(.top, 4)
+                        Text(LocalizedStringKey(group)).font(.subheadline.weight(.semibold)).padding(.top, 4)
                         ForEach(items.prefix(6)) { p in
                             Button {
                                 p.item.openInMaps()

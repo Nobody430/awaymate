@@ -30,7 +30,7 @@ struct TripPlannerView: View {
                             Button {
                                 if interests.contains(i) { interests.remove(i) } else { interests.insert(i) }
                             } label: {
-                                Text(i).font(.subheadline)
+                                Text(LocalizedStringKey(i)).font(.subheadline)
                                     .frame(maxWidth: .infinity).padding(.vertical, 8)
                                     .background(interests.contains(i) ? Theme.accent : Theme.card, in: Capsule())
                                     .foregroundStyle(interests.contains(i) ? Color.white : Color.primary)
@@ -200,11 +200,11 @@ struct BookingRow: View {
         var parts = [booking.city]
         if booking.kind == .hotel || booking.kind == .car {
             parts.append("\(booking.start.formatted(.dateTime.day().month(.abbreviated))) – \(booking.end.formatted(.dateTime.day().month(.abbreviated)))")
-            if booking.kind == .hotel && booking.nights > 0 { parts.append("\(booking.nights) Nächte") }
+            if booking.kind == .hotel && booking.nights > 0 { parts.append(String(localized: "\(booking.nights) Nächte")) }
         } else {
             parts.append(booking.start.formatted(.dateTime.day().month(.abbreviated)))
         }
-        if !booking.bookingReference.isEmpty { parts.append("Code \(booking.bookingReference)") }
+        if !booking.bookingReference.isEmpty { parts.append(String(localized: "Code \(booking.bookingReference)")) }
         return parts.filter { !$0.isEmpty }.joined(separator: " · ")
     }
 }

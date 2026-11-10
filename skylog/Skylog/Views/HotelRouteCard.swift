@@ -37,15 +37,15 @@ struct HotelRouteCard: View {
     @ViewBuilder
     private func legView(_ leg: Leg, outbound: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(outbound ? "Vom Hotel zum Flughafen \(flight.departure.code)" : "Vom Flughafen \(flight.arrival.code) zum Hotel")
+            Text(outbound ? String(localized: "Vom Hotel zum Flughafen \(flight.departure.code)") : String(localized: "Vom Flughafen \(flight.arrival.code) zum Hotel"))
                 .font(.caption).foregroundStyle(.secondary)
             Text(leg.hotel.name).font(.subheadline.bold())
             if !leg.hotel.address.isEmpty {
                 Text(leg.hotel.address).font(.caption).foregroundStyle(.secondary)
             }
             HStack(spacing: 14) {
-                if let t = leg.times.transit { chip("tram.fill", "ÖV \(Fmt.duration(Int(t / 60)))") }
-                if let t = leg.times.car { chip("car.fill", "Taxi \(Fmt.duration(Int(t / 60)))") }
+                if let t = leg.times.transit { chip("tram.fill", String(localized: "ÖV \(Fmt.duration(Int(t / 60)))")) }
+                if let t = leg.times.car { chip("car.fill", String(localized: "Taxi \(Fmt.duration(Int(t / 60)))")) }
                 if let t = leg.times.walk { chip("figure.walk", Fmt.duration(Int(t / 60))) }
                 if let d = leg.times.distanceKm { chip("ruler", Fmt.km(d)) }
             }

@@ -30,8 +30,8 @@ struct ManualFlightView: View {
                 TextField("Airline (optional)", text: $airline)
             }
             Section {
-                airportField("Von (Code, z.B. ZRH)", text: $from, info: fromInfo)
-                airportField("Nach (Code, z.B. BKK)", text: $to, info: toInfo)
+                airportField(String(localized: "Von (Code, z.B. ZRH)"), text: $from, info: fromInfo)
+                airportField(String(localized: "Nach (Code, z.B. BKK)"), text: $to, info: toInfo)
             } footer: {
                 Text("3-Buchstaben-Code des Flughafens. Den findest du auf Ticket oder Bordkarte.")
             }

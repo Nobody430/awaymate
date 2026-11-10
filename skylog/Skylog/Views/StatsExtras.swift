@@ -45,14 +45,14 @@ struct ReviewPoster: View {
                 Image(systemName: "airplane").font(.title2)
             }
             HStack(alignment: .top) {
-                figure("\(stats.count)", "Flüge")
-                figure(Fmt.km(stats.distance), "geflogen")
-                figure(Fmt.duration(stats.minutes), "in der Luft")
+                figure("\(stats.count)", String(localized: "Flüge"))
+                figure(Fmt.km(stats.distance), String(localized: "geflogen"))
+                figure(Fmt.duration(stats.minutes), String(localized: "in der Luft"))
             }
             HStack(alignment: .top) {
-                figure("\(stats.countries.count)", "Länder")
-                figure("\(stats.airports.count)", "Flughäfen")
-                figure(String(format: "%.1f×", stats.distance / 40_075), "um die Erde")
+                figure("\(stats.countries.count)", String(localized: "Länder"))
+                figure("\(stats.airports.count)", String(localized: "Flughäfen"))
+                figure(String(format: "%.1f×", stats.distance / 40_075), String(localized: "um die Erde"))
             }
             if let l = stats.longest, let km = l.computedDistanceKm {
                 Text("Längster Flug: \(l.departure.displayCity) → \(l.arrival.displayCity) · \(Fmt.km(km))").font(.footnote)
@@ -197,7 +197,7 @@ struct AircraftCollectionCard: View {
                     }
                 }
                 if types.count > 4 || regs.contains(where: { $0.count > 1 }) {
-                    Button(expanded ? "Weniger anzeigen" : "Alle anzeigen") { expanded.toggle() }.font(.caption)
+                    Button(expanded ? String(localized: "Weniger anzeigen") : String(localized: "Alle anzeigen")) { expanded.toggle() }.font(.caption)
                 }
             }
             .padding()

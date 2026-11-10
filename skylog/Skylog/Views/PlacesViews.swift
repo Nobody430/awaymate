@@ -3,7 +3,7 @@ import MapKit
 
 enum Countries {
     static func name(_ code: String) -> String {
-        Locale(identifier: "de_CH").localizedString(forRegionCode: code) ?? code
+        Locale.current.localizedString(forRegionCode: code) ?? code
     }
 
     static func flag(_ code: String) -> String {
@@ -121,7 +121,7 @@ struct CountryDetailView: View {
             Section("Orte") {
                 ForEach(visit.cities, id: \.self) { city in
                     let count = visit.flights.filter { $0.arrival.displayCity == city || $0.departure.displayCity == city }.count
-                    LabeledContent(city, value: "\(count) Flüge")
+                    LabeledContent(city, value: String(localized: "\(count) Flüge"))
                 }
             }
             Section("Flüge (\(visit.flights.count))") {

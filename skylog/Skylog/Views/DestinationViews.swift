@@ -12,19 +12,19 @@ struct DestinationCard: View {
         VStack(alignment: .leading, spacing: 10) {
             Label("In \(flight.arrival.displayCity)", systemImage: "mappin.and.ellipse").font(.headline)
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                InfoTile(title: "Ortszeit", value: localTime, icon: "clock")
-                InfoTile(title: "Zeitverschiebung", value: offset, icon: "globe")
+                InfoTile(title: String(localized: "Ortszeit"), value: localTime, icon: "clock")
+                InfoTile(title: String(localized: "Zeitverschiebung"), value: offset, icon: "globe")
                 if let w = weather {
-                    InfoTile(title: "Wetter bei Ankunft",
+                    InfoTile(title: String(localized: "Wetter bei Ankunft"),
                              value: "\(Int(w.temperature.rounded()))°" + (w.precipitationChance.map { " · \($0)% 💧" } ?? ""),
                              icon: w.symbol)
                 }
                 if let info, info.currency != "CHF" {
-                    InfoTile(title: "1 CHF =", value: rate.map { "\($0.formatted(.number.precision(.significantDigits(3...5)))) \(info.currency)" } ?? info.currency,
+                    InfoTile(title: String(localized: "1 CHF ="), value: rate.map { "\($0.formatted(.number.precision(.significantDigits(3...5)))) \(info.currency)" } ?? info.currency,
                              icon: "banknote")
                 }
                 if let info, info.plugs != home?.plugs {
-                    InfoTile(title: "Steckdose", value: "Typ \(info.plugs) · \(info.voltage) V", icon: "powerplug")
+                    InfoTile(title: String(localized: "Steckdose"), value: String(localized: "Typ \(info.plugs) · \(info.voltage) V"), icon: "powerplug")
                 }
             }
             if let info, info.voltage < 200 {
@@ -54,7 +54,7 @@ struct DestinationCard: View {
         // at arrival time, not today (daylight-saving changes)
         let at = flight.arrival.best ?? Date()
         let diff = (flight.arrival.tz.secondsFromGMT(for: at) - TimeZone.current.secondsFromGMT(for: at)) / 60
-        if diff == 0 { return "keine" }
+        if diff == 0 { return String(localized: "keine") }
         let h = Double(diff) / 60
         return (diff > 0 ? "+" : "−") + abs(h).formatted(.number.precision(.fractionLength(0...1))) + " h"
     }
@@ -79,14 +79,14 @@ struct TravelDayCard: View {
         let longHaul = (flight.computedDistanceKm ?? 0) > 3500
         let dtz = flight.departure.tz, atz = flight.arrival.tz
         var s: [Step] = [
-            Step(time: dep.addingTimeInterval(-Double(buffer) * 60), title: "Am Flughafen sein", icon: "building.2", tz: dtz),
-            Step(time: dep.addingTimeInterval(longHaul ? -60 * 60 : -40 * 60), title: "Gepäckaufgabe schliesst (ca.)", icon: "suitcase", tz: dtz),
-            Step(time: dep.addingTimeInterval(longHaul ? -50 * 60 : -30 * 60), title: "Boarding" + (flight.departure.gate.map { " · Gate \($0)" } ?? ""), icon: "person.wave.2", tz: dtz),
-            Step(time: dep, title: "Abflug \(flight.departure.code)", icon: "airplane.departure", tz: dtz),
+            Step(time: dep.addingTimeInterval(-Double(buffer) * 60), title: String(localized: "Am Flughafen sein"), icon: "building.2", tz: dtz),
+            Step(time: dep.addingTimeInterval(longHaul ? -60 * 60 : -40 * 60), title: String(localized: "Gepäckaufgabe schliesst (ca.)"), icon: "suitcase", tz: dtz),
+            Step(time: dep.addingTimeInterval(longHaul ? -50 * 60 : -30 * 60), title: String(localized: "Boarding") + (flight.departure.gate.map { String(localized: " · Gate \($0)") } ?? ""), icon: "person.wave.2", tz: dtz),
+            Step(time: dep, title: String(localized: "Abflug \(flight.departure.code)"), icon: "airplane.departure", tz: dtz),
         ]
         if let arr = flight.arrival.best {
-            s.append(Step(time: arr, title: "Landung \(flight.arrival.code)", icon: "airplane.arrival", tz: atz))
-            s.append(Step(time: arr.addingTimeInterval(30 * 60), title: "Gepäck" + (flight.arrival.baggageBelt.map { " · Band \($0)" } ?? ""), icon: "suitcase.rolling", tz: atz))
+            s.append(Step(time: arr, title: String(localized: "Landung \(flight.arrival.code)"), icon: "airplane.arrival", tz: atz))
+            s.append(Step(time: arr.addingTimeInterval(30 * 60), title: String(localized: "Gepäck") + (flight.arrival.baggageBelt.map { String(localized: " · Band \($0)") } ?? ""), icon: "suitcase.rolling", tz: atz))
         }
         return s
     }
@@ -100,7 +100,7 @@ struct TravelDayCard: View {
                     Menu {
                         Picker("Am Flughafen", selection: $bufferSetting) {
                             ForEach(AirportBuffer.choices, id: \.self) { m in
-                                Text(m == 0 ? "Automatisch (\(AirportBuffer.label(AirportBuffer.recommended(flight))))" : "\(AirportBuffer.label(m)) vorher").tag(m)
+                                Text(m == 0 ? String(localized: "Automatisch (\(AirportBuffer.label(AirportBuffer.recommended(flight))))") : String(localized: "\(AirportBuffer.label(m)) vorher")).tag(m)
                             }
                         }
                     } label: {
@@ -140,7 +140,7 @@ struct LiveActivityButton: View {
                     running = LiveFlight.isRunning(flight)
                 }
             } label: {
-                Label(running ? "Live-Aktivität beenden" : "Auf Sperrbildschirm verfolgen",
+                Label(running ? String(localized: "Live-Aktivität beenden") : String(localized: "Auf Sperrbildschirm verfolgen"),
                       systemImage: running ? "stop.circle" : "livephoto")
                     .frame(maxWidth: .infinity)
             }

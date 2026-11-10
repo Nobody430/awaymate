@@ -12,17 +12,17 @@ struct TimetableCard: View {
                 Label("Zeiten im Detail", systemImage: "clock.badge.checkmark").font(.headline)
                 header
                 Text("ABFLUG").font(.caption2).foregroundStyle(.secondary)
-                timeRow("Gate verlassen", t.outScheduled, t.outActual ?? t.outEstimated, actual: t.outActual != nil, tz: dtz)
-                durationRow("Rollen", span(t.outScheduled, t.offScheduled), span(t.outActual ?? t.outEstimated, t.offActual ?? t.offEstimated))
-                timeRow("Start", t.offScheduled, t.offActual ?? t.offEstimated, actual: t.offActual != nil, tz: dtz)
+                timeRow(String(localized: "Gate verlassen"), t.outScheduled, t.outActual ?? t.outEstimated, actual: t.outActual != nil, tz: dtz)
+                durationRow(String(localized: "Rollen"), span(t.outScheduled, t.offScheduled), span(t.outActual ?? t.outEstimated, t.offActual ?? t.offEstimated))
+                timeRow(String(localized: "Start"), t.offScheduled, t.offActual ?? t.offEstimated, actual: t.offActual != nil, tz: dtz)
                 Divider()
                 Text("ANKUNFT").font(.caption2).foregroundStyle(.secondary)
-                timeRow("Landung", t.onScheduled, t.onActual ?? t.onEstimated, actual: t.onActual != nil, tz: atz)
-                durationRow("Rollen", span(t.onScheduled, t.inScheduled), span(t.onActual ?? t.onEstimated, t.inActual ?? t.inEstimated))
-                timeRow("Am Gate", t.inScheduled, t.inActual ?? t.inEstimated, actual: t.inActual != nil, tz: atz)
+                timeRow(String(localized: "Landung"), t.onScheduled, t.onActual ?? t.onEstimated, actual: t.onActual != nil, tz: atz)
+                durationRow(String(localized: "Rollen"), span(t.onScheduled, t.inScheduled), span(t.onActual ?? t.onEstimated, t.inActual ?? t.inEstimated))
+                timeRow(String(localized: "Am Gate"), t.inScheduled, t.inActual ?? t.inEstimated, actual: t.inActual != nil, tz: atz)
                 Divider()
-                durationRow("Flugzeit", span(t.offScheduled, t.onScheduled), span(t.offActual ?? t.offEstimated, t.onActual ?? t.onEstimated))
-                durationRow("Gesamt", span(t.outScheduled, t.inScheduled), span(t.outActual ?? t.outEstimated, t.inActual ?? t.inEstimated))
+                durationRow(String(localized: "Flugzeit"), span(t.offScheduled, t.onScheduled), span(t.offActual ?? t.offEstimated, t.onActual ?? t.onEstimated))
+                durationRow(String(localized: "Gesamt"), span(t.outScheduled, t.inScheduled), span(t.outActual ?? t.outEstimated, t.inActual ?? t.inEstimated))
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -54,7 +54,7 @@ struct TimetableCard: View {
         return HStack {
             VStack(alignment: .leading, spacing: 0) {
                 Text(title).font(.subheadline)
-                if current != nil { Text(actual ? "tatsächlich" : "erwartet").font(.caption2).foregroundStyle(.secondary) }
+                if current != nil { Text(actual ? String(localized: "tatsächlich") : String(localized: "erwartet")).font(.caption2).foregroundStyle(.secondary) }
             }
             Spacer()
             Text(Fmt.time(scheduled, tz)).frame(width: 70, alignment: .trailing).foregroundStyle(.secondary)
@@ -90,19 +90,19 @@ struct PlaneHistoryCard: View {
                 }
                 if let i = flight.inbound {
                     let delay = i.expectedDelay(ourDeparture: flight.departure.best)
-                    Label(i.isCanceled ? "Zubringer annulliert" : delay >= 15 ? "Wird knapp: ca. \(delay) Min. Verspätung möglich" : "Alles gut – genug Zeit für deinen Abflug",
+                    Label(i.isCanceled ? String(localized: "Zubringer annulliert") : delay >= 15 ? String(localized: "Wird knapp: ca. \(delay) Min. Verspätung möglich") : String(localized: "Alles gut – genug Zeit für deinen Abflug"),
                           systemImage: i.isCanceled || delay >= 15 ? "exclamationmark.triangle.fill" : "checkmark.circle.fill")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(i.isCanceled ? .red : delay >= 15 ? .orange : .green)
                 }
-                row(title: "Dein Flug · \(flight.departure.code) → \(flight.arrival.code)",
-                    detail: "Abflug \(Fmt.time(flight.departure.best, flight.departure.tz))",
+                row(title: String(localized: "Dein Flug · \(flight.departure.code) → \(flight.arrival.code)"),
+                    detail: String(localized: "Abflug \(Fmt.time(flight.departure.best, flight.departure.tz))"),
                     delay: flight.departure.delayMinutes, icon: "circle")
                 ForEach(Array(legs.prefix(4).enumerated()), id: \.offset) { _, leg in
                     row(title: "\(leg.fromCode) → \(leg.toCode ?? "?") · \(leg.number)",
-                        detail: leg.landed ? "Gelandet \(Fmt.time(leg.arrival, flight.departure.tz))"
-                            : leg.departed ? "In der Luft · Landung \(Fmt.time(leg.arrival, flight.departure.tz))"
-                            : "Geplant · Landung \(Fmt.time(leg.arrival, flight.departure.tz))",
+                        detail: leg.landed ? String(localized: "Gelandet \(Fmt.time(leg.arrival, flight.departure.tz))")
+                            : leg.departed ? String(localized: "In der Luft · Landung \(Fmt.time(leg.arrival, flight.departure.tz))")
+                            : String(localized: "Geplant · Landung \(Fmt.time(leg.arrival, flight.departure.tz))"),
                         delay: leg.arrivalDelay, icon: leg.landed ? "checkmark.circle" : leg.departed ? "airplane" : "clock")
                 }
                 Text("Zeiten in der Ortszeit von \(flight.departure.code).").font(.caption2).foregroundStyle(.secondary)
@@ -122,7 +122,7 @@ struct PlaneHistoryCard: View {
             }
             Spacer()
             if let d = delay {
-                Text(d >= 5 ? "\(Fmt.duration(d)) später" : d <= -5 ? "\(Fmt.duration(-d)) früher" : "Pünktlich")
+                Text(d >= 5 ? String(localized: "\(Fmt.duration(d)) später") : d <= -5 ? String(localized: "\(Fmt.duration(-d)) früher") : String(localized: "Pünktlich"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(d >= 15 ? .red : d >= 5 ? .orange : .green)
             }
@@ -153,9 +153,9 @@ struct RouteHistoryCard: View {
                     Text("Du bist diese Strecke noch nie geflogen.").font(.subheadline).foregroundStyle(.secondary)
                 } else {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
-                        InfoTile(title: "Flüge", value: "\(same.count)" + (reverse.isEmpty ? "" : " (+\(reverse.count) zurück)"), icon: "airplane")
-                        InfoTile(title: "Distanz", value: Fmt.km((same + reverse).compactMap(\.computedDistanceKm).reduce(0, +)), icon: "ruler")
-                        InfoTile(title: "Flugzeit", value: Fmt.duration((same + reverse).compactMap(\.durationMinutes).reduce(0, +)), icon: "clock")
+                        InfoTile(title: String(localized: "Flüge"), value: "\(same.count)" + (reverse.isEmpty ? "" : String(localized: " (+\(reverse.count) zurück)")), icon: "airplane")
+                        InfoTile(title: String(localized: "Distanz"), value: Fmt.km((same + reverse).compactMap(\.computedDistanceKm).reduce(0, +)), icon: "ruler")
+                        InfoTile(title: String(localized: "Flugzeit"), value: Fmt.duration((same + reverse).compactMap(\.durationMinutes).reduce(0, +)), icon: "clock")
                     }
                     if let last = (same + reverse).max(by: { $0.sortDate < $1.sortDate }) {
                         Text("Zuletzt: \(last.number) am \(Fmt.day(last.sortDate, last.departure.tz))").font(.caption).foregroundStyle(.secondary)
@@ -195,7 +195,7 @@ struct UpdatesCard: View {
                     }
                 }
                 if list.count > 3 {
-                    Button(expanded ? "Weniger anzeigen" : "Alle \(list.count) anzeigen") { expanded.toggle() }.font(.caption)
+                    Button(expanded ? String(localized: "Weniger anzeigen") : String(localized: "Alle \(list.count) anzeigen")) { expanded.toggle() }.font(.caption)
                 }
             }
             .padding()
@@ -246,7 +246,7 @@ struct DepartureConditionsCard: View {
                             Image(systemName: w.symbol).font(.title3).frame(width: 28)
                             VStack(alignment: .leading, spacing: 1) {
                                 Text("Wetter beim Abflug").font(.caption).foregroundStyle(.secondary)
-                                Text("\(Int(w.temperature.rounded()))°" + (w.precipitationChance.map { " · \($0)% Regen" } ?? "") + (w.isRough ? " · kann Verspätungen bringen" : ""))
+                                Text("\(Int(w.temperature.rounded()))°" + (w.precipitationChance.map { String(localized: " · \($0)% Regen") } ?? "") + (w.isRough ? String(localized: " · kann Verspätungen bringen") : ""))
                                     .font(.subheadline.weight(.medium))
                             }
                         }
@@ -309,19 +309,19 @@ struct ConnectionCard: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(next.number) · \(next.departure.code) → \(next.arrival.code)").font(.subheadline.weight(.semibold))
-                        Text("Abflug \(Fmt.time(next.departure.best, next.departure.tz))"
-                             + (next.departure.gate.map { " · Gate \($0)" } ?? "")
-                             + (next.departure.terminal.map { " · Terminal \($0)" } ?? ""))
+                        Text(String(localized: "Abflug \(Fmt.time(next.departure.best, next.departure.tz))")
+                             + (next.departure.gate.map { String(localized: " · Gate \($0)") } ?? "")
+                             + (next.departure.terminal.map { String(localized: " · Terminal \($0)") } ?? ""))
                             .font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text(layover < 0 ? "verpasst?" : Fmt.duration(layover)).font(.title3.bold()).foregroundStyle(color)
+                        Text(layover < 0 ? String(localized: "verpasst?") : Fmt.duration(layover)).font(.title3.bold()).foregroundStyle(color)
                         Text("zum Umsteigen").font(.caption2).foregroundStyle(.secondary)
                     }
                 }
                 if let planned, layover <= planned - 10 {
-                    Text("Geplant waren \(Fmt.duration(planned)). " + (layover < 45 ? "Das wird sehr knapp – früh bei der Crew melden." : "Zügig umsteigen."))
+                    Text(String(localized: "Geplant waren \(Fmt.duration(planned)). ") + (layover < 45 ? String(localized: "Das wird sehr knapp – früh bei der Crew melden.") : String(localized: "Zügig umsteigen.")))
                         .font(.caption).foregroundStyle(color)
                 }
                 if let a = flight.arrival.terminal, let b = next.departure.terminal, a != b {
@@ -352,7 +352,7 @@ struct BoardingPassButton: View {
                         Image(systemName: "qrcode").font(.title2)
                         VStack(alignment: .leading, spacing: 1) {
                             Text("Bordkarte öffnen").font(.headline)
-                            Text(files.count == 1 ? first.lastPathComponent : "\(files.count) Dokumente").font(.caption).lineLimit(1)
+                            Text(files.count == 1 ? first.lastPathComponent : String(localized: "\(files.count) Dokumente")).font(.caption).lineLimit(1)
                         }
                         Spacer()
                         Image(systemName: "chevron.right")

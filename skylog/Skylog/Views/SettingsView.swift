@@ -197,7 +197,7 @@ struct SettingsView: View {
                                         await CalendarSync.sync(store.flights, bookings: BookingStore.shared.bookings)
                                     } else {
                                         calendarSync = false
-                                        message = "Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Skylog → Kalender (Vollzugriff)."
+                                        message = String(localized: "Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Skylog → Kalender (Vollzugriff).")
                                     }
                                 } else {
                                     CalendarSync.removeAll()
@@ -254,9 +254,9 @@ struct SettingsView: View {
                 case .success(let url):
                     do {
                         let n = try store.importFlights(from: url)
-                        message = "\(n) Flüge importiert."
+                        message = String(localized: "\(n) Flüge importiert.")
                     } catch {
-                        message = "Import fehlgeschlagen: \(error.localizedDescription)"
+                        message = String(localized: "Import fehlgeschlagen: \(error.localizedDescription)")
                     }
                 case .failure(let error):
                     message = error.localizedDescription
@@ -267,7 +267,7 @@ struct SettingsView: View {
             }
             .confirmationDialog("\(dupes) doppelte Flüge entfernen?", isPresented: $confirmDupes, titleVisibility: .visible) {
                 Button("Entfernen", role: .destructive) {
-                    message = "\(store.removeDuplicates()) doppelte Flüge entfernt."
+                    message = String(localized: "\(store.removeDuplicates()) doppelte Flüge entfernt.")
                     recount()
                 }
             } message: {
@@ -275,7 +275,7 @@ struct SettingsView: View {
             }
             .confirmationDialog("\(junk) unvollständige Flüge löschen?", isPresented: $confirmJunk, titleVisibility: .visible) {
                 Button("Löschen", role: .destructive) {
-                    message = "\(store.removeIncomplete()) unvollständige Flüge entfernt."
+                    message = String(localized: "\(store.removeIncomplete()) unvollständige Flüge entfernt.")
                     recount()
                 }
             } message: {

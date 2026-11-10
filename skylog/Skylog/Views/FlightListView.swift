@@ -33,7 +33,7 @@ struct FlightListView: View {
                                         .font(.caption.weight(.semibold)).foregroundStyle(.orange)
                                 }
                                 HStack {
-                                    Button(f.replacesID == nil ? "Hinzufügen" : "Ersetzen") { store.acceptPending(f.id) }
+                                    Button(f.replacesID == nil ? String(localized: "Hinzufügen") : String(localized: "Ersetzen")) { store.acceptPending(f.id) }
                                         .buttonStyle(.borderedProminent)
                                     Button("Ignorieren", role: .destructive) { store.ignorePending(f.id) }
                                         .buttonStyle(.bordered)
@@ -48,7 +48,7 @@ struct FlightListView: View {
 
                 if items.isEmpty {
                     ContentUnavailableView {
-                        Label(segment == 0 ? "Keine anstehenden Flüge" : "Noch keine Flüge", systemImage: "airplane.departure")
+                        Label(segment == 0 ? String(localized: "Keine anstehenden Flüge") : String(localized: "Noch keine Flüge"), systemImage: "airplane.departure")
                     } description: {
                         Text("Tippe auf + und gib deine Flugnummer ein.")
                     }

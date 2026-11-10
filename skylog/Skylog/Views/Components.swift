@@ -7,7 +7,7 @@ struct StatusPill: View {
     var body: some View {
         let status = flight.displayStatus
         let delayed = (flight.departure.delayMinutes ?? 0) >= 15 && !status.isAirborne && !status.isFinal
-        let text = delayed ? "Verspätet" : status.label
+        let text = delayed ? String(localized: "Verspätet") : status.label
         let color = delayed ? Fmt.delayColor(flight.departure.delayMinutes) : status.color
         Text(text)
             .font(.caption.weight(.semibold))

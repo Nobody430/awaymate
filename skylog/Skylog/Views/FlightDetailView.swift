@@ -57,9 +57,9 @@ struct FlightDetailView: View {
                 if !f.isPast { FamilyCard(flight: f) }
                 AircraftSeatCard(flight: f)
                 if !f.isPast {
-                    AirportCard(endpoint: f.departure, title: "Abflug")
+                    AirportCard(endpoint: f.departure, title: String(localized: "Abflug"))
                 }
-                AirportCard(endpoint: f.arrival, title: "Ankunft")
+                AirportCard(endpoint: f.arrival, title: String(localized: "Ankunft"))
                 DocumentsCard(flightID: f.id)
                 UpdatesCard(flight: f)
                 RouteHistoryCard(flight: f)
@@ -175,8 +175,8 @@ struct FlightDetailView: View {
 
     private func times(_ f: Flight) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            timeColumn("Abflug", f.departure, actual: f.departure.runway != nil, status: f.displayStatus)
-            timeColumn("Ankunft", f.arrival, actual: f.arrival.runway != nil, status: f.displayStatus, dayOffset: f.arrivalDayOffset)
+            timeColumn(String(localized: "Abflug"), f.departure, actual: f.departure.runway != nil, status: f.displayStatus)
+            timeColumn(String(localized: "Ankunft"), f.arrival, actual: f.arrival.runway != nil, status: f.displayStatus, dayOffset: f.arrivalDayOffset)
         }
     }
 
@@ -198,7 +198,7 @@ struct FlightDetailView: View {
             } else if e.scheduled != nil {
                 Text("Pünktlich").font(.caption.weight(.semibold)).foregroundStyle(.green)
             }
-            Text(actual ? "Tatsächlich" : (e.revised ?? e.predicted) != nil ? "Erwartet" : "Planzeit")
+            Text(actual ? String(localized: "Tatsächlich") : (e.revised ?? e.predicted) != nil ? String(localized: "Erwartet") : String(localized: "Planzeit"))
                 .font(.caption2).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -215,9 +215,9 @@ struct FlightDetailView: View {
             if hasDep {
                 Text("Abflug · \(f.departure.name ?? f.departure.code)").font(.caption).foregroundStyle(.secondary)
                 LazyVGrid(columns: columns, spacing: 8) {
-                    InfoTile(title: "Terminal", value: f.departure.terminal)
-                    InfoTile(title: "Gate", value: f.departure.gate)
-                    InfoTile(title: "Check-in", value: f.departure.checkInDesk)
+                    InfoTile(title: String(localized: "Terminal"), value: f.departure.terminal)
+                    InfoTile(title: String(localized: "Gate"), value: f.departure.gate)
+                    InfoTile(title: String(localized: "Check-in"), value: f.departure.checkInDesk)
                 }
                 if let other = f.gateConflict, !f.isPast, f.departure.runway == nil {
                     Label("Eine andere Quelle meldet Gate \(other). Bitte auf den Anzeigen am Flughafen prüfen.", systemImage: "exclamationmark.triangle")
@@ -229,9 +229,9 @@ struct FlightDetailView: View {
             if hasArr {
                 Text("Ankunft · \(f.arrival.name ?? f.arrival.code)").font(.caption).foregroundStyle(.secondary).padding(.top, 4)
                 LazyVGrid(columns: columns, spacing: 8) {
-                    InfoTile(title: "Terminal", value: f.arrival.terminal)
-                    InfoTile(title: "Gate", value: f.arrival.gate)
-                    InfoTile(title: "Gepäck", value: f.arrival.baggageBelt, icon: "suitcase.rolling")
+                    InfoTile(title: String(localized: "Terminal"), value: f.arrival.terminal)
+                    InfoTile(title: String(localized: "Gate"), value: f.arrival.gate)
+                    InfoTile(title: String(localized: "Gepäck"), value: f.arrival.baggageBelt, icon: "suitcase.rolling")
                 }
             }
         }
@@ -269,23 +269,23 @@ struct FlightDetailView: View {
                     .font(.caption).foregroundStyle(.secondary)
             }
             LazyVGrid(columns: columns, spacing: 8) {
-                InfoTile(title: "Höhe", value: p.altitudeM.map { "\(Int($0 * 3.28084).formatted()) ft" }, icon: "arrow.up.to.line")
-                InfoTile(title: "Geschwindigkeit", value: p.speedKmh.map { "\(Int($0)) km/h" }, icon: "speedometer")
-                InfoTile(title: "Kurs", value: p.heading.map { "\(Int($0))°" }, icon: "location.north.line")
-                InfoTile(title: "Steigrate", value: p.verticalRate.map { "\(Int($0 * 196.85)) ft/min" }, icon: "arrow.up.right")
+                InfoTile(title: String(localized: "Höhe"), value: p.altitudeM.map { "\(Int($0 * 3.28084).formatted()) ft" }, icon: "arrow.up.to.line")
+                InfoTile(title: String(localized: "Geschwindigkeit"), value: p.speedKmh.map { "\(Int($0)) km/h" }, icon: "speedometer")
+                InfoTile(title: String(localized: "Kurs"), value: p.heading.map { "\(Int($0))°" }, icon: "location.north.line")
+                InfoTile(title: String(localized: "Steigrate"), value: p.verticalRate.map { "\(Int($0 * 196.85)) ft/min" }, icon: "arrow.up.right")
             }
         }
     }
 
     private func aircraft(_ f: Flight) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            row("Flugzeug", f.aircraftModel)
-            row("Kennzeichen", f.aircraftReg)
-            row("Rufzeichen", f.callSign)
-            row("Transponder", f.icao24?.uppercased())
-            row("Distanz", f.computedDistanceKm.map(Fmt.km))
-            row("Airline", [f.airlineName, f.airlineIata, f.airlineIcao].compactMap { $0 }.joined(separator: " · "))
-            row("Allianz", Alliance.name(f.airlineIata ?? String(f.number.prefix(2))))
+            row(String(localized: "Flugzeug"), f.aircraftModel)
+            row(String(localized: "Kennzeichen"), f.aircraftReg)
+            row(String(localized: "Rufzeichen"), f.callSign)
+            row(String(localized: "Transponder"), f.icao24?.uppercased())
+            row(String(localized: "Distanz"), f.computedDistanceKm.map(Fmt.km))
+            row(String(localized: "Airline"), [f.airlineName, f.airlineIata, f.airlineIcao].compactMap { $0 }.joined(separator: " · "))
+            row(String(localized: "Allianz"), Alliance.name(f.airlineIata ?? String(f.number.prefix(2))))
         }
         .padding(.horizontal)
         .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

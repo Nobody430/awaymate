@@ -165,7 +165,7 @@ struct TransitCard: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("\(Fmt.time(c.departure, tz)) → \(Fmt.time(c.arrival, tz))")
                         .font(.subheadline.monospacedDigit().weight(.semibold))
-                    Text(c.products.joined(separator: " · ") + (c.transfers > 0 ? " · \(c.transfers)× umsteigen" : " · direkt"))
+                    Text(c.products.joined(separator: " · ") + (c.transfers > 0 ? String(localized: " · \(c.transfers)× umsteigen") : String(localized: " · direkt")))
                         .font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -193,7 +193,7 @@ struct TransitCard: View {
                 fromAirport = try await Transit.connections(from: arrStation, to: home, at: arr.addingTimeInterval(30 * 60), arriveBy: false)
             }
         } catch {
-            self.error = "Verbindungen nicht verfügbar."
+            self.error = String(localized: "Verbindungen nicht verfügbar.")
         }
     }
 }
@@ -360,7 +360,7 @@ struct TripDetailView: View {
                         }
                     }
                     Button { planning = true } label: {
-                        Label(trip.plan == nil ? "Reise mit KI planen" : "Plan neu erstellen", systemImage: "sparkles")
+                        Label(trip.plan == nil ? String(localized: "Reise mit KI planen") : String(localized: "Plan neu erstellen"), systemImage: "sparkles")
                     }
                 }
                 Section("Flüge") {
@@ -417,7 +417,7 @@ struct TripDetailView: View {
                         Button {
                             do {
                                 let path = try ObsidianVault.write(name: "\(trip.name) – Packliste", markdown: PackingAI.markdown(trip: trip))
-                                packingMessage = "In Obsidian gespeichert: \(path)"
+                                packingMessage = String(localized: "In Obsidian gespeichert: \(path)")
                             } catch { packingMessage = error.localizedDescription }
                         } label: { Label("Packliste in Obsidian speichern", systemImage: "square.and.arrow.down") }
                     }
@@ -443,7 +443,7 @@ struct TripDetailView: View {
             let new = items.filter { !existing.contains($0.name.lowercased()) }
             t.packing += new.map { PackItem(name: $0.name) }
             store.upsert(t)
-            packingMessage = "\(new.count) persönliche Punkte hinzugefügt" + (PersonalProfile.text.isEmpty ? " (Tipp: Profil/Obsidian in den Einstellungen ergänzen)." : ".")
+            packingMessage = String(localized: "\(new.count) persönliche Punkte hinzugefügt") + (PersonalProfile.text.isEmpty ? String(localized: " (Tipp: Profil/Obsidian in den Einstellungen ergänzen).") : ".")
         } catch {
             packingMessage = error.localizedDescription
         }

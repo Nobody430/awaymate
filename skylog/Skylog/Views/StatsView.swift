@@ -64,12 +64,12 @@ struct StatsView: View {
                     .font(.subheadline)
 
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                        InfoTile(title: "Flüge", value: "\(s.count)", icon: "airplane")
-                        InfoTile(title: "Distanz", value: Fmt.km(s.distance), icon: "point.topleft.down.to.point.bottomright.curvepath")
-                        InfoTile(title: "In der Luft", value: Fmt.duration(s.minutes), icon: "clock")
-                        InfoTile(title: "Um die Erde", value: String(format: "%.2f×", s.distance / 40_075), icon: "globe.europe.africa")
-                        InfoTile(title: "Flughäfen", value: "\(s.airports.count)", icon: "building.2")
-                        InfoTile(title: "Länder", value: "\(s.countries.count)", icon: "flag")
+                        InfoTile(title: String(localized: "Flüge"), value: "\(s.count)", icon: "airplane")
+                        InfoTile(title: String(localized: "Distanz"), value: Fmt.km(s.distance), icon: "point.topleft.down.to.point.bottomright.curvepath")
+                        InfoTile(title: String(localized: "In der Luft"), value: Fmt.duration(s.minutes), icon: "clock")
+                        InfoTile(title: String(localized: "Um die Erde"), value: String(format: "%.2f×", s.distance / 40_075), icon: "globe.europe.africa")
+                        InfoTile(title: String(localized: "Flughäfen"), value: "\(s.airports.count)", icon: "building.2")
+                        InfoTile(title: String(localized: "Länder"), value: "\(s.countries.count)", icon: "flag")
                     }
 
                     if !s.flights.isEmpty {
@@ -77,7 +77,7 @@ struct StatsView: View {
                     }
 
                     if let l = s.longest, let km = l.computedDistanceKm {
-                        card("Längster Flug") {
+                        card(String(localized: "Längster Flug")) {
                             HStack {
                                 Text("\(l.departure.code) → \(l.arrival.code)").font(.title3.bold())
                                 Spacer()
@@ -87,7 +87,7 @@ struct StatsView: View {
                     }
 
                     if s.monthly.count > 1 {
-                        card("Flüge pro Monat") {
+                        card(String(localized: "Flüge pro Monat")) {
                             Chart(s.monthly, id: \.month) { item in
                                 BarMark(x: .value("Monat", item.month, unit: .month), y: .value("Flüge", item.count))
                                     .foregroundStyle(Theme.accent)
@@ -97,15 +97,15 @@ struct StatsView: View {
                     }
 
                     if s.count > 0 {
-                        YearReviewCard(stats: s, title: year.map { "Mein Flugjahr \($0)" } ?? "Meine Flüge")
+                        YearReviewCard(stats: s, title: year.map { String(localized: "Mein Flugjahr \(String($0))") } ?? String(localized: "Meine Flüge"))
                         PunctualityCard(flights: s.flights)
                         AircraftCollectionCard(flights: s.flights)
                     }
 
-                    topList("Airlines", s.top { [$0.airlineName] })
-                    topList("Flughäfen", s.top { [$0.departure.iata ?? $0.departure.icao, $0.arrival.iata ?? $0.arrival.icao] })
-                    topList("Strecken", s.top { $0.departure.code == "???" || $0.arrival.code == "???" ? [] : ["\($0.departure.code) → \($0.arrival.code)"] })
-                    topList("Flugzeugtypen", s.top { [$0.aircraftModel] })
+                    topList(String(localized: "Airlines"), s.top { [$0.airlineName] })
+                    topList(String(localized: "Flughäfen"), s.top { [$0.departure.iata ?? $0.departure.icao, $0.arrival.iata ?? $0.arrival.icao] })
+                    topList(String(localized: "Strecken"), s.top { $0.departure.code == "???" || $0.arrival.code == "???" ? [] : ["\($0.departure.code) → \($0.arrival.code)"] })
+                    topList(String(localized: "Flugzeugtypen"), s.top { [$0.aircraftModel] })
 
                     if s.count == 0 {
                         ContentUnavailableView("Noch keine Statistik", systemImage: "chart.bar",

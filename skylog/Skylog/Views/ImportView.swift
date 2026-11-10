@@ -30,7 +30,7 @@ struct ImportView: View {
                         Button {
                             Task { await scanOutlook() }
                         } label: {
-                            Label(connected ? "Postfach nach Flügen durchsuchen" : "Mit Outlook anmelden & durchsuchen",
+                            Label(connected ? String(localized: "Postfach nach Flügen durchsuchen") : String(localized: "Mit Outlook anmelden & durchsuchen"),
                                   systemImage: "envelope.badge")
                         }
                         .disabled(busy)
@@ -45,8 +45,8 @@ struct ImportView: View {
                     Text("Outlook / Hotmail / MSN")
                 } footer: {
                     Text(AIClient.hasKey
-                         ? "Mit KI-Erkennung: Die KI liest die gefundenen Mails und übernimmt nur echte Buchungen (inkl. Umbuchungen und Stornos)."
-                         : "Tipp: Mit einem KI-Key (Einstellungen → KI-Erkennung) werden Flüge viel genauer erkannt.")
+                         ? String(localized: "Mit KI-Erkennung: Die KI liest die gefundenen Mails und übernimmt nur echte Buchungen (inkl. Umbuchungen und Stornos).")
+                         : String(localized: "Tipp: Mit einem KI-Key (Einstellungen → KI-Erkennung) werden Flüge viel genauer erkannt."))
                 }
 
                 if !pendingMails.isEmpty {
@@ -62,8 +62,8 @@ struct ImportView: View {
                         .disabled(busy)
                     } footer: {
                         Text(AIClient.provider == .openai
-                             ? "Kosten werden direkt von deinem OpenAI-Guthaben abgebucht. Die Mail-Texte gehen dafür verschlüsselt an OpenAI."
-                             : "Kosten werden direkt von deinem Claude-Guthaben abgebucht. Die Mail-Texte gehen dafür verschlüsselt an Anthropic.")
+                             ? String(localized: "Kosten werden direkt von deinem OpenAI-Guthaben abgebucht. Die Mail-Texte gehen dafür verschlüsselt an OpenAI.")
+                             : String(localized: "Kosten werden direkt von deinem Claude-Guthaben abgebucht. Die Mail-Texte gehen dafür verschlüsselt an Anthropic."))
                     }
                 }
 
@@ -74,11 +74,11 @@ struct ImportView: View {
                     HStack {
                         Button("Aus Zwischenablage") {
                             pasteText = UIPasteboard.general.string ?? ""
-                            analyze(pasteText, source: "Eingefügter Text")
+                            analyze(pasteText, source: String(localized: "Eingefügter Text"))
                         }
                         .buttonStyle(.borderless)
                         Spacer()
-                        Button("Analysieren") { analyze(pasteText, source: "Eingefügter Text") }
+                        Button("Analysieren") { analyze(pasteText, source: String(localized: "Eingefügter Text")) }
                             .buttonStyle(.borderless)
                             .disabled(pasteText.isEmpty)
                     }
@@ -114,7 +114,7 @@ struct ImportView: View {
                                     if !c.airports.isEmpty {
                                         Text(c.airports.joined(separator: " → ")).font(.subheadline)
                                     }
-                                    Text(exists ? "Bereits gespeichert" : c.source)
+                                    Text(exists ? String(localized: "Bereits gespeichert") : c.source)
                                         .font(.caption)
                                         .foregroundStyle(exists ? .orange : .secondary)
                                         .lineLimit(1)
@@ -172,12 +172,12 @@ struct ImportView: View {
     private func analyze(_ text: String, source: String) {
         let found = FlightTextParser.parse(text, source: source)
         merge(found)
-        status = found.isEmpty ? "Keine Flüge erkannt." : "\(found.count) Flug/Flüge erkannt."
+        status = found.isEmpty ? String(localized: "Keine Flüge erkannt.") : String(localized: "\(found.count) Flug/Flüge erkannt.")
     }
 
     private func analyzeFile(_ url: URL) {
         guard let text = DocumentText.extract(from: url), !text.isEmpty else {
-            status = "Datei konnte nicht gelesen werden: \(url.lastPathComponent)"
+            status = String(localized: "Datei konnte nicht gelesen werden: \(url.lastPathComponent)")
             return
         }
         analyze(text, source: url.lastPathComponent)
@@ -195,14 +195,14 @@ struct ImportView: View {
         }
         do {
             if !OutlookAuth.shared.isConnected {
-                status = "Anmeldung …"
+                status = String(localized: "Anmeldung …")
                 try await OutlookAuth.shared.signIn()
                 connected = true
             }
             if AIClient.hasKey {
                 let mails = try await OutlookMail.fetchMails { message in status = message }
                 pendingMails = MailAI.relevant(mails)
-                status = "\(mails.count) Mails durchsucht, \(pendingMails.count) davon enthalten Flugdaten."
+                status = String(localized: "\(mails.count) Mails durchsucht, \(pendingMails.count) davon enthalten Flugdaten.")
             } else {
                 let found = try await OutlookMail.scan { message in status = message }
                 merge(found)
@@ -233,9 +233,9 @@ struct ImportView: View {
             if replaceExisting && !result.bookings.isEmpty { BookingStore.shared.deleteAll() }
             var stays = 0
             for b in result.bookings where BookingStore.shared.upsert(b) && !b.cancelled { stays += 1 }
-            status = "\(result.flights.count) Flüge erkannt – prüfen und importieren."
-                + (stays > 0 ? " \(stays) Hotels/Mietwagen/Züge wurden direkt den Reisen hinzugefügt." : "")
-                + (result.failedMails > 0 ? " Achtung: \(result.failedMails) Mails konnten nicht gelesen werden (\(result.failure ?? "KI-Fehler")) – später nochmal scannen." : "")
+            status = String(localized: "\(result.flights.count) Flüge erkannt – prüfen und importieren.")
+                + (stays > 0 ? String(localized: " \(stays) Hotels/Mietwagen/Züge wurden direkt den Reisen hinzugefügt.") : "")
+                + (result.failedMails > 0 ? String(localized: " Achtung: \(result.failedMails) Mails konnten nicht gelesen werden (\(result.failure ?? String(localized: "KI-Fehler"))) – später nochmal scannen.") : "")
         } catch {
             status = error.localizedDescription
         }
@@ -247,7 +247,7 @@ struct ImportView: View {
         let todo = candidates.filter { selected.contains($0.id) }
         var ok = 0, fallback = 0, skipped = 0
         for (i, c) in todo.enumerated() {
-            status = "Importiere \(i + 1)/\(todo.count): \(c.number) …"
+            status = String(localized: "Importiere \(i + 1)/\(todo.count): \(c.number) …")
             do {
                 // Save the API quota: only flights around today get live data; everything else from the mail.
                 let near = abs(c.date.timeIntervalSinceNow) < 3 * 86400
@@ -267,9 +267,9 @@ struct ImportView: View {
             }
             selected.remove(c.id)
         }
-        status = "\(ok) Flüge mit Live-Daten"
-            + (fallback > 0 ? ", \(fallback) aus den Mail-Angaben importiert" : "")
-            + (skipped > 0 ? ", \(skipped) unplausible Treffer verworfen" : "") + "."
+        status = String(localized: "\(ok) Flüge mit Live-Daten")
+            + (fallback > 0 ? String(localized: ", \(fallback) aus den Mail-Angaben importiert") : "")
+            + (skipped > 0 ? String(localized: ", \(skipped) unplausible Treffer verworfen") : "") + "."
     }
 
     /// Known airline, two airport codes, in the past.
@@ -293,7 +293,7 @@ struct ImportView: View {
         var f = Flight(number: c.number, date: Fmt.apiDate.string(from: c.date), status: future ? "Expected" : "Arrived",
                        departure: dep, arrival: arr)
         if let ref = c.bookingReference {
-            f.notes = "Buchungscode: \(ref)"
+            f.notes = String(localized: "Buchungscode: \(ref)")
             f.bookingReference = ref.uppercased()
         }
         return f
