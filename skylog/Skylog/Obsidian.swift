@@ -117,7 +117,7 @@ enum PackingAI {
                 "properties": ["items": ["type": "array", "items": item]]]
     }()
 
-    static func generate(trip: Trip, flights: [Flight], bookings: [TravelBooking]) async throws -> [Item] {
+    static func generate(trip: Trip, flights: [Flight], bookings: [TravelBooking], compact: Bool = false) async throws -> [Item] {
         let f = DateFormatter()
         f.dateFormat = "yyyy-MM-dd"
         var context = "Reise: \(trip.name), \(f.string(from: trip.start)) bis \(f.string(from: trip.end)) (\(max(1, Calendar.current.dateComponents([.day], from: trip.start, to: trip.end).day ?? 1)) Tage)\n"
@@ -137,13 +137,18 @@ enum PackingAI {
         if !profile.isEmpty { context += "\n\(profile)\n" }
 
         let system = """
-        Du erstellst eine persönliche Packliste auf Deutsch (Schweizer Schreibweise, kein ß).
+        Du erstellst eine persönliche Packliste. Schreibe alle Texte auf \(AIClient.outputLanguage).
         Nutze die persönlichen Infos (Gewohnheiten, Gesundheit, Hobbys, Geräte, frühere Learnings) und die Reise (Ziel, Klima zur Reisezeit, Dauer, Aktivitäten, Unterkunft).
-        Liste 15–35 Dinge, die NICHT schon auf der Packliste stehen. Kategorie z.B. Dokumente, Kleidung, Hygiene, Gesundheit, Technik, Aktivitäten, Sonstiges.
+        Liste \(compact ? "höchstens 15" : "15–30") Dinge, die NICHT schon auf der Packliste stehen. Kategorie z.B. Dokumente, Kleidung, Hygiene, Gesundheit, Technik, Aktivitäten, Sonstiges.
         reason: kurz, warum (z.B. „du trägst Kontaktlinsen“, „Regenzeit in Salta“). Keine sensiblen Details wörtlich wiederholen.
         """
-        let text = try await AIClient.send(system: system, user: context, schema: schema, effort: "low", maxTokens: 6000)
-        return try JSONDecoder().decode(Response.self, from: Data(text.utf8)).items
+        do {
+            let text = try await AIClient.send(system: system, user: context, schema: schema, effort: "low", maxTokens: 16000)
+            return try JSONDecoder().decode(Response.self, from: Data(text.utf8)).items
+        } catch let f as AIClient.Failure where f.tooLong && !compact {
+            // didn't fit: ask once more for a shorter list
+            return try await generate(trip: trip, flights: flights, bookings: bookings, compact: true)
+        }
     }
 
     static func markdown(trip: Trip) -> String {

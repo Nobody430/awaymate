@@ -60,7 +60,7 @@ struct TripPlannerView: View {
                     }
                     .disabled(working || !AIClient.hasKey || destination.isEmpty)
                 } footer: {
-                    if working { Text("Die KI plant deine Reise … das dauert meist 30–60 Sekunden.") }
+                    if working { Text("Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten.") }
                     if let error { Text(error).foregroundStyle(.red) }
                 }
             }

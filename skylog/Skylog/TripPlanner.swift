@@ -59,7 +59,7 @@ enum TripPlanner {
         context += "\n\nAufgabe: Erstelle jetzt den vollständigen Reiseplan für diese Reise."
 
         let system = """
-        Du bist ein erfahrener Reiseplaner. Erstelle einen realistischen Tag-für-Tag-Plan auf Deutsch (Schweizer Schreibweise, kein ß).
+        Du bist ein erfahrener Reiseplaner. Erstelle einen realistischen Tag-für-Tag-Plan. Schreibe alle Texte auf \(AIClient.outputLanguage).
         - Berücksichtige Ankunfts- und Abflugzeiten (Ankunftstag/Abreisetag nur leicht verplanen, Jetlag bei Langstrecken bedenken).
         - Plane rund um die gebuchten Unterkünfte; bei mehreren Orten die Reisetage zwischen den Orten einplanen.
         - Konkrete Orte, Quartiere und Gerichte nennen; Wege realistisch (Distanzen, Öffnungszeiten-typisch, Siesta etc.).
@@ -70,24 +70,55 @@ enum TripPlanner {
         - summary: 2–3 Sätze Überblick. date im Format YYYY-MM-DD.
         Erfinde keine konkreten Preise oder Öffnungszeiten als Fakten – formuliere sie als ungefähr.
         """
-        // Name every day explicitly so the model can't return an empty skeleton
+        // Every day is named explicitly, and long trips are planned in blocks of a few days:
+        // one huge answer often doesn't fit ("Antwort zu lang") or comes back empty.
         var days: [String] = []
         var d = Calendar.current.startOfDay(for: trip.start)
-        while d <= trip.end && days.count < 21 {
+        while d <= trip.end && days.count < 28 {
             days.append(f.string(from: d))
             d = Calendar.current.date(byAdding: .day, value: 1, to: d) ?? trip.end.addingTimeInterval(1)
         }
-        if !days.isEmpty {
-            context += "\n\nErstelle für JEDEN dieser Tage einen Eintrag in days (mit 2–6 items): " + days.joined(separator: ", ")
+        guard !days.isEmpty else { throw AIClient.Failure(message: String(localized: "Die Reise hat keine Tage – bitte Start und Ende prüfen.")) }
+
+        func request(_ block: [String], first: Bool, itemsPerDay: String) async throws -> TripPlan {
+            var task = "\n\nErstelle für JEDEN dieser Tage einen Eintrag in days (mit \(itemsPerDay) items): " + block.joined(separator: ", ")
+            if block.count < days.count {
+                task += "\nDie ganze Reise dauert vom \(days.first!) bis \(days.last!); plane hier NUR die genannten Tage, passend zum Rest."
+            }
+            if !first {
+                task += "\nsummary und budget: leerer Text. tips und packing: leere Listen (die gibt es schon)."
+            }
+            var lastText = ""
+            for attempt in 0..<2 {
+                let extra = attempt == 0 ? "" : "\n\nWICHTIG: Deine letzte Antwort war leer. Fülle days mit items vollständig aus."
+                let text = try await AIClient.send(system: system, user: context + task + extra, schema: schema, effort: "medium", maxTokens: 16000)
+                lastText = text
+                if let plan = try? JSONDecoder().decode(TripPlan.self, from: Data(text.utf8)), plan.isUsable { return plan }
+            }
+            throw AIClient.Failure(message: String(localized: "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: ") + String(lastText.prefix(200)))
         }
 
-        var lastText = ""
-        for attempt in 0..<2 {
-            let extra = attempt == 0 ? "" : "\n\nWICHTIG: Deine letzte Antwort war leer. Fülle ALLE Felder vollständig aus – summary, days mit items, tips, packing, budget."
-            let text = try await AIClient.send(system: system, user: context + extra, schema: schema, effort: "medium", maxTokens: 32000)
-            lastText = text
-            if let plan = try? JSONDecoder().decode(TripPlan.self, from: Data(text.utf8)), plan.isUsable { return plan }
+        /// Plans `block`; if the answer doesn't fit, halves the block (down to single days with fewer items).
+        func planBlock(_ block: [String], first: Bool) async throws -> [TripPlan] {
+            do {
+                return [try await request(block, first: first, itemsPerDay: block.count == 1 ? "2–4" : "2–6")]
+            } catch let failure as AIClient.Failure where failure.tooLong && block.count > 1 {
+                let half = block.count / 2
+                let a = try await planBlock(Array(block[..<half]), first: first)
+                let b = try await planBlock(Array(block[half...]), first: false)
+                return a + b
+            }
         }
-        throw AIClient.Failure(message: String(localized: "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: ") + String(lastText.prefix(200)))
+
+        let blockSize = 5
+        var parts: [TripPlan] = []
+        for start in stride(from: 0, to: days.count, by: blockSize) {
+            let block = Array(days[start..<min(start + blockSize, days.count)])
+            parts += try await planBlock(block, first: start == 0)
+        }
+        let head = parts.first { !$0.summary.isEmpty } ?? parts[0]
+        var seen = Set<String>()
+        let allDays = parts.flatMap(\.days).filter { seen.insert($0.date).inserted }.sorted { $0.date < $1.date }
+        return TripPlan(summary: head.summary, days: allDays, tips: head.tips, packing: head.packing, budget: head.budget)
     }
 }

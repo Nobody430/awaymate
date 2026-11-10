@@ -26,6 +26,17 @@ enum AIClient {
         provider == .openai ? !setting("openaiKey").isEmpty : !setting("anthropicKey").isEmpty
     }
 
+    /// Language the AI should write in: the language the app is shown in.
+    static var outputLanguage: String {
+        switch String((Bundle.main.preferredLocalizations.first ?? "de").prefix(2)) {
+        case "en": "Englisch (English)"
+        case "fr": "Französisch (français)"
+        case "it": "Italienisch (italiano)"
+        case "es": "Spanisch (español)"
+        default: "Deutsch (Schweizer Schreibweise, kein ß)"
+        }
+    }
+
     struct Failure: LocalizedError {
         let message: String
         /// Worth trying again shortly (overload, rate limit)
@@ -33,6 +44,8 @@ enum AIClient {
         var retryAfter: Double? = nil
         /// Will fail again for every request (bad key, no credit)
         var fatal = false
+        /// The answer did not fit – ask for less (fewer days / items) instead of repeating the same request
+        var tooLong = false
         var errorDescription: String? { message }
     }
 
@@ -73,7 +86,7 @@ enum AIClient {
         let json = try await perform(request)
         switch json["stop_reason"] as? String {
         case "refusal": throw Failure(message: String(localized: "Die Anfrage wurde abgelehnt."))
-        case "max_tokens": throw Failure(message: String(localized: "Antwort zu lang – bitte nochmal versuchen."))
+        case "max_tokens": throw Failure(message: String(localized: "Antwort zu lang – bitte nochmal versuchen."), tooLong: true)
         default: break
         }
         let blocks = json["content"] as? [[String: Any]] ?? []
@@ -105,7 +118,7 @@ enum AIClient {
         let message = choice?["message"] as? [String: Any]
         if let refusal = message?["refusal"] as? String, !refusal.isEmpty { throw Failure(message: String(localized: "Die Anfrage wurde abgelehnt.")) }
         switch choice?["finish_reason"] as? String {
-        case "length": throw Failure(message: String(localized: "Antwort zu lang – bitte nochmal versuchen."))
+        case "length": throw Failure(message: String(localized: "Antwort zu lang – bitte nochmal versuchen."), tooLong: true)
         case "content_filter": throw Failure(message: String(localized: "Die Anfrage wurde abgelehnt."))
         default: break
         }
