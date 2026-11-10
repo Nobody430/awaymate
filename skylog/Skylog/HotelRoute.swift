@@ -39,21 +39,41 @@ enum HotelRoute {
     static func hotel(after f: Flight, flights: [Flight]) -> TravelBooking? {
         guard f.arrival.code != homeAirport, !isConnection(after: f, in: flights),
               let arr = f.arrival.best ?? f.arrival.scheduled else { return nil }
+        // Compare calendar days (bookings are stored as dates, not times): the stay must cover the arrival day.
+        // A check-in on the next day only counts for late-evening arrivals.
+        let day = dayNumber(arr, f.arrival.tz)
+        let late = Calendar.current.dateComponents(in: f.arrival.tz, from: arr).hour ?? 0 >= 21
         let cands = hotels.filter {
-            $0.start > arr.addingTimeInterval(-36 * 3600) && $0.start < arr.addingTimeInterval(36 * 3600) && $0.end > arr
+            let ci = dayNumber($0.start, .current), co = dayNumber($0.end, .current)
+            return co > day && (ci <= day || (late && ci == day + 1)) && ci >= day - 1
         }
-        return cands.min { score($0, arr, f.arrival) < score($1, arr, f.arrival) }
+        // prefer the same city, then the check-in closest to the arrival day
+        return cands.min { a, b in
+            let sa = sameCity(a, f.arrival), sb = sameCity(b, f.arrival)
+            if sa != sb { return sa }
+            return abs(dayNumber(a.start, .current) - day) < abs(dayNumber(b.start, .current) - day)
+        }
+    }
+
+    /// Days since 1970 of the calendar day `date` falls on in `tz`.
+    private static func dayNumber(_ date: Date, _ tz: TimeZone) -> Int {
+        Int(floor((date.timeIntervalSince1970 + Double(tz.secondsFromGMT(for: date))) / 86400))
     }
 
     /// Hotel you leave from for this flight (stay covers the departure day).
     static func hotel(before f: Flight, flights: [Flight]) -> TravelBooking? {
         guard f.departure.code != homeAirport, !isConnection(before: f, in: flights), let dep = f.departure.best ?? f.departure.scheduled else { return nil }
-        let cands = hotels.filter { $0.start < dep && $0.end > dep.addingTimeInterval(-36 * 3600) }
-        return cands.min { score($0, dep, f.departure, useEnd: true) < score($1, dep, f.departure, useEnd: true) }
-    }
-
-    private static func score(_ b: TravelBooking, _ t: Date, _ e: FlightEndpoint, useEnd: Bool = false) -> Double {
-        abs((useEnd ? b.end : b.start).timeIntervalSince(t)) - (sameCity(b, e) ? 86400 : 0)
+        // Stay must end on the departure day (or the day before, for early-morning flights)
+        let day = dayNumber(dep, f.departure.tz)
+        let cands = hotels.filter {
+            let ci = dayNumber($0.start, .current), co = dayNumber($0.end, .current)
+            return ci <= day && (co == day || co == day + 1 || co == day - 1) && ci < co
+        }
+        return cands.min { a, b in
+            let sa = sameCity(a, f.departure), sb = sameCity(b, f.departure)
+            if sa != sb { return sa }
+            return abs(dayNumber(a.end, .current) - day) < abs(dayNumber(b.end, .current) - day)
+        }
     }
 
     // MARK: Location

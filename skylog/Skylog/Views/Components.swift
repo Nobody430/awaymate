@@ -5,7 +5,7 @@ struct StatusPill: View {
     let flight: Flight
 
     var body: some View {
-        let status = flight.normalizedStatus
+        let status = flight.displayStatus
         let delayed = (flight.departure.delayMinutes ?? 0) >= 15 && !status.isAirborne && !status.isFinal
         let text = delayed ? "Verspätet" : status.label
         let color = delayed ? Fmt.delayColor(flight.departure.delayMinutes) : status.color
@@ -21,6 +21,8 @@ struct StatusPill: View {
 struct TimeLabel: View {
     let endpoint: FlightEndpoint
     var font: Font = .headline
+    /// Arrival on another calendar day than the departure (shown as +1 / −1)
+    var dayOffset: Int = 0
 
     var body: some View {
         let changed = (endpoint.delayMinutes.map { abs($0) >= 5 }) ?? false
@@ -34,6 +36,11 @@ struct TimeLabel: View {
             Text(Fmt.time(endpoint.best, endpoint.tz))
                 .font(font.monospacedDigit())
                 .foregroundStyle(changed ? Fmt.delayColor(endpoint.delayMinutes) : .primary)
+            if dayOffset != 0 {
+                Text(dayOffset > 0 ? "+\(dayOffset)" : "\(dayOffset)")
+                    .font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+                    .baselineOffset(6)
+            }
         }
     }
 }

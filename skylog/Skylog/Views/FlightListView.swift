@@ -6,6 +6,8 @@ struct FlightListView: View {
     @State private var showImport = false
     @State private var sharedPDF: SharedFile?
     @State private var segment = 0
+    @State private var toDelete: [UUID] = []
+    @State private var exporting = false
 
     var body: some View {
         NavigationStack {
@@ -59,7 +61,7 @@ struct FlightListView: View {
                     .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 }
                 .onDelete { offsets in
-                    store.delete(offsets.map { items[$0].id })
+                    toDelete = offsets.map { items[$0].id }
                 }
 
                 if let error = store.lastError {
@@ -79,10 +81,15 @@ struct FlightListView: View {
                     HStack {
                         if !items.isEmpty {
                             Button {
-                                Task { if let url = await FlightPDF.make(items) { sharedPDF = SharedFile(url: url) } }
+                                Task {
+                                    exporting = true
+                                    defer { exporting = false }
+                                    if let url = await FlightPDF.make(items) { sharedPDF = SharedFile(url: url) }
+                                }
                             } label: {
-                                Image(systemName: "square.and.arrow.up")
+                                if exporting { ProgressView() } else { Image(systemName: "square.and.arrow.up") }
                             }
+                            .disabled(exporting)
                         }
                         if store.isRefreshing { ProgressView() }
                     }
@@ -97,6 +104,12 @@ struct FlightListView: View {
                 }
             }
             .refreshable { await store.refreshActive(force: true) }
+            .confirmationDialog("Flug wirklich löschen?", isPresented: Binding(get: { !toDelete.isEmpty }, set: { if !$0 { toDelete = [] } }),
+                                titleVisibility: .visible) {
+                Button("Löschen", role: .destructive) { store.delete(toDelete); toDelete = [] }
+            } message: {
+                Text("Notizen, Sitzplatz und Dokumente dieses Flugs gehen verloren.")
+            }
             .sheet(isPresented: $showAdd) { AddFlightView() }
             .sheet(isPresented: $showImport) { ImportView() }
             .sheet(item: $sharedPDF) { file in

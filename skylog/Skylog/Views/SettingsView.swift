@@ -29,6 +29,17 @@ struct SettingsView: View {
     @State private var importing = false
     @State private var confirmWipe = false
     @State private var message: String?
+    @State private var exportFile: URL?
+    @State private var confirmDupes = false
+    @State private var confirmJunk = false
+    @State private var dupes = 0
+    @State private var junk = 0
+
+    private func recount() {
+        dupes = store.duplicates.count
+        junk = store.incomplete.count
+        exportFile = nil
+    }
 
     var body: some View {
         NavigationStack {
@@ -138,6 +149,9 @@ struct SettingsView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .font(.footnote.monospaced())
+                    if mailWatch, let e = MailWatcher.lastError {
+                        Text("Letzte Mail-Prüfung fehlgeschlagen – \(e)").font(.caption).foregroundStyle(.orange)
+                    }
                     NavigationLink {
                         KeyGuideView(guide: .outlook)
                     } label: {
@@ -182,27 +196,24 @@ struct SettingsView: View {
                 }
 
                 Section("Daten") {
-                    if let url = store.exportURL() {
-                        ShareLink(item: url) { Label("Flüge exportieren (JSON)", systemImage: "square.and.arrow.up") }
+                    // the file is written on tap, not on every redraw of the settings
+                    if let exportFile {
+                        ShareLink(item: exportFile) { Label("Export teilen …", systemImage: "square.and.arrow.up") }
+                    } else {
+                        Button { exportFile = store.exportURL() } label: {
+                            Label("Flüge exportieren (JSON)", systemImage: "square.and.arrow.up")
+                        }
                     }
                     Button { importing = true } label: {
                         Label("Flüge importieren", systemImage: "square.and.arrow.down")
                     }
-                    let dupes = store.duplicates.count
                     if dupes > 0 {
-                        Button(role: .destructive) {
-                            let n = store.removeDuplicates()
-                            message = "\(n) doppelte Flüge entfernt."
-                        } label: {
+                        Button(role: .destructive) { confirmDupes = true } label: {
                             Label("Duplikate entfernen (\(dupes))", systemImage: "square.on.square.dashed")
                         }
                     }
-                    let junk = store.incomplete.count
                     if junk > 0 {
-                        Button(role: .destructive) {
-                            let n = store.removeIncomplete()
-                            message = "\(n) unvollständige Flüge entfernt."
-                        } label: {
+                        Button(role: .destructive) { confirmJunk = true } label: {
                             Label("Aufräumen: \(junk) unvollständige Flüge löschen", systemImage: "wand.and.stars")
                         }
                     }
@@ -215,7 +226,7 @@ struct SettingsView: View {
                     LabeledContent("Gespeicherte Flüge", value: "\(store.flights.count)")
                     LabeledContent("Version", value: "1.0")
                 } footer: {
-                    Text("Skylog – eigener Flug-Tracker. Daten: AeroDataBox, OpenSky Network.")
+                    Text("Skylog – eigener Flug-Tracker. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.")
                 }
             }
             .navigationTitle("Einstellungen")
@@ -233,8 +244,25 @@ struct SettingsView: View {
                 }
             }
             .confirmationDialog("Wirklich alle Flüge löschen?", isPresented: $confirmWipe, titleVisibility: .visible) {
-                Button("Alle löschen", role: .destructive) { store.deleteAll() }
+                Button("Alle löschen", role: .destructive) { store.deleteAll(); recount() }
             }
+            .confirmationDialog("\(dupes) doppelte Flüge entfernen?", isPresented: $confirmDupes, titleVisibility: .visible) {
+                Button("Entfernen", role: .destructive) {
+                    message = "\(store.removeDuplicates()) doppelte Flüge entfernt."
+                    recount()
+                }
+            } message: {
+                Text("Von jedem doppelten Flug bleibt der Eintrag mit den besten Daten.")
+            }
+            .confirmationDialog("\(junk) unvollständige Flüge löschen?", isPresented: $confirmJunk, titleVisibility: .visible) {
+                Button("Löschen", role: .destructive) {
+                    message = "\(store.removeIncomplete()) unvollständige Flüge entfernt."
+                    recount()
+                }
+            } message: {
+                Text(store.incomplete.prefix(8).map { "\($0.number) \($0.departure.code)→\($0.arrival.code) \($0.date)" }.joined(separator: "\n"))
+            }
+            .onAppear { recount() }
             .alert(message ?? "", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
                 Button("OK", role: .cancel) {}
             }

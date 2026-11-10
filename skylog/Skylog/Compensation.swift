@@ -25,7 +25,9 @@ enum Compensation {
     }
 
     static func arrivalDelayMinutes(_ f: Flight) -> Int? {
-        guard let scheduled = f.arrival.scheduled, let actual = f.arrival.runway ?? f.arrival.revised else { return nil }
+        // only real arrival times count – an estimate is not a claim yet
+        guard let scheduled = f.arrival.scheduled,
+              let actual = f.arrival.runway ?? (f.normalizedStatus == .arrived ? f.arrival.revised : nil) else { return nil }
         return Int(actual.timeIntervalSince(scheduled) / 60)
     }
 

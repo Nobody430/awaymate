@@ -75,7 +75,7 @@ enum Weather {
         let (data, _) = try await URLSession.shared.data(from: c.url!)
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let hourly = json["hourly"] as? [String: Any],
-              let temps = hourly["temperature_2m"] as? [Double] else { return nil }
+              let temps = hourly["temperature_2m"] as? [Double], !temps.isEmpty else { return nil }
         let hour = min(max(Calendar(identifier: .gregorian).dateComponents(in: TimeZone(identifier: "UTC")!, from: date).hour ?? 12, 0), temps.count - 1)
         let rain = (hourly["precipitation_probability"] as? [Any])?[safe: hour] as? Int
         let code = (hourly["weather_code"] as? [Int])?[safe: hour] ?? 0

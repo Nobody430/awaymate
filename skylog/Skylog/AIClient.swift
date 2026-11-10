@@ -28,6 +28,11 @@ enum AIClient {
 
     struct Failure: LocalizedError {
         let message: String
+        /// Worth trying again shortly (overload, rate limit)
+        var retryable = false
+        var retryAfter: Double? = nil
+        /// Will fail again for every request (bad key, no credit)
+        var fatal = false
         var errorDescription: String? { message }
     }
 
@@ -96,8 +101,15 @@ enum AIClient {
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
         let json = try await perform(request)
-        guard let message = (json["choices"] as? [[String: Any]])?.first?["message"] as? [String: Any],
-              let text = message["content"] as? String, !text.isEmpty else {
+        let choice = (json["choices"] as? [[String: Any]])?.first
+        let message = choice?["message"] as? [String: Any]
+        if let refusal = message?["refusal"] as? String, !refusal.isEmpty { throw Failure(message: "Die Anfrage wurde abgelehnt.") }
+        switch choice?["finish_reason"] as? String {
+        case "length": throw Failure(message: "Antwort zu lang – bitte nochmal versuchen.")
+        case "content_filter": throw Failure(message: "Die Anfrage wurde abgelehnt.")
+        default: break
+        }
+        guard let text = message?["content"] as? String, !text.isEmpty else {
             throw Failure(message: "Leere Antwort erhalten.")
         }
         return text
@@ -105,17 +117,39 @@ enum AIClient {
 
     // MARK: Shared
 
+    /// Sends the request; retries overload, rate limits and network hiccups up to 3 times with a pause.
     private static func perform(_ request: URLRequest) async throws -> [String: Any] {
+        var attempt = 0
+        while true {
+            attempt += 1
+            do {
+                return try await performOnce(request)
+            } catch let f as Failure where f.retryable && attempt < 4 {
+                try await Task.sleep(for: .seconds(f.retryAfter ?? Double(attempt * attempt * 3)))
+            } catch let e as URLError where attempt < 3 && [.timedOut, .networkConnectionLost, .notConnectedToInternet, .cannotConnectToHost].contains(e.code) {
+                try await Task.sleep(for: .seconds(Double(attempt * 4)))
+            }
+        }
+    }
+
+    private static func performOnce(_ request: URLRequest) async throws -> [String: Any] {
         let (data, response) = try await URLSession.shared.data(for: request)
-        let status = (response as? HTTPURLResponse)?.statusCode ?? 0
-        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
+        let http = response as? HTTPURLResponse
+        let status = http?.statusCode ?? 0
+        guard let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] else {
+            if (500...599).contains(status) || status == 429 { throw Failure(message: "KI-Dienst überlastet – bitte später nochmal.", retryable: true) }
+            throw Failure(message: "Unlesbare Antwort vom KI-Dienst (HTTP \(status)): " + String(decoding: data.prefix(200), as: UTF8.self))
+        }
         guard status == 200 else {
             let msg = (json["error"] as? [String: Any])?["message"] as? String ?? "HTTP \(status)"
+            let wait = http?.value(forHTTPHeaderField: "retry-after").flatMap(Double.init).map { min($0, 60) }
             switch status {
-            case 401: throw Failure(message: "API-Key ungültig.")
-            case 402: throw Failure(message: "Kein Guthaben mehr auf dem KI-Konto.")
-            case 429: throw Failure(message: "Zu viele Anfragen oder kein Guthaben – kurz warten bzw. Guthaben prüfen. (\(msg))")
-            case 529, 500...599: throw Failure(message: "KI-Dienst überlastet – bitte später nochmal.")
+            case 401: throw Failure(message: "API-Key ungültig.", fatal: true)
+            case 402: throw Failure(message: "Kein Guthaben mehr auf dem KI-Konto.", fatal: true)
+            case 429 where msg.lowercased().contains("quota") || msg.lowercased().contains("credit") || msg.lowercased().contains("billing"):
+                throw Failure(message: "Kein Guthaben mehr auf dem KI-Konto. (\(msg))", fatal: true)
+            case 429: throw Failure(message: "Zu viele Anfragen – kurz warten. (\(msg))", retryable: true, retryAfter: wait)
+            case 408, 529, 500...599: throw Failure(message: "KI-Dienst überlastet – bitte später nochmal.", retryable: true, retryAfter: wait)
             default: throw Failure(message: msg)
             }
         }

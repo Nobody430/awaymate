@@ -110,7 +110,9 @@ struct TransitCard: View {
     }
 
     var body: some View {
-        if depStation != nil || arrStation != nil {
+        let showDep = depStation != nil && !flight.isPast && flight.departure.best != nil
+        let showArr = arrStation != nil && (flight.arrival.best.map { $0 > Date().addingTimeInterval(-6 * 3600) } ?? false)
+        if (showDep || showArr) && flight.normalizedStatus != .canceled {
             VStack(alignment: .leading, spacing: 10) {
                 Label("Zug & Bus", systemImage: "tram.fill").font(.headline)
                 if home.isEmpty {
@@ -127,12 +129,12 @@ struct TransitCard: View {
                     if let depStation, !flight.isPast, let dep = flight.departure.best {
                         Text("Hin: \(home) → \(depStation), Ankunft spätestens \(Fmt.time(dep.addingTimeInterval(-Double(buffer) * 60), flight.departure.tz)) (\(buffer) Min vor Abflug)")
                             .font(.caption).foregroundStyle(.secondary)
-                        connections(toAirport)
+                        connections(toAirport, tz: flight.departure.tz)
                     }
                     if let arrStation, let arr = flight.arrival.best, arr > Date().addingTimeInterval(-6 * 3600) {
-                        Text("Zurück: \(arrStation) → \(home), ab \(Fmt.time(arr.addingTimeInterval(30 * 60), .current))")
+                        Text("Zurück: \(arrStation) → \(home), ab \(Fmt.time(arr.addingTimeInterval(30 * 60), flight.arrival.tz))")
                             .font(.caption).foregroundStyle(.secondary)
-                        connections(fromAirport)
+                        connections(fromAirport, tz: flight.arrival.tz)
                     }
                     HStack {
                         Button("Haltestelle ändern") { draft = home; home = "" }.font(.caption)
@@ -154,11 +156,14 @@ struct TransitCard: View {
     }
 
     @ViewBuilder
-    private func connections(_ list: [Transit.Connection]) -> some View {
+    private func connections(_ list: [Transit.Connection], tz: TimeZone) -> some View {
+        if list.isEmpty && !loading && error == nil {
+            Text("Keine Verbindungen gefunden.").font(.caption).foregroundStyle(.secondary)
+        }
         ForEach(list) { c in
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("\(c.departure.formatted(date: .omitted, time: .shortened)) → \(c.arrival.formatted(date: .omitted, time: .shortened))")
+                    Text("\(Fmt.time(c.departure, tz)) → \(Fmt.time(c.arrival, tz))")
                         .font(.subheadline.monospacedDigit().weight(.semibold))
                     Text(c.products.joined(separator: " · ") + (c.transfers > 0 ? " · \(c.transfers)× umsteigen" : " · direkt"))
                         .font(.caption).foregroundStyle(.secondary)
@@ -254,6 +259,7 @@ struct TripsView: View {
     @Environment(FlightStore.self) private var flights
     @State private var trips = TripStore.shared
     @State private var editing: Trip?
+    @State private var toDelete: [UUID] = []
 
     var body: some View {
         NavigationStack {
@@ -289,7 +295,7 @@ struct TripsView: View {
                             }
                         }
                     }
-                    .onDelete { trips.delete($0.map { trips.trips[$0].id }) }
+                    .onDelete { toDelete = $0.map { trips.trips[$0].id } }
                 }
             }
             .navigationTitle("Reisen")
@@ -299,6 +305,12 @@ struct TripsView: View {
                 }
             }
             .sheet(item: $editing) { t in TripEditor(trip: t) }
+            .confirmationDialog("Reise wirklich löschen?", isPresented: Binding(get: { !toDelete.isEmpty }, set: { if !$0 { toDelete = [] } }),
+                                titleVisibility: .visible) {
+                Button("Löschen", role: .destructive) { trips.delete(toDelete); toDelete = [] }
+            } message: {
+                Text("Reiseplan und Packliste gehen verloren. Die Flüge bleiben erhalten.")
+            }
         }
     }
 }
@@ -385,7 +397,7 @@ struct TripDetailView: View {
                     }
                     HStack {
                         TextField("Hinzufügen …", text: $newItem).onSubmit(addItem)
-                        Button("Add", action: addItem).disabled(newItem.isEmpty)
+                        Button("Hinzufügen", action: addItem).disabled(newItem.isEmpty)
                     }
                     Button("Alle zurücksetzen") {
                         var t = trip

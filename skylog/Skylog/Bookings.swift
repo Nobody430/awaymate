@@ -54,10 +54,15 @@ final class BookingStore {
     init() {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601
-        if let data = try? Data(contentsOf: file), let b = try? d.decode([TravelBooking].self, from: data) { bookings = b }
+        let loaded = SafeFile.load([TravelBooking].self, from: file, decoder: d)
+        writable = loaded.writable
+        bookings = loaded.value ?? []
     }
 
+    @ObservationIgnored private var writable = true
+
     private func save() {
+        guard writable else { return }
         let e = JSONEncoder()
         e.dateEncodingStrategy = .iso8601
         try? e.encode(bookings).write(to: file, options: .atomic)
@@ -75,6 +80,7 @@ final class BookingStore {
         if let i = bookings.firstIndex(where: { $0.key == b.key || (!b.bookingReference.isEmpty && $0.kind == b.kind && $0.bookingReference.uppercased() == b.bookingReference.uppercased()) }) {
             var updated = b
             updated.id = bookings[i].id
+            if updated == bookings[i] { return false }     // nothing new – no second notification
             bookings[i] = updated
         } else {
             bookings.append(b)

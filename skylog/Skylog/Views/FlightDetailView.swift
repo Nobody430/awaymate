@@ -8,6 +8,9 @@ struct FlightDetailView: View {
     @State private var refreshing = false
     @State private var error: String?
     @State private var confirmDelete = false
+    @State private var seatDraft = ""
+    @State private var notesDraft = ""
+    @State private var draftsLoaded = false
     @State private var sharedPDF: SharedFile?
 
     var body: some View {
@@ -23,9 +26,17 @@ struct FlightDetailView: View {
             VStack(spacing: 16) {
                 FlightRouteMap(flight: f)
                     .frame(height: 280)
+                    .allowsHitTesting(false)     // the map must not swallow scrolling / pull-to-refresh
                     .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
 
                 header(f)
+                if let error {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote).foregroundStyle(.orange)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+                }
                 LiveActivityButton(flight: f)
                 times(f)
                 gates(f)
@@ -36,9 +47,9 @@ struct FlightDetailView: View {
                 }
                 TravelDayCard(flight: f)
                 TransitCard(flight: f)
-                HotelRouteCard(flight: f)
-                DestinationCard(flight: f)
-                FamilyCard(flight: f)
+                if !f.isPast { HotelRouteCard(flight: f) }
+                if !f.isPast && f.normalizedStatus != .canceled && f.arrival.code != HotelRoute.homeAirport { DestinationCard(flight: f) }
+                if !f.isPast { FamilyCard(flight: f) }
                 AircraftSeatCard(flight: f)
                 if !f.isPast {
                     AirportCard(endpoint: f.departure, title: "Abflug")
@@ -48,9 +59,6 @@ struct FlightDetailView: View {
                 aircraft(f)
                 personal
 
-                if let error {
-                    Text(error).font(.footnote).foregroundStyle(.orange)
-                }
                 if let updated = f.lastUpdated {
                     Text("Aktualisiert \(updated.formatted(.relative(presentation: .named)))")
                         .font(.caption)
@@ -97,8 +105,8 @@ struct FlightDetailView: View {
             ShareSheet(items: [file.url]).presentationDetents([.medium, .large])
         }
         .task(id: flightID) {
-            if let current = store.flight(flightID), !current.isPast,
-               current.lastUpdated.map({ Date().timeIntervalSince($0) > 20 * 60 }) ?? true {
+            // Same rules as the automatic refresh (no query for a flight weeks away each time it is opened)
+            if Settings.autoRefresh, FlightData.isConfigured, let current = store.flight(flightID), store.isDue(current) {
                 await refresh()
             }
             while !Task.isCancelled {
@@ -160,18 +168,25 @@ struct FlightDetailView: View {
 
     private func times(_ f: Flight) -> some View {
         HStack(alignment: .top, spacing: 12) {
-            timeColumn("Abflug", f.departure, actual: f.departure.runway != nil)
-            timeColumn("Ankunft", f.arrival, actual: f.arrival.runway != nil)
+            timeColumn("Abflug", f.departure, actual: f.departure.runway != nil, status: f.displayStatus)
+            timeColumn("Ankunft", f.arrival, actual: f.arrival.runway != nil, status: f.displayStatus, dayOffset: f.arrivalDayOffset)
         }
     }
 
-    private func timeColumn(_ title: String, _ e: FlightEndpoint, actual: Bool) -> some View {
+    private func timeColumn(_ title: String, _ e: FlightEndpoint, actual: Bool, status: FlightStatus, dayOffset: Int = 0) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title).font(.caption).foregroundStyle(.secondary)
-            TimeLabel(endpoint: e, font: .title.weight(.bold))
-            Text("Geplant \(Fmt.time(e.scheduled, e.tz)) \(Fmt.tzAbbrev(e.tz, at: e.scheduled))")
-                .font(.caption).foregroundStyle(.secondary)
-            if let d = Fmt.delay(e.delayMinutes) {
+            TimeLabel(endpoint: e, font: .title.weight(.bold), dayOffset: dayOffset)
+            if dayOffset != 0, e.best != nil {
+                Text(Fmt.day(e.best, e.tz)).font(.caption).foregroundStyle(.secondary)
+            }
+            if e.scheduled != nil {
+                Text("Geplant \(Fmt.time(e.scheduled, e.tz)) \(Fmt.tzAbbrev(e.tz, at: e.scheduled))")
+                    .font(.caption).foregroundStyle(.secondary)
+            }
+            if status == .canceled || status == .diverted {
+                EmptyView()
+            } else if let d = Fmt.delay(e.delayMinutes) {
                 Text(d).font(.caption.weight(.semibold)).foregroundStyle(Fmt.delayColor(e.delayMinutes))
             } else if e.scheduled != nil {
                 Text("Pünktlich").font(.caption.weight(.semibold)).foregroundStyle(.green)
@@ -186,18 +201,25 @@ struct FlightDetailView: View {
 
     private func gates(_ f: Flight) -> some View {
         let columns = [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())]
+        // old / manual flights without any gate data: no rows of dashes
+        let hasDep = f.departure.terminal != nil || f.departure.gate != nil || f.departure.checkInDesk != nil || !f.isPast
+        let hasArr = f.arrival.terminal != nil || f.arrival.gate != nil || f.arrival.baggageBelt != nil || !f.isPast
         return VStack(alignment: .leading, spacing: 8) {
-            Text("Abflug · \(f.departure.name ?? f.departure.code)").font(.caption).foregroundStyle(.secondary)
-            LazyVGrid(columns: columns, spacing: 8) {
-                InfoTile(title: "Terminal", value: f.departure.terminal)
-                InfoTile(title: "Gate", value: f.departure.gate)
-                InfoTile(title: "Check-in", value: f.departure.checkInDesk)
+            if hasDep {
+                Text("Abflug · \(f.departure.name ?? f.departure.code)").font(.caption).foregroundStyle(.secondary)
+                LazyVGrid(columns: columns, spacing: 8) {
+                    InfoTile(title: "Terminal", value: f.departure.terminal)
+                    InfoTile(title: "Gate", value: f.departure.gate)
+                    InfoTile(title: "Check-in", value: f.departure.checkInDesk)
+                }
             }
-            Text("Ankunft · \(f.arrival.name ?? f.arrival.code)").font(.caption).foregroundStyle(.secondary).padding(.top, 4)
-            LazyVGrid(columns: columns, spacing: 8) {
-                InfoTile(title: "Terminal", value: f.arrival.terminal)
-                InfoTile(title: "Gate", value: f.arrival.gate)
-                InfoTile(title: "Gepäck", value: f.arrival.baggageBelt, icon: "suitcase.rolling")
+            if hasArr {
+                Text("Ankunft · \(f.arrival.name ?? f.arrival.code)").font(.caption).foregroundStyle(.secondary).padding(.top, 4)
+                LazyVGrid(columns: columns, spacing: 8) {
+                    InfoTile(title: "Terminal", value: f.arrival.terminal)
+                    InfoTile(title: "Gate", value: f.arrival.gate)
+                    InfoTile(title: "Gepäck", value: f.arrival.baggageBelt, icon: "suitcase.rolling")
+                }
             }
         }
     }
@@ -268,24 +290,34 @@ struct FlightDetailView: View {
     private var personal: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Persönlich").font(.caption).foregroundStyle(.secondary)
-            TextField("Sitzplatz", text: binding(\.seat))
+            TextField("Sitzplatz", text: $seatDraft)
+                .onSubmit { commitPersonal() }
                 .padding(12)
                 .background(Theme.card, in: RoundedRectangle(cornerRadius: 12))
-            TextField("Notizen (Buchungscode, Lounge …)", text: binding(\.notes), axis: .vertical)
+            TextField("Notizen (Buchungscode, Lounge …)", text: $notesDraft, axis: .vertical)
                 .lineLimit(2...6)
                 .padding(12)
                 .background(Theme.card, in: RoundedRectangle(cornerRadius: 12))
         }
+        .onAppear {
+            guard !draftsLoaded, let f = store.flight(flightID) else { return }
+            seatDraft = f.seat
+            notesDraft = f.notes
+            draftsLoaded = true
+        }
+        .onDisappear { commitPersonal() }
+        // save shortly after typing stops instead of on every keystroke
+        .task(id: seatDraft + "\u{1}" + notesDraft) {
+            try? await Task.sleep(for: .seconds(1))
+            if !Task.isCancelled { commitPersonal() }
+        }
     }
 
-    private func binding(_ keyPath: WritableKeyPath<Flight, String>) -> Binding<String> {
-        Binding(
-            get: { store.flight(flightID)?[keyPath: keyPath] ?? "" },
-            set: { value in
-                guard var f = store.flight(flightID) else { return }
-                f[keyPath: keyPath] = value
-                store.update(f)
-            }
-        )
+    private func commitPersonal() {
+        guard draftsLoaded, var f = store.flight(flightID), f.seat != seatDraft || f.notes != notesDraft else { return }
+        f.seat = seatDraft
+        f.notes = notesDraft
+        store.update(f)
     }
+
 }

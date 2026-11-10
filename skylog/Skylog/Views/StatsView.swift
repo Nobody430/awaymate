@@ -6,9 +6,14 @@ struct FlightStats {
 
     var count: Int { flights.count }
     var distance: Double { flights.compactMap(\.computedDistanceKm).reduce(0, +) }
-    var minutes: Int { flights.compactMap(\.durationMinutes).reduce(0, +) }
-    var airports: Set<String> { Set(flights.flatMap { [$0.departure.code, $0.arrival.code] }) }
-    var countries: Set<String> { Set(flights.flatMap { [$0.departure.countryCode, $0.arrival.countryCode] }.compactMap { $0 }) }
+    /// Flights without times are estimated from the distance (≈ 800 km/h + 30 min)
+    var minutes: Int {
+        flights.reduce(0) { sum, f in
+            sum + (f.durationMinutes ?? f.computedDistanceKm.map { Int($0 / 800 * 60) + 30 } ?? 0)
+        }
+    }
+    var airports: Set<String> { Set(flights.flatMap { [$0.departure.code, $0.arrival.code] }.filter { $0 != "???" }) }
+    var countries: Set<String> { Set(flights.flatMap { [$0.departure.countryCode, $0.arrival.countryCode] }.compactMap { $0?.uppercased() }) }
     var longest: Flight? { flights.max { ($0.computedDistanceKm ?? 0) < ($1.computedDistanceKm ?? 0) } }
 
     func top(_ key: (Flight) -> [String?], limit: Int = 5) -> [(String, Int)] {
@@ -92,8 +97,8 @@ struct StatsView: View {
                     }
 
                     topList("Airlines", s.top { [$0.airlineName] })
-                    topList("Flughäfen", s.top { [$0.departure.code, $0.arrival.code] })
-                    topList("Strecken", s.top { ["\($0.departure.code) → \($0.arrival.code)"] })
+                    topList("Flughäfen", s.top { [$0.departure.iata ?? $0.departure.icao, $0.arrival.iata ?? $0.arrival.icao] })
+                    topList("Strecken", s.top { $0.departure.code == "???" || $0.arrival.code == "???" ? [] : ["\($0.departure.code) → \($0.arrival.code)"] })
                     topList("Flugzeugtypen", s.top { [$0.aircraftModel] })
 
                     if s.count == 0 {

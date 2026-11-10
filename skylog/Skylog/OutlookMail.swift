@@ -136,6 +136,7 @@ final class OutlookAuth: NSObject, ASWebAuthenticationPresentationContextProvidi
         let refresh_token: String?
         let expires_in: Double?
         let error_description: String?
+        let error: String?
     }
 
     private func token(_ form: [String: String]) async throws {
@@ -151,7 +152,8 @@ final class OutlookAuth: NSObject, ASWebAuthenticationPresentationContextProvidi
         let (data, _) = try await URLSession.shared.data(for: request)
         let response = try JSONDecoder().decode(TokenResponse.self, from: data)
         guard let access = response.access_token else {
-            if form["grant_type"] == "refresh_token" { signOut() }
+            // Only a really invalid login signs out – not a temporary server problem
+            if form["grant_type"] == "refresh_token", ["invalid_grant", "interaction_required"].contains(response.error ?? "") { signOut() }
             throw MailError.auth(response.error_description ?? "unbekannt")
         }
         accessToken = access

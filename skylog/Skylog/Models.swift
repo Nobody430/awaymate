@@ -199,6 +199,13 @@ struct Flight: Identifiable, Codable, Hashable {
 
     var normalizedStatus: FlightStatus { FlightStatus(raw: status) }
 
+    /// Local arrival day minus local departure day (ZRH 22:40 → BKK 15:30 = +1).
+    var arrivalDayOffset: Int {
+        guard let d = departure.best, let a = arrival.best else { return 0 }
+        func day(_ date: Date, _ tz: TimeZone) -> Int { Int(floor((date.timeIntervalSince1970 + Double(tz.secondsFromGMT(for: date))) / 86400)) }
+        return day(a, arrival.tz) - day(d, departure.tz)
+    }
+
     /// Status for display: an old flight whose status was never updated counts as landed.
     var displayStatus: FlightStatus {
         let s = normalizedStatus

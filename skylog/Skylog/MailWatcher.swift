@@ -13,6 +13,12 @@ enum MailWatcher {
 
     private static var running = false
 
+    /// Shown in the settings so a silently failing watcher is noticed.
+    static var lastError: String? { UserDefaults.standard.string(forKey: "mailWatchError") }
+    private static func seenFailure(_ e: Error) {
+        UserDefaults.standard.set("\(Date().formatted(date: .abbreviated, time: .shortened)): \(e.localizedDescription)", forKey: "mailWatchError")
+    }
+
     static func check(store: FlightStore, force: Bool = false) async {
         guard enabled, OutlookAuth.shared.isConnected, !running else { return }
         if !force, let last = lastCheck, Date().timeIntervalSince(last) < 20 * 60 { return }
@@ -21,14 +27,26 @@ enum MailWatcher {
 
         let since = (lastCheck ?? Date().addingTimeInterval(-7 * 86400)).addingTimeInterval(-10 * 60)
         do {
+            let started = Date()
             let mails = try await OutlookMail.recentMails(since: since)
-            lastCheck = Date()
-            let relevant = MailAI.relevant(mails)
-            guard !relevant.isEmpty else { return }
+            // Don't send the same mail to the AI twice (overlap window, repeated checks)
+            var seen = Set(UserDefaults.standard.stringArray(forKey: "processedMailIDs") ?? [])
+            let relevant = MailAI.relevant(mails).filter { !seen.contains($0.id) }
+            guard !relevant.isEmpty else { lastCheck = started; return }
+            // lastCheck and the processed list only move forward once the mails were really read (below)
+            func markProcessed() {
+                lastCheck = started
+                seen.formUnion(relevant.map(\.id))
+                let ordered = (UserDefaults.standard.stringArray(forKey: "processedMailIDs") ?? []) + relevant.map(\.id)
+                UserDefaults.standard.set(Array(ordered.suffix(500)), forKey: "processedMailIDs")
+                UserDefaults.standard.removeObject(forKey: "mailWatchError")
+            }
 
             var candidates: [FlightCandidate]
             if AIClient.hasKey {
                 let result = try await MailAI.extractAll(relevant) { _ in }
+                guard result.failedMails == 0 else { throw AIClient.Failure(message: result.failure ?? "KI-Fehler") }
+                markProcessed()
                 candidates = result.flights
                 for b in result.bookings where BookingStore.shared.upsert(b) {
                     let title = b.cancelled ? "\(b.kind.label) storniert" : "Neue Buchung: \(b.kind.label)"
@@ -40,11 +58,13 @@ enum MailWatcher {
                     FlightTextParser.parse(m.subject + "\n" + m.text, source: m.subject, reference: m.received)
                 }
                 .filter(ImportView.isPlausible)
+                markProcessed()
             }
 
             for c in candidates {
                 if c.cancelled {
-                    if var existing = store.flights.first(where: { $0.number == c.number && $0.date == Fmt.apiDate.string(from: c.date) }),
+                    if var existing = store.flights.first(where: {
+                        FlightStore.normalizedNumber($0.number) == FlightStore.normalizedNumber(c.number) && $0.date == Fmt.apiDate.string(from: c.date) }),
                        existing.normalizedStatus != .canceled {
                         existing.status = "Canceled"
                         store.update(existing)
@@ -67,7 +87,8 @@ enum MailWatcher {
                 }
             }
         } catch {
-            // Silent in the background; the next check tries again.
+            // Silent in the background; the next check tries again (lastCheck was not moved).
+            seenFailure(error)
         }
     }
 }

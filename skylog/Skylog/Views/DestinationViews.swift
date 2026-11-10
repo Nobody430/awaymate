@@ -51,7 +51,9 @@ struct DestinationCard: View {
     }
 
     private var offset: String {
-        let diff = (flight.arrival.tz.secondsFromGMT() - TimeZone.current.secondsFromGMT()) / 60
+        // at arrival time, not today (daylight-saving changes)
+        let at = flight.arrival.best ?? Date()
+        let diff = (flight.arrival.tz.secondsFromGMT(for: at) - TimeZone.current.secondsFromGMT(for: at)) / 60
         if diff == 0 { return "keine" }
         let h = Double(diff) / 60
         return (diff > 0 ? "+" : "−") + abs(h).formatted(.number.precision(.fractionLength(0...1))) + " h"
@@ -64,7 +66,7 @@ struct TravelDayCard: View {
     @AppStorage(AirportBuffer.key) private var bufferSetting = 0
 
     struct Step: Identifiable {
-        let id = UUID()
+        var id: String { title }
         let time: Date
         let title: String
         let icon: String
@@ -90,7 +92,7 @@ struct TravelDayCard: View {
     }
 
     var body: some View {
-        if !flight.isPast, let dep = flight.departure.best, dep.timeIntervalSinceNow < 3 * 86400 {
+        if !flight.isPast, flight.normalizedStatus != .canceled, let dep = flight.departure.best, dep.timeIntervalSinceNow < 3 * 86400 {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Label("Reisetag", systemImage: "list.bullet.clipboard").font(.headline)

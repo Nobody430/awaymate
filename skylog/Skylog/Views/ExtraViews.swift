@@ -37,7 +37,9 @@ struct AircraftSeatCard: View {
                 .buttonStyle(.bordered)
                 Text("Kostet 1 Abfrage aus deinem Gratis-Kontingent.").font(.caption2).foregroundStyle(.secondary)
             } else {
-                Text("Kennzeichen noch nicht bekannt – meist 1–2 Tage vor Abflug.").font(.caption).foregroundStyle(.secondary)
+                if !flight.isPast {
+                    Text("Kennzeichen noch nicht bekannt – meist 1–2 Tage vor Abflug.").font(.caption).foregroundStyle(.secondary)
+                }
             }
             if let error { Text(error).font(.caption).foregroundStyle(.orange) }
 
@@ -47,7 +49,10 @@ struct AircraftSeatCard: View {
             }
             if let sun = SunSide.analyse(flight) {
                 Label(sun.summary, systemImage: "sun.max").font(.subheadline)
-                if let side = SeatInfo.side(of: flight.seat, model: model) {
+                // only when one side clearly gets more sun (not on night flights)
+                if let side = SeatInfo.side(of: flight.seat, model: model),
+                   max(sun.leftMinutes, sun.rightMinutes) > 2 * min(sun.leftMinutes, sun.rightMinutes),
+                   max(sun.leftMinutes, sun.rightMinutes) >= 20 {
                     let sunny = sun.leftMinutes > sun.rightMinutes ? "links" : "rechts"
                     Text(side == sunny ? "Dein Platz ist auf der Sonnenseite – Sonnenbrille einpacken 😎" : "Dein Platz ist auf der Schattenseite 👍")
                         .font(.caption).foregroundStyle(.secondary)

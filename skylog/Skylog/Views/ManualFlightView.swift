@@ -89,7 +89,8 @@ struct ManualFlightView: View {
     private func save() {
         let dep = endpoint(from, fromInfo, time: withTimes ? departure : nil, dayOffset: 0)
         let arr = endpoint(to, toInfo, time: withTimes ? arrival : nil, dayOffset: arrivalNextDay ? 1 : 0)
-        let isFuture = (dep.scheduled ?? date) > Date()
+        // without times: the flight counts as upcoming until its day is over
+        let isFuture = (dep.scheduled ?? Calendar.current.startOfDay(for: date).addingTimeInterval(86400)) > Date()
         var f = Flight(number: FlightStore.normalizedNumber(number), date: Fmt.apiDate.string(from: date),
                        status: isFuture ? "Expected" : "Arrived", departure: dep, arrival: arr)
         f.airlineName = airline.isEmpty ? nil : airline

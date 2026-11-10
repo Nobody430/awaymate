@@ -45,8 +45,8 @@ struct ImportView: View {
                     Text("Outlook / Hotmail / MSN")
                 } footer: {
                     Text(AIClient.hasKey
-                         ? "Mit KI-Erkennung: Claude liest die gefundenen Mails und übernimmt nur echte Buchungen (inkl. Umbuchungen und Stornos)."
-                         : "Tipp: Mit einem Claude-Key (Einstellungen → KI-Erkennung) werden Flüge viel genauer erkannt.")
+                         ? "Mit KI-Erkennung: Die KI liest die gefundenen Mails und übernimmt nur echte Buchungen (inkl. Umbuchungen und Stornos)."
+                         : "Tipp: Mit einem KI-Key (Einstellungen → KI-Erkennung) werden Flüge viel genauer erkannt.")
                 }
 
                 if !pendingMails.isEmpty {
@@ -61,7 +61,9 @@ struct ImportView: View {
                         }
                         .disabled(busy)
                     } footer: {
-                        Text("Kosten werden direkt von deinem Claude-Guthaben abgebucht. Die Mail-Texte gehen dafür verschlüsselt an Anthropic.")
+                        Text(AIClient.provider == .openai
+                             ? "Kosten werden direkt von deinem OpenAI-Guthaben abgebucht. Die Mail-Texte gehen dafür verschlüsselt an OpenAI."
+                             : "Kosten werden direkt von deinem Claude-Guthaben abgebucht. Die Mail-Texte gehen dafür verschlüsselt an Anthropic.")
                     }
                 }
 
@@ -221,17 +223,19 @@ struct ImportView: View {
             UIApplication.shared.endBackgroundTask(bgTask)
         }
         do {
-            if replaceExisting { store.deleteAll() }
             let result = try await MailAI.extractAll(pendingMails) { message in status = message }
+            // Only now – if the AI run had failed, nothing would be lost
+            if replaceExisting && !result.flights.isEmpty { store.deleteAll() }
             pendingMails = []
             candidates = []
             selected = []
             merge(result.flights)
-            if replaceExisting { BookingStore.shared.deleteAll() }
+            if replaceExisting && !result.bookings.isEmpty { BookingStore.shared.deleteAll() }
             var stays = 0
             for b in result.bookings where BookingStore.shared.upsert(b) && !b.cancelled { stays += 1 }
             status = "\(result.flights.count) Flüge erkannt – prüfen und importieren."
                 + (stays > 0 ? " \(stays) Hotels/Mietwagen/Züge wurden direkt den Reisen hinzugefügt." : "")
+                + (result.failedMails > 0 ? " Achtung: \(result.failedMails) Mails konnten nicht gelesen werden (\(result.failure ?? "KI-Fehler")) – später nochmal scannen." : "")
         } catch {
             status = error.localizedDescription
         }

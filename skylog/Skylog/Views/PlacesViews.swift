@@ -62,7 +62,7 @@ struct PlacesCard: View {
                                 .font(.caption).foregroundStyle(.secondary).lineLimit(1)
                         }
                         Spacer()
-                        Text("\(v.flights.count)×").font(.subheadline).foregroundStyle(.secondary)
+                        Text("\(max(v.arrivals, 1))×").font(.subheadline).foregroundStyle(.secondary)
                         Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
                     }
                 }

@@ -264,7 +264,9 @@ final class FlightStore {
         guard !f.isPast else { return false }
         let dep = f.departure.best ?? f.sortDate
         let arr = f.arrival.best ?? dep.addingTimeInterval(4 * 3600)
-        guard dep < now.addingTimeInterval(72 * 3600), arr > now.addingTimeInterval(-90 * 60) else { return false }
+        // FlightAware alone only knows flights about 2 days ahead – don't pay for "not found"
+        let horizon: TimeInterval = FlightProvider.current == .flightaware ? 46 * 3600 : 72 * 3600
+        guard dep < now.addingTimeInterval(horizon), arr > now.addingTimeInterval(-90 * 60) else { return false }
         if let a = attempts[f.id] {
             let backoff = force ? 60 : min(3600, 300 * pow(2, Double(a.fails - 1)))
             if now.timeIntervalSince(a.last) < backoff { return false }
@@ -423,14 +425,16 @@ final class FlightStore {
         return d
     }()
 
+    @ObservationIgnored private var writable = true
+
     private func load() {
-        guard let data = try? Data(contentsOf: fileURL),
-              let decoded = try? Self.decoder.decode([Flight].self, from: data) else { return }
-        flights = decoded
+        let loaded = SafeFile.load([Flight].self, from: fileURL, decoder: Self.decoder)
+        writable = loaded.writable
+        flights = loaded.value ?? []
     }
 
     private func save() {
-        guard let data = try? Self.encoder.encode(flights) else { return }
+        guard writable, let data = try? Self.encoder.encode(flights) else { return }
         try? data.write(to: fileURL, options: .atomic)
         LiveFlight.publish(upcoming)
         PushClient.scheduleSync()

@@ -105,16 +105,38 @@ enum MailAI {
 
     /// True if the flight is the owner's: name among the passengers, or (no names) a direct, non-forwarded mail.
     static func belongsToOwner(_ e: Extracted) -> Bool {
-        let parts = passengerName.lowercased().folding(options: .diacriticInsensitive, locale: nil)
-            .split(separator: " ").map(String.init).filter { $0.count >= 2 }
-        guard !parts.isEmpty else { return !e.forwarded }
+        let variants = nameVariants(passengerName)
+        guard variants.contains(where: { !$0.isEmpty }) else { return !e.forwarded }
         if e.passengers.isEmpty { return !e.forwarded }
+        let titles: Set<String> = ["mr", "mrs", "ms", "miss", "mstr", "herr", "frau", "dr", "prof", "sr", "sra", "m", "mme"]
         return e.passengers.contains { p in
-            let n = p.lowercased().folding(options: .diacriticInsensitive, locale: nil)
-            // surname (last part) must match; first name or initial optional
-            guard let surname = parts.last, n.contains(surname) else { return false }
-            return true
+            let tokens = tokens(p)
+            return variants.contains { parts in
+                // surname as a whole word ("Meier" must not match "Obermeier"), or glued ticket style "MUSTERRAFFAELMR"
+                guard let surname = parts.last else { return false }
+                let glued = tokens.count == 1 && tokens[0].hasPrefix(surname) && tokens[0].count > surname.count
+                guard tokens.contains(surname) || glued else { return false }
+                // if the ticket shows a given name, it must be ours (first name or initial) – keeps family members out
+                let firsts = parts.dropLast()
+                let others = glued ? [String(tokens[0].dropFirst(surname.count))] : tokens.filter { $0 != surname && !titles.contains($0) }
+                guard !firsts.isEmpty, !others.isEmpty else { return true }
+                return others.contains { o in firsts.contains { f in o.hasPrefix(f) || f.hasPrefix(o) } }
+            }
         }
+    }
+
+    private static func fold(_ s: String) -> String { s.lowercased().folding(options: .diacriticInsensitive, locale: nil) }
+
+    private static func tokens(_ s: String) -> [String] {
+        fold(s).split { !$0.isLetter }.map(String.init).filter { !$0.isEmpty }
+    }
+
+    /// "Müller" appears on tickets as MULLER or MUELLER – accept both.
+    static func nameVariants(_ name: String) -> [[String]] {
+        let translit = name.lowercased().replacingOccurrences(of: "ä", with: "ae").replacingOccurrences(of: "ö", with: "oe")
+            .replacingOccurrences(of: "ü", with: "ue").replacingOccurrences(of: "ß", with: "ss")
+        let a = tokens(name).filter { $0.count >= 2 }, b = tokens(translit).filter { $0.count >= 2 }
+        return a == b ? [a] : [a, b]
     }
 
     private static func flightKey(_ e: Extracted) -> String {
@@ -133,6 +155,8 @@ enum MailAI {
             let current = full.filter { $0.1.id == newestFull.id }
             let currentKeys = Set(current.map { flightKey($0.0) })
             result += current
+            // A cancellation after the newest confirmation wins, even for a leg that confirmation contains
+            result += group.filter { $0.0.mailType == "cancellation" && $0.1.received > newestFull.received && currentKeys.contains(flightKey($0.0)) }
             for item in group where !currentKeys.contains(flightKey(item.0)) {
                 switch item.0.mailType {
                 case "boardingpass", "checkin":
@@ -142,12 +166,28 @@ enum MailAI {
                 case "cancellation":
                     result.append(item)                        // handled as cancelled below
                 default:
-                    break                                      // legs of an outdated itinerary
+                    // Older leg: outdated only if the newest mail contains a replacement for it. A partial mail
+                    // (schedule change for one leg, seat purchase) must not delete the rest of the trip.
+                    if !current.contains(where: { replaces($0.0, item.0) }) { result.append(item) }
                 }
             }
         }
         return result
     }
+
+    /// `new` is the re-booked version of `old`: same route, or same origin/destination within 2 days.
+    private static func replaces(_ new: Extracted, _ old: Extracted) -> Bool {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        let days = f.date(from: new.date).flatMap { n in f.date(from: old.date).map { abs(n.timeIntervalSince($0)) / 86400 } } ?? 99
+        let nf = new.from.uppercased(), nt = new.to.uppercased(), of = old.from.uppercased(), ot = old.to.uppercased()
+        if nf == of && nt == ot { return days <= 3 }
+        return (nf == of || nt == ot) && days <= 2
+    }
+
+    /// Real flight numbers only ("LX 92", "U2 1234") – not years, prices or order numbers.
+    static let flightNumberPattern = "\\b(?:[A-Z]{2}|[A-Z]\\d|\\d[A-Z])\\s?\\d{2,4}\\b"
 
     static let maxCharsPerMail = 9000
 
@@ -156,7 +196,7 @@ enum MailAI {
         let text = m.text
         guard text.count > maxCharsPerMail else { return text }
         let ns = text as NSString
-        let regex = try! NSRegularExpression(pattern: "\\b[A-Z0-9]{2}\\s?\\d{1,4}\\b")
+        let regex = try! NSRegularExpression(pattern: flightNumberPattern)
         var ranges: [NSRange] = [NSRange(location: 0, length: min(2000, ns.length))]
         for match in regex.matches(in: text, range: NSRange(location: 0, length: ns.length)) {
             let start = max(0, match.range.location - 350)
@@ -180,16 +220,20 @@ enum MailAI {
     static func relevant(_ mails: [OutlookMail.MailItem]) -> [OutlookMail.MailItem] {
         let keywords = ["boarding", "bordkarte", "e-ticket", "eticket", "itinerary", "reiseplan", "buchung", "booking", "flug", "flight",
                         "vol ", "vuelo", "check-in", "pnr", "reservation", "reservierung", "ticket"]
-        let nameParts = passengerName.lowercased().split(separator: " ").map(String.init).filter { $0.count >= 3 }
+        let nameParts = Set(nameVariants(passengerName).flatMap { $0 }.filter { $0.count >= 3 })
         return mails.filter { m in
+            let full = m.subject + " " + m.text
             let t = (m.subject + " " + m.text.prefix(6000)).lowercased()
             guard keywords.contains(where: { t.contains($0) }) else { return false }
-            // With a name set, the mail must mention at least part of it
-            if !nameParts.isEmpty, !nameParts.contains(where: { t.contains($0) }) { return false }
+            // With a name set, the mail must mention at least part of it (anywhere, umlauts folded)
+            if !nameParts.isEmpty {
+                let folded = fold(full)
+                if !nameParts.contains(where: { folded.contains($0) }) { return false }
+            }
             let stay = ["hotel", "booking.com", "airbnb", "unterkunft", "übernachtung", "check-in:", "anreise", "mietwagen", "car rental",
                         "sixt", "hertz", "europcar", "avis", "enterprise", "zugticket", "sbb", "trainline", "deutsche bahn", "flixbus"]
             if stay.contains(where: { t.contains($0) }) { return true }
-            return t.range(of: "\\b[a-z0-9]{2}\\s?-?\\d{1,4}\\b", options: .regularExpression) != nil
+            return full.range(of: flightNumberPattern, options: .regularExpression) != nil
         }
     }
 
@@ -213,7 +257,7 @@ enum MailAI {
         let body = batch.map { index, m in
             "### Mail \(index)\nVon: \(m.from)\nDatum: \(f.string(from: m.received))\nBetreff: \(m.subject)\n\n\(relevantText(m))"
         }.joined(separator: "\n\n")
-        let text = try await AIClient.send(system: fullSystem, user: body, schema: schema, effort: "low", maxTokens: 8000)
+        let text = try await AIClient.send(system: fullSystem, user: body, schema: schema, effort: "low", maxTokens: 16000)
         let response = try JSONDecoder().decode(Response.self, from: Data(text.utf8))
         let byIndex = Dictionary(uniqueKeysWithValues: batch.map { ($0.0, $0.1) })
         return (response.flights.compactMap { e in byIndex[e.mailIndex].map { (e, $0) } },
@@ -223,6 +267,36 @@ enum MailAI {
     struct ExtractResult {
         var flights: [FlightCandidate]
         var bookings: [TravelBooking]
+        /// Mails the AI could not read (after retries)
+        var failedMails = 0
+        var failure: String?
+    }
+
+    /// One batch; if it fails (bad JSON, too long), the mails are tried one by one so a single odd mail doesn't lose six.
+    private static func requestResilient(_ batch: [(Int, OutlookMail.MailItem)]) async
+        -> (flights: [(Extracted, OutlookMail.MailItem)], bookings: [(ExtractedBooking, OutlookMail.MailItem)], failed: Int, error: Error?) {
+        do {
+            let r = try await request(batch)
+            return (r.0, r.1, 0, nil)
+        } catch {
+            guard batch.count > 1, !(error is AIClient.Failure && (error as? AIClient.Failure)?.fatal == true) else {
+                return ([], [], batch.count, error)
+            }
+            var flights: [(Extracted, OutlookMail.MailItem)] = [], bookings: [(ExtractedBooking, OutlookMail.MailItem)] = []
+            var failed = 0
+            var last: Error? = nil
+            for one in batch {
+                do {
+                    let r = try await request([one])
+                    flights += r.0
+                    bookings += r.1
+                } catch {
+                    failed += 1
+                    last = error
+                }
+            }
+            return (flights, bookings, failed, last)
+        }
     }
 
     static func extract(_ mails: [OutlookMail.MailItem], progress: @escaping @MainActor (String) -> Void) async throws -> [FlightCandidate] {
@@ -237,17 +311,16 @@ enum MailAI {
         var foundBookings: [(ExtractedBooking, OutlookMail.MailItem)] = []
         var done = 0
         var lastError: Error?
+        var failedMails = 0
 
         for chunk in stride(from: 0, to: batches.count, by: 3).map({ Array(batches[$0..<min($0 + 3, batches.count)]) }) {
-            await withTaskGroup(of: Result<([(Extracted, OutlookMail.MailItem)], [(ExtractedBooking, OutlookMail.MailItem)]), Error>.self) { group in
-                for b in chunk { group.addTask { do { return .success(try await request(b)) } catch { return .failure(error) } } }
+            await withTaskGroup(of: (flights: [(Extracted, OutlookMail.MailItem)], bookings: [(ExtractedBooking, OutlookMail.MailItem)], failed: Int, error: Error?).self) { group in
+                for b in chunk { group.addTask { await requestResilient(b) } }
                 for await r in group {
-                    switch r {
-                    case .success(let pair):
-                        found += pair.0
-                        foundBookings += pair.1
-                    case .failure(let e): lastError = e
-                    }
+                    found += r.flights
+                    foundBookings += r.bookings
+                    failedMails += r.failed
+                    if let e = r.error { lastError = e }
                     done += 1
                     await progress("KI liest Mails … \(min(done * mailsPerRequest, mails.count))/\(mails.count) · \(found.count) Flugabschnitte")
                 }
@@ -255,7 +328,8 @@ enum MailAI {
         }
         if found.isEmpty && foundBookings.isEmpty, let lastError { throw lastError }
 
-        found = reconcileBookings(found)
+        // Only the owner's flights take part in reconciliation (someone else's newer mail must not replace ours)
+        found = reconcileBookings(found.filter { belongsToOwner($0.0) })
 
         // Latest mail per flight wins (re-bookings / cancellations)
         var latest: [String: (Extracted, OutlookMail.MailItem)] = [:]
@@ -285,7 +359,8 @@ enum MailAI {
         }
         .sorted { $0.date > $1.date }
 
-        return ExtractResult(flights: flights, bookings: convertBookings(foundBookings))
+        return ExtractResult(flights: flights, bookings: convertBookings(foundBookings),
+                             failedMails: failedMails, failure: failedMails > 0 ? lastError?.localizedDescription : nil)
     }
 
     /// Newest mail per booking wins; only bookings with the owner as guest (if a name is set).

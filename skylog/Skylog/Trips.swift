@@ -56,10 +56,15 @@ final class TripStore {
     init() {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601
-        if let data = try? Data(contentsOf: file), let t = try? d.decode([Trip].self, from: data) { trips = t }
+        let loaded = SafeFile.load([Trip].self, from: file, decoder: d)
+        writable = loaded.writable
+        trips = loaded.value ?? []
     }
 
+    @ObservationIgnored private var writable = true
+
     private func save() {
+        guard writable else { return }
         let e = JSONEncoder()
         e.dateEncodingStrategy = .iso8601
         try? e.encode(trips).write(to: file, options: .atomic)
