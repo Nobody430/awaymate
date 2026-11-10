@@ -36,6 +36,7 @@ targets:
         UIBackgroundModes: [fetch, remote-notification, location]
         NSLocationWhenInUseUsageDescription: Skylog nutzt deinen ungefähren Standort am Reisetag, um Flugdaten im Hintergrund aktuell zu halten.
         NSLocationAlwaysAndWhenInUseUsageDescription: Am Reisetag hält Skylog die App über deinen ungefähren Standort wach und aktualisiert Gate, Verspätungen und Landung – auch wenn die App geschlossen ist. Am Flughafen wird automatisch aktualisiert.
+        NSCalendarsFullAccessUsageDescription: Skylog trägt deine Flüge und Hotels in den Kalender ein und hält Zeiten und Gates dort aktuell.
         BGTaskSchedulerPermittedIdentifiers: [com.nobody430.skylog.refresh]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
@@ -45,7 +46,7 @@ targets:
         CFBundleDocumentTypes:
           - CFBundleTypeName: Flugdokument
             LSHandlerRank: Alternate
-            LSItemContentTypes: [com.adobe.pdf, public.email-message, public.plain-text, public.html]
+            LSItemContentTypes: [com.adobe.pdf, public.email-message, public.plain-text, public.html, public.image, com.apple.pkpass]
   SkylogWidgets:
     type: app-extension
     platform: iOS

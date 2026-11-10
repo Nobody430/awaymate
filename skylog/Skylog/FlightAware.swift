@@ -140,6 +140,8 @@ enum FlightData {
         f.faFlightID = f.faFlightID ?? b.faFlightID
         f.timetable = f.timetable ?? b.timetable
         f.adbGate = f.adbGate ?? b.adbGate
+        f.bookingReference = f.bookingReference ?? b.bookingReference
+        f.warnedLayover = f.warnedLayover ?? b.warnedLayover
         f.updates = f.updates ?? b.updates
         f.planeLegs = f.planeLegs ?? b.planeLegs
         f.callSign = f.callSign ?? b.callSign

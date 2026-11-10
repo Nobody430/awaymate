@@ -61,6 +61,8 @@ enum MailWatcher {
                 markProcessed()
             }
 
+            let stillBooked = Set(candidates.filter { !$0.cancelled }.map {
+                FlightStore.normalizedNumber($0.number) + "|" + Fmt.apiDate.string(from: $0.date) })
             for c in candidates {
                 if c.cancelled {
                     if var existing = store.flights.first(where: {
@@ -74,8 +76,25 @@ enum MailWatcher {
                     continue
                 }
                 guard !store.contains(number: c.number, date: c.date),
-                      let flight = await ImportView.manualFlight(c) else { continue }
+                      var flight = await ImportView.manualFlight(c) else { continue }
                 let route = "\(flight.number) \(flight.departure.displayCity) → \(flight.arrival.displayCity) am \(Fmt.day(c.date))"
+                // Re-booking: same booking code, the old flight is no longer in the mail
+                if let old = store.rebookedFlight(for: flight, stillBooked: stillBooked) {
+                    let what = "\(old.number) am \(Fmt.day(old.sortDate, old.departure.tz)) wurde umgebucht auf \(route)"
+                    if autoAdd {
+                        store.delete([old.id])
+                        store.add(flight)
+                        Notifier.post(id: "mail-rebook-\(c.id)", title: "✈️ Flug umgebucht", body: what + ". In Skylog ersetzt.")
+                    } else {
+                        flight.replacesID = old.id
+                        if store.suggest(flight) {
+                            Notifier.post(id: "mail-rebook-\(c.id)", title: "✈️ Flug umgebucht?", body: what + ". Ersetzen?",
+                                          category: NotificationDelegate.newFlightCategory,
+                                          userInfo: ["pendingID": flight.id.uuidString])
+                        }
+                    }
+                    continue
+                }
                 if autoAdd {
                     store.add(flight)
                     Notifier.post(id: "mail-new-\(c.id)", title: "✈️ Neuer Flug hinzugefügt", body: route + ".")

@@ -37,10 +37,12 @@ struct FlightDetailView: View {
                         .padding(12)
                         .background(Color.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
                 }
+                BoardingPassButton(flight: f)
                 LiveActivityButton(flight: f)
                 times(f)
                 gates(f)
                 if let i = f.inbound, !f.isInAir, !f.normalizedStatus.isFinal { inbound(i, f) }
+                ConnectionCard(flight: f)
                 PlaneHistoryCard(flight: f)
                 DepartureConditionsCard(flight: f)
                 TimetableCard(flight: f)

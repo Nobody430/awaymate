@@ -7,32 +7,44 @@ import UIKit
 enum FlightPDF {
     static let pageWidth: CGFloat = 595 // A4 width in points
 
-    static func make(_ flights: [Flight]) async -> URL? {
-        guard !flights.isEmpty else { return nil }
+    static func make(_ unsorted: [Flight]) async -> URL? {
+        guard !unsorted.isEmpty else { return nil }
+        let flights = unsorted.sorted { $0.sortDate < $1.sortDate }
         var maps: [UUID: UIImage] = [:]
-        for f in flights {
-            if let img = await snapshot(f) { maps[f.id] = img }
+        // maps only for short lists (one snapshot per flight takes time)
+        if flights.count <= 10 {
+            for f in flights {
+                if let img = await snapshot(f) { maps[f.id] = img }
+            }
         }
 
         let name = flights.count == 1 ? "Flug \(flights[0].number) \(flights[0].date)" : "Reiseplan"
         let url = FileManager.default.temporaryDirectory.appending(path: "\(name).pdf")
-        let renderer = ImageRenderer(content:
-            ItineraryPDFView(flights: flights, maps: maps)
-                .frame(width: pageWidth)
-                .environment(\.colorScheme, .light)
-        )
-        renderer.proposedSize = ProposedViewSize(width: pageWidth, height: nil)
-
+        // One page per few flights instead of a single endless page
+        let perPage = maps.isEmpty ? 5 : 2
+        let pages = stride(from: 0, to: flights.count, by: perPage).map { Array(flights[$0..<min($0 + perPage, flights.count)]) }
+        var a4 = CGRect(x: 0, y: 0, width: pageWidth, height: 842)
+        guard let ctx = CGContext(url as CFURL, mediaBox: &a4, nil) else { return nil }
         var success = false
-        renderer.render { size, draw in
-            var box = CGRect(origin: .zero, size: size)
-            guard let ctx = CGContext(url as CFURL, mediaBox: &box, nil) else { return }
-            ctx.beginPDFPage(nil)
-            draw(ctx)
-            ctx.endPDFPage()
-            ctx.closePDF()
-            success = true
+        for page in pages {
+            let renderer = ImageRenderer(content:
+                ItineraryPDFView(flights: page, maps: maps)
+                    .frame(width: pageWidth)
+                    .environment(\.colorScheme, .light)
+            )
+            renderer.proposedSize = ProposedViewSize(width: pageWidth, height: nil)
+            renderer.render { size, draw in
+                var box = CGRect(origin: .zero, size: CGSize(width: pageWidth, height: max(size.height, 842)))
+                let info = [kCGPDFContextMediaBox as String: Data(bytes: &box, count: MemoryLayout<CGRect>.size)] as CFDictionary
+                ctx.beginPDFPage(info)
+                // content starts at the top of the page
+                ctx.translateBy(x: 0, y: box.height - size.height)
+                draw(ctx)
+                ctx.endPDFPage()
+                success = true
+            }
         }
+        ctx.closePDF()
         return success ? url : nil
     }
 

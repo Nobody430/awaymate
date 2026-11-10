@@ -28,8 +28,12 @@ struct FlightListView: View {
                                 Text("\(f.number) · \(f.departure.code) → \(f.arrival.code)").font(.headline)
                                 Text("\(f.departure.displayCity) → \(f.arrival.displayCity) · \(Fmt.day(f.sortDate, f.departure.tz))")
                                     .font(.caption).foregroundStyle(.secondary)
+                                if let old = f.replacesID.flatMap(store.flight) {
+                                    Text("Umbuchung: ersetzt \(old.number) vom \(Fmt.day(old.sortDate, old.departure.tz))")
+                                        .font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                                }
                                 HStack {
-                                    Button("Hinzufügen") { store.acceptPending(f.id) }
+                                    Button(f.replacesID == nil ? "Hinzufügen" : "Ersetzen") { store.acceptPending(f.id) }
                                         .buttonStyle(.borderedProminent)
                                     Button("Ignorieren", role: .destructive) { store.ignorePending(f.id) }
                                         .buttonStyle(.bordered)

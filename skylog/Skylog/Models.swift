@@ -217,6 +217,12 @@ struct Flight: Identifiable, Codable, Hashable {
     var inbound: InboundFlight? = nil
     /// Departure time the user was last told about (so creeping delays are noticed)
     var lastNotifiedDeparture: Date? = nil
+    /// Booking code (PNR) from the mail – links re-bookings to the flight they replace
+    var bookingReference: String? = nil
+    /// For a suggestion from a re-booking mail: the stored flight it replaces
+    var replacesID: UUID? = nil
+    /// Layover the user was last warned about (minutes), so the warning isn't repeated
+    var warnedLayover: Int? = nil
     /// Departure gate as reported by AeroDataBox (airport data) – preferred over FlightAware's
     var adbGate: String? = nil
     /// A different departure gate reported by the other source (shown as a hint)

@@ -52,7 +52,35 @@ struct NextFlightView: View {
     let entry: NextFlightEntry
 
     var body: some View {
-        if let f = entry.flight {
+        if family == .accessoryInline {
+            // one line above the clock
+            if let f = entry.flight {
+                let line = " \(f.number) \(f.from)→\(f.to) \(f.departure.formatted(date: .omitted, time: .shortened))" + (f.gate.map { " · \($0)" } ?? "")
+                Text(Image(systemName: "airplane")) + Text(line)
+            } else {
+                Text(Image(systemName: "airplane")) + Text(" Kein Flug geplant")
+            }
+        } else if family == .accessoryRectangular {
+            // compact block under the clock
+            if let f = entry.flight {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("\(f.number) · \(f.from) → \(f.to)").font(.headline).lineLimit(1)
+                    if f.departure > entry.date {
+                        Text("Abflug \(f.departure, style: .relative)").font(.caption).lineLimit(1)
+                    } else {
+                        Text("Landung \(f.arrival.formatted(date: .omitted, time: .shortened))").font(.caption)
+                    }
+                    Text([f.delayMinutes >= 5 ? "+\(f.delayMinutes) Min" : f.status, f.terminal.map { "T\($0)" }, f.gate.map { "Gate \($0)" }]
+                        .compactMap { $0 }.joined(separator: " · "))
+                        .font(.caption2).lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .containerBackground(for: .widget) { Color.clear }
+            } else {
+                Text("Kein Flug geplant").font(.caption)
+                    .containerBackground(for: .widget) { Color.clear }
+            }
+        } else if let f = entry.flight {
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
                     Text(f.number).font(.caption.weight(.semibold))
@@ -103,7 +131,7 @@ struct NextFlightWidget: Widget {
         }
         .configurationDisplayName("Nächster Flug")
         .description("Countdown, Gate und Status deines nächsten Flugs.")
-        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular])
+        .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryInline])
     }
 }
 

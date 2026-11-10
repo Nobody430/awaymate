@@ -29,6 +29,7 @@ struct SettingsView: View {
     @State private var importing = false
     @State private var confirmWipe = false
     @State private var message: String?
+    @AppStorage("calendarSync") private var calendarSync = false
     @State private var exportFile: URL?
     @State private var confirmDupes = false
     @State private var confirmJunk = false
@@ -185,6 +186,21 @@ struct SettingsView: View {
                         .onChange(of: travelMode) { _, _ in TravelMode.shared.evaluate(store) }
                     Toggle("Mitteilung bei Gate-/Zeitänderung", isOn: $notifyChanges)
                     Toggle("Live-Aktivität automatisch (4 h vor Abflug)", isOn: $liveActivities)
+                    Toggle("Flüge & Hotels in den Kalender eintragen", isOn: $calendarSync)
+                        .onChange(of: calendarSync) { _, on in
+                            Task {
+                                if on {
+                                    if await CalendarSync.requestAccess() {
+                                        await CalendarSync.sync(store.flights, bookings: BookingStore.shared.bookings)
+                                    } else {
+                                        calendarSync = false
+                                        message = "Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Skylog → Kalender (Vollzugriff)."
+                                    }
+                                } else {
+                                    CalendarSync.removeAll()
+                                }
+                            }
+                        }
                     Toggle("Erinnerungen (Check-in, Boarding, Landung)", isOn: $reminders)
                         .onChange(of: reminders) { _, _ in
                             store.flights.forEach { Notifier.scheduleReminders(for: $0) }

@@ -291,3 +291,122 @@ struct DepartureConditionsCard: View {
         }
     }
 }
+
+// MARK: - Connection
+
+/// Shows the connecting flight and how much time is left to change planes.
+struct ConnectionCard: View {
+    let flight: Flight
+    @Environment(FlightStore.self) private var store
+
+    var body: some View {
+        if !flight.isPast, flight.normalizedStatus != .canceled, let next = store.connection(after: flight),
+           let layover = FlightStore.layoverMinutes(flight, next) {
+            let planned = flight.arrival.scheduled.flatMap { s in next.departure.scheduled.map { Int($0.timeIntervalSince(s) / 60) } }
+            let color: Color = layover < 45 ? .red : layover < 75 ? .orange : .green
+            VStack(alignment: .leading, spacing: 8) {
+                Label("Anschlussflug", systemImage: "arrow.triangle.branch").font(.headline)
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(next.number) · \(next.departure.code) → \(next.arrival.code)").font(.subheadline.weight(.semibold))
+                        Text("Abflug \(Fmt.time(next.departure.best, next.departure.tz))"
+                             + (next.departure.gate.map { " · Gate \($0)" } ?? "")
+                             + (next.departure.terminal.map { " · Terminal \($0)" } ?? ""))
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text(layover < 0 ? "verpasst?" : Fmt.duration(layover)).font(.title3.bold()).foregroundStyle(color)
+                        Text("zum Umsteigen").font(.caption2).foregroundStyle(.secondary)
+                    }
+                }
+                if let planned, layover <= planned - 10 {
+                    Text("Geplant waren \(Fmt.duration(planned)). " + (layover < 45 ? "Das wird sehr knapp – früh bei der Crew melden." : "Zügig umsteigen."))
+                        .font(.caption).foregroundStyle(color)
+                }
+                if let a = flight.arrival.terminal, let b = next.departure.terminal, a != b {
+                    Text("Terminalwechsel: Ankunft Terminal \(a), Abflug Terminal \(b).").font(.caption).foregroundStyle(.orange)
+                }
+            }
+            .padding()
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+    }
+}
+
+// MARK: - Boarding pass on the travel day
+
+/// From 24 h before departure: one tap to the stored boarding pass / documents.
+struct BoardingPassButton: View {
+    let flight: Flight
+    @State private var files: [URL] = []
+    @State private var preview: URL?
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if let dep = flight.departure.best, !flight.isPast, flight.arrival.runway == nil,
+               dep.timeIntervalSinceNow < 24 * 3600, let first = files.first {
+                Button { preview = first } label: {
+                    HStack {
+                        Image(systemName: "qrcode").font(.title2)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text("Bordkarte öffnen").font(.headline)
+                            Text(files.count == 1 ? first.lastPathComponent : "\(files.count) Dokumente").font(.caption).lineLimit(1)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                    }
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Theme.accent, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .quickLookPreview($preview, in: files)
+        .onAppear { files = FlightDocs.list(flight.id).sorted { score($0) > score($1) } }
+    }
+
+    /// Boarding passes first
+    private func score(_ u: URL) -> Int {
+        let n = u.lastPathComponent.lowercased()
+        return (n.contains("board") || n.contains("bord") || n.hasSuffix("pkpass") ? 2 : 0) + (n.hasSuffix("pdf") ? 1 : 0)
+    }
+}
+
+/// Sheet for a file shared to Skylog: attach it to one of the upcoming flights.
+struct AttachDocumentView: View {
+    let url: URL
+    @Environment(FlightStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(store.upcoming.prefix(12)) { f in
+                        Button {
+                            FlightDocs.add(url, to: f.id)
+                            dismiss()
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("\(f.number) · \(f.departure.code) → \(f.arrival.code)").font(.headline)
+                                Text(Fmt.day(f.departure.best ?? f.sortDate, f.departure.tz)).font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    if store.upcoming.isEmpty { Text("Keine anstehenden Flüge.").foregroundStyle(.secondary) }
+                } header: {
+                    Text("„\(url.lastPathComponent)“ ablegen bei")
+                } footer: {
+                    Text("Am Reisetag erscheint das Dokument zuoberst im Flug als „Bordkarte öffnen“.")
+                }
+            }
+            .navigationTitle("Dokument ablegen")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Abbrechen") { dismiss() } } }
+        }
+    }
+}

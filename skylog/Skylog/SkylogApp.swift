@@ -67,6 +67,7 @@ struct ImportFile: Identifiable {
 
 struct RootView: View {
     @State private var importFile: ImportFile?
+    @State private var attachFile: ImportFile?
 
     var body: some View {
         TabView {
@@ -83,10 +84,19 @@ struct RootView: View {
         }
         .tint(Theme.accent)
         .onOpenURL { url in
-            if url.isFileURL { importFile = ImportFile(url: url) }
+            guard url.isFileURL else { return }
+            // PDFs, images and Wallet passes are documents for a flight; everything else goes to the import
+            if ["pdf", "png", "jpg", "jpeg", "heic", "pkpass"].contains(url.pathExtension.lowercased()) {
+                attachFile = ImportFile(url: url)
+            } else {
+                importFile = ImportFile(url: url)
+            }
         }
         .sheet(item: $importFile) { file in
             ImportView(initialFile: file.url)
+        }
+        .sheet(item: $attachFile) { file in
+            AttachDocumentView(url: file.url)
         }
     }
 }

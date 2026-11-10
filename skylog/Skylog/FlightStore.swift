@@ -37,9 +37,62 @@ final class FlightStore {
 
     func acceptPending(_ id: UUID) {
         guard let i = pending.firstIndex(where: { $0.id == id }) else { return }
-        let f = pending.remove(at: i)
+        var f = pending.remove(at: i)
         savePending()
+        // a re-booking replaces the old flight
+        if let old = f.replacesID { delete([old]) }
+        f.replacesID = nil
         add(f)
+    }
+
+    /// Stored upcoming flight that a new flight from a re-booking mail replaces:
+    /// same booking code, not the same flight, same route or same origin/destination within 2 days.
+    func rebookedFlight(for new: Flight, stillBooked: Set<String>) -> Flight? {
+        guard let ref = new.bookingReference, !ref.isEmpty else { return nil }
+        return flights.first { old in
+            guard !old.isPast, old.bookingReference == ref || old.notes.uppercased().contains(ref.uppercased()), !Self.isSameFlight(old, new),
+                  !stillBooked.contains(Self.normalizedNumber(old.number) + "|" + old.date) else { return false }
+            let days = abs(old.sortDate.timeIntervalSince(new.sortDate)) / 86400
+            let sameFrom = old.departure.code == new.departure.code, sameTo = old.arrival.code == new.arrival.code
+            return (sameFrom && sameTo && days <= 3) || ((sameFrom || sameTo) && days <= 2)
+        }
+    }
+
+    // MARK: Connections
+
+    /// The next own flight leaving from this flight's arrival airport within 24 h.
+    func connection(after f: Flight) -> Flight? {
+        guard let arr = f.arrival.best ?? f.arrival.scheduled else { return nil }
+        return flights.filter { o in
+            guard o.id != f.id, o.departure.code == f.arrival.code, o.normalizedStatus != .canceled,
+                  let dep = o.departure.best ?? o.departure.scheduled else { return false }
+            return dep > arr.addingTimeInterval(-3 * 3600) && dep < arr.addingTimeInterval(24 * 3600)
+                && (o.departure.scheduled ?? dep) > (f.departure.scheduled ?? arr)
+        }
+        .min { ($0.departure.best ?? $0.sortDate) < ($1.departure.best ?? $1.sortDate) }
+    }
+
+    /// Minutes between landing and the connecting departure (can be negative).
+    static func layoverMinutes(_ f: Flight, _ next: Flight) -> Int? {
+        guard let arr = f.arrival.best, let dep = next.departure.best else { return nil }
+        return Int(dep.timeIntervalSince(arr) / 60)
+    }
+
+    /// Warns when a delay eats up the connection time (once per 15-minute step).
+    private func checkConnection(_ id: UUID, notify: Bool) {
+        guard var f = flight(id), !f.normalizedStatus.isFinal, let next = connection(after: f),
+              let layover = Self.layoverMinutes(f, next), let planned = f.arrival.scheduled.flatMap({ s in
+                  next.departure.scheduled.map { Int($0.timeIntervalSince(s) / 60) } }) else { return }
+        guard layover < 75, layover <= planned - 15, layover <= (f.warnedLayover ?? Int.max) - 15 else { return }
+        f.warnedLayover = layover
+        let text = layover < 0 ? "Anschluss \(next.number) wird voraussichtlich verpasst"
+            : "Nur noch \(layover) Min. zum Umsteigen auf \(next.number) in \(f.arrival.code)"
+        f.log(text)
+        update(f)
+        if notify && Settings.notifyChanges {
+            Notifier.post(id: "\(id)-connection", title: "\(f.number): Anschluss wird knapp",
+                          body: text + " (geplant waren \(planned) Min.). Sprich früh mit der Crew oder dem Transfer-Schalter.")
+        }
     }
 
     func ignorePending(_ id: UUID) {
@@ -244,6 +297,7 @@ final class FlightStore {
         update(new)
         Notifier.scheduleReminders(for: new)
         HotelRoute.scheduleReminders(for: new, flights: flights)
+        checkConnection(id, notify: notify)
     }
 
     /// Refresh interval depending on the flight phase:
@@ -329,6 +383,7 @@ final class FlightStore {
         await updateLivePositions()
         await LiveFlight.syncAll(flights)
         LiveFlight.autoStartIfNeeded(upcoming)
+        await CalendarSync.sync(flights, bookings: BookingStore.shared.bookings)
     }
 
     // MARK: Inbound aircraft

@@ -96,6 +96,12 @@ struct StatsView: View {
                         }
                     }
 
+                    if s.count > 0 {
+                        YearReviewCard(stats: s, title: year.map { "Mein Flugjahr \($0)" } ?? "Meine Flüge")
+                        PunctualityCard(flights: s.flights)
+                        AircraftCollectionCard(flights: s.flights)
+                    }
+
                     topList("Airlines", s.top { [$0.airlineName] })
                     topList("Flughäfen", s.top { [$0.departure.iata ?? $0.departure.icao, $0.arrival.iata ?? $0.arrival.icao] })
                     topList("Strecken", s.top { $0.departure.code == "???" || $0.arrival.code == "???" ? [] : ["\($0.departure.code) → \($0.arrival.code)"] })

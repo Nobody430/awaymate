@@ -292,7 +292,10 @@ struct ImportView: View {
         let future = (dep.scheduled ?? c.date) > Date()
         var f = Flight(number: c.number, date: Fmt.apiDate.string(from: c.date), status: future ? "Expected" : "Arrived",
                        departure: dep, arrival: arr)
-        if let ref = c.bookingReference { f.notes = "Buchungscode: \(ref)" }
+        if let ref = c.bookingReference {
+            f.notes = "Buchungscode: \(ref)"
+            f.bookingReference = ref.uppercased()
+        }
         return f
     }
 
