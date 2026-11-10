@@ -91,7 +91,7 @@ final class FlightStore {
     // MARK: Mutations
 
     /// "lx 092" → "LX92"
-    static func normalizedNumber(_ n: String) -> String {
+    nonisolated static func normalizedNumber(_ n: String) -> String {
         let t = n.replacingOccurrences(of: " ", with: "").uppercased()
         guard t.count > 2 else { return t }
         let digits = t.dropFirst(2).drop { $0 == "0" }
