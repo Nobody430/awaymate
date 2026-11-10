@@ -1,0 +1,37 @@
+name: Export Skylog strings
+
+# Lets the compiler collect every localizable string of Skylog (exact keys incl. format specifiers)
+# and prints them to the log, so translations can be written without a Mac.
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: '26'
+      - name: Export
+        working-directory: skylog
+        run: |
+          brew install xcodegen >/dev/null
+          xcodegen generate
+          xcodebuild -exportLocalizations -project Skylog.xcodeproj -localizationPath l10n -exportLanguage en \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGN_IDENTITY="" PROVISIONING_PROFILE_SPECIFIER="" 2>&1 | tail -40
+          python3 - <<'PY'
+          import glob, json, base64, xml.etree.ElementTree as ET
+          out = {}
+          for path in glob.glob("l10n/**/*.xliff", recursive=True):
+              ns = {"x": "urn:oasis:names:tc:xliff:document:1.2"}
+              for f in ET.parse(path).getroot().findall("x:file", ns):
+                  name = f.get("original")
+                  units = [{"id": u.get("id"), "source": (u.find("x:source", ns).text or "")} for u in f.iter("{urn:oasis:names:tc:xliff:document:1.2}trans-unit")]
+                  out[name] = units
+                  print("FILE", name, len(units))
+          data = base64.b64encode(json.dumps(out, ensure_ascii=False).encode()).decode()
+          for i in range(0, len(data), 3000):
+              print("L10N:" + data[i:i+3000])
+          print("L10N-END")
+          PY
