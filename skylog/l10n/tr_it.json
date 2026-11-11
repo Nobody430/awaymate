@@ -795,7 +795,8 @@
   "Keine neuen Flüge oder Buchungen in deinen Mails.": "Nessun nuovo volo o prenotazione nelle tue e-mail.",
   "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "Novità dalle tue e-mail: %lld voli, %lld prenotazioni (nuove o modificate).",
   "Mails jetzt prüfen": "Controlla le e-mail ora",
-  "Mails geprüft": "E-mail controllate"
+  "Mails geprüft": "E-mail controllate",
+  "Letzte 30 Tage erneut lesen": "Rileggi gli ultimi 30 giorni"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

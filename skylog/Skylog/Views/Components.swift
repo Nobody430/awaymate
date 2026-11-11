@@ -206,11 +206,13 @@ struct MailSyncButton: View {
     @Environment(FlightStore.self) private var store
     @State private var busy = false
     @State private var result: String?
+    @State private var rescanned = false
 
     var body: some View {
         Button {
             Task {
                 busy = true
+                rescanned = false
                 result = await MailWatcher.checkNow(store: store)
                 busy = false
             }
@@ -221,6 +223,17 @@ struct MailSyncButton: View {
         .accessibilityLabel(Text("Mails jetzt prüfen"))
         .alert("Mails geprüft", isPresented: Binding(get: { result != nil }, set: { if !$0 { result = nil } })) {
             Button("OK", role: .cancel) {}
+            if !rescanned {
+                // e.g. after deleting a flight by mistake: mails that were already read are read again
+                Button("Letzte 30 Tage erneut lesen") {
+                    Task {
+                        busy = true
+                        rescanned = true
+                        result = await MailWatcher.checkNow(store: store, rescanDays: 30)
+                        busy = false
+                    }
+                }
+            }
         } message: {
             Text(result ?? "")
         }

@@ -795,7 +795,8 @@
   "Keine neuen Flüge oder Buchungen in deinen Mails.": "Aucun nouveau vol ni réservation dans tes e-mails.",
   "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "Nouveau depuis tes e-mails : %lld vols, %lld réservations (nouvelles ou modifiées).",
   "Mails jetzt prüfen": "Vérifier les e-mails maintenant",
-  "Mails geprüft": "E-mails vérifiés"
+  "Mails geprüft": "E-mails vérifiés",
+  "Letzte 30 Tage erneut lesen": "Relire les 30 derniers jours"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Aucun vol prévu",

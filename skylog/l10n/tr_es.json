@@ -795,7 +795,8 @@
   "Keine neuen Flüge oder Buchungen in deinen Mails.": "No hay vuelos ni reservas nuevos en tus correos.",
   "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "Nuevo desde tus correos: %lld vuelos, %lld reservas (nuevas o modificadas).",
   "Mails jetzt prüfen": "Comprobar correos ahora",
-  "Mails geprüft": "Correos comprobados"
+  "Mails geprüft": "Correos comprobados",
+  "Letzte 30 Tage erneut lesen": "Volver a leer los últimos 30 días"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Sin vuelos programados",

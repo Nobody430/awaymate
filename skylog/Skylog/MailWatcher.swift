@@ -20,7 +20,8 @@ enum MailWatcher {
     }
 
     /// Manual check ("sync" button): reads the mails received since the last check and says what came of it.
-    static func checkNow(store: FlightStore) async -> String {
+    /// `rescanDays`: read the mails of the last days again, also the ones already processed (e.g. after deleting a flight by mistake).
+    static func checkNow(store: FlightStore, rescanDays: Int? = nil) async -> String {
         guard OutlookAuth.shared.isConnected else {
             return String(localized: "Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren.")
         }
@@ -28,7 +29,7 @@ enum MailWatcher {
         let flightsBefore = store.flights.count + store.pending.count
         let known = Dictionary(uniqueKeysWithValues: BookingStore.shared.bookings.map { ($0.id, $0) })
         let errorBefore = lastError
-        await check(store: store, force: true)
+        await check(store: store, force: true, rescanDays: rescanDays)
         if let error = lastError, error != errorBefore { return String(localized: "Die Mails konnten nicht geprüft werden: \(error)") }
         let flights = max(0, store.flights.count + store.pending.count - flightsBefore)
         let bookings = BookingStore.shared.bookings.filter { known[$0.id] != $0 }.count
@@ -36,20 +37,21 @@ enum MailWatcher {
         return String(localized: "Neu aus deinen Mails: \(flights) Flüge, \(bookings) Buchungen (neu oder geändert).")
     }
 
-    static func check(store: FlightStore, force: Bool = false) async {
+    static func check(store: FlightStore, force: Bool = false, rescanDays: Int? = nil) async {
         // the manual check (force) also works when the automatic one is switched off
         guard enabled || force, OutlookAuth.shared.isConnected, !running else { return }
         if !force, let last = lastCheck, Date().timeIntervalSince(last) < 20 * 60 { return }
         running = true
         defer { running = false }
 
-        let since = (lastCheck ?? Date().addingTimeInterval(-7 * 86400)).addingTimeInterval(-10 * 60)
+        let since = rescanDays.map { Date().addingTimeInterval(-Double($0) * 86400) }
+            ?? (lastCheck ?? Date().addingTimeInterval(-7 * 86400)).addingTimeInterval(-10 * 60)
         do {
             let started = Date()
             let mails = try await OutlookMail.recentMails(since: since)
             // Don't send the same mail to the AI twice (overlap window, repeated checks)
             var seen = Set(UserDefaults.standard.stringArray(forKey: "processedMailIDs") ?? [])
-            let relevant = MailAI.relevant(mails).filter { !seen.contains($0.id) }
+            let relevant = MailAI.relevant(mails).filter { rescanDays != nil || !seen.contains($0.id) }
             guard !relevant.isEmpty else { lastCheck = started; return }
             // lastCheck and the processed list only move forward once the mails were really read (below)
             func markProcessed() {

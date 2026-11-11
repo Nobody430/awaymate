@@ -795,7 +795,8 @@
   "Keine neuen Flüge oder Buchungen in deinen Mails.": "No new flights or bookings in your emails.",
   "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "New from your emails: %lld flights, %lld bookings (new or changed).",
   "Mails jetzt prüfen": "Check emails now",
-  "Mails geprüft": "Emails checked"
+  "Mails geprüft": "Emails checked",
+  "Letzte 30 Tage erneut lesen": "Read the last 30 days again"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",
