@@ -753,7 +753,8 @@
   "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld flight(s) found in the calendar – review and import.",
   "Kalender: %@": "Calendar: %@",
   "Diagnose-Protokoll teilen": "Share diagnostic log",
-  "Ablauf": "Itinerary"
+  "Ablauf": "Itinerary",
+  "Weiter zur nächsten Unterkunft": "On to the next stay"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

@@ -753,7 +753,8 @@
   "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld vuelo(s) encontrado(s) en el calendario – revisa e importa.",
   "Kalender: %@": "Calendario: %@",
   "Diagnose-Protokoll teilen": "Compartir registro de diagnóstico",
-  "Ablauf": "Itinerario"
+  "Ablauf": "Itinerario",
+  "Weiter zur nächsten Unterkunft": "Hacia el siguiente alojamiento"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Sin vuelos programados",
