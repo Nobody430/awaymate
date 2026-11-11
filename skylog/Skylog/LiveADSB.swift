@@ -44,11 +44,26 @@ enum LiveADSB {
         let onGround: Bool
     }
 
-    private static let endpoints = ["https://api.adsb.lol/v2/callsign/", "https://api.airplanes.live/v2/callsign/"]
+    private static let hosts = ["https://api.adsb.lol/v2/", "https://api.airplanes.live/v2/"]
 
     static func lookup(callsign: String) async -> Fix? {
-        for base in endpoints {
-            guard let url = URL(string: base + callsign) else { continue }
+        await lookup(path: "callsign/" + callsign) {
+            (($0["flight"] as? String) ?? "").trimmingCharacters(in: .whitespaces).uppercased() == callsign
+        }
+    }
+
+    /// By aircraft registration – for flights whose callsign on the transponder differs from the published one.
+    static func lookup(registration: String) async -> Fix? {
+        let reg = registration.replacingOccurrences(of: " ", with: "").uppercased()
+        guard reg.count >= 4 else { return nil }
+        return await lookup(path: "reg/" + reg) {
+            (($0["r"] as? String) ?? "").replacingOccurrences(of: " ", with: "").uppercased() == reg
+        }
+    }
+
+    private static func lookup(path: String, matches isMatch: ([String: Any]) -> Bool) async -> Fix? {
+        for base in hosts {
+            guard let url = URL(string: base + path) else { continue }
             var request = URLRequest(url: url)
             request.timeoutInterval = 10
             request.setValue("Skylog/1.0 (personal flight tracker)", forHTTPHeaderField: "User-Agent")
@@ -56,8 +71,8 @@ enum LiveADSB {
                   (response as? HTTPURLResponse)?.statusCode == 200,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                   let list = json["ac"] as? [[String: Any]] else { continue }
-            // pick the freshest aircraft whose callsign matches exactly
-            let matches = list.filter { (($0["flight"] as? String) ?? "").trimmingCharacters(in: .whitespaces).uppercased() == callsign }
+            // pick the freshest aircraft that matches exactly
+            let matches = list.filter(isMatch)
             guard let ac = matches.min(by: { (($0["seen"] as? NSNumber)?.doubleValue ?? 99) < (($1["seen"] as? NSNumber)?.doubleValue ?? 99) }),
                   let lat = (ac["lat"] as? NSNumber)?.doubleValue,
                   let lon = (ac["lon"] as? NSNumber)?.doubleValue else { continue }

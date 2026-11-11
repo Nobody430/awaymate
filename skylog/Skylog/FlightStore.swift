@@ -486,9 +486,19 @@ final class FlightStore {
     func updateLive(_ id: UUID) async {
         guard let f = flight(id), isLiveWindow(f) else { return }
         if let cs = LiveADSB.callsign(for: f) {
-            let fix = await LiveADSB.lookup(callsign: cs)
+            var fix = await LiveADSB.lookup(callsign: cs)
+            var via = "cs=\(cs)"
+            // No hit under the published callsign: try the aircraft itself. While it may still be flying the
+            // previous leg, only a position on the ground counts.
+            if fix == nil, let reg = f.aircraftReg, !reg.isEmpty, let byReg = await LiveADSB.lookup(registration: reg) {
+                let previousLegOver = f.inbound?.landed == true || (f.inbound == nil && (f.departure.best.map { Date() > $0 } ?? false))
+                if byReg.onGround || previousLegOver {
+                    fix = byReg
+                    via += " reg=\(reg)"
+                }
+            }
             guard var current = flight(id) else { return }
-            DiagLog.add("adsb", "\(f.number) cs=\(cs) " + (fix.map { String(format: "%.3f/%.3f %@ boden=%@", $0.position.lat, $0.position.lon, $0.position.source, $0.onGround ? "ja" : "nein") } ?? "kein Treffer"))
+            DiagLog.add("adsb", "\(f.number) \(via) " + (fix.map { String(format: "%.3f/%.3f %@ boden=%@", $0.position.lat, $0.position.lon, $0.position.source, $0.onGround ? "ja" : "nein") } ?? "kein Treffer"))
             let notes = LiveADSB.apply(fix, to: &current)
             if fix != nil || !notes.isEmpty {
                 for n in notes { current.log(n.takeoff ? String(localized: "Gestartet (Live-Position)") : String(localized: "Gelandet (Live-Position)")) }

@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 /// Keeps flights, trips and bookings in step between the user's own devices – through the user's own push server.
 /// The server only stores one document; merging happens here: per entry the newest change wins,
@@ -44,6 +45,7 @@ enum DeviceSync {
     private static let encoder: JSONEncoder = {
         let e = JSONEncoder()
         e.dateEncodingStrategy = .iso8601
+        e.outputFormatting = .sortedKeys      // same content → same text, so "nothing changed" can be detected
         return e
     }()
     private static let decoder: JSONDecoder = {
@@ -110,9 +112,19 @@ enum DeviceSync {
     static func sync() async -> Bool {
         guard enabled, !running else { return false }
         running = true
-        defer { running = false }
+        // iOS may freeze the app right after it goes to the background – ask for time to finish the request
+        let background = UIApplication.shared.beginBackgroundTask(withName: "DeviceSync")
+        defer {
+            running = false
+            UIApplication.shared.endBackgroundTask(background)
+        }
         do {
-            var remote = try await fetch()
+            var remote: Envelope
+            do { remote = try await fetch() } catch is URLError {
+                // first request after the app was asleep often hits a dead connection: one quiet retry
+                try await Task.sleep(for: .seconds(1))
+                remote = try await fetch()
+            }
             for _ in 0..<3 {
                 let remoteDoc = try remote.data.flatMap { try decoder.decode(Document.self, from: Data($0.utf8)) } ?? Document()
                 let local = Document(flights: FlightStore.shared.flights, trips: TripStore.shared.trips,
@@ -124,7 +136,8 @@ enum DeviceSync {
                     throw AIClient.Failure(message: String(localized: "Abgleich abgebrochen: das Ergebnis hätte zu viele Flüge entfernt."))
                 }
                 let text = String(decoding: try encoder.encode(merged), as: UTF8.self)
-                if let next = try await put(rev: remote.rev, data: text) {
+                let unchanged = text == String(decoding: try encoder.encode(remoteDoc), as: UTF8.self)
+                if !unchanged, let next = try await put(rev: remote.rev, data: text) {
                     remote = next          // someone else was faster – merge again with their version
                     continue
                 }
@@ -132,7 +145,9 @@ enum DeviceSync {
                 TripStore.shared.replaceAll(merged.trips)
                 BookingStore.shared.replaceAll(merged.bookings)
                 deleted = merged.deleted
-                DiagLog.add("sync", "ok: \(merged.flights.count) Flüge (lokal vorher \(local.flights.count), Server \(remoteDoc.flights.count)), \(merged.trips.count) Reisen, \(merged.bookings.count) Buchungen, rev \(remote.rev)")
+                if !unchanged || merged.flights != local.flights || merged.bookings != local.bookings {
+                    DiagLog.add("sync", "\(unchanged ? "geholt" : "gesendet"): \(merged.flights.count) Flüge (lokal vorher \(local.flights.count), Server \(remoteDoc.flights.count)), \(merged.trips.count) Reisen, \(merged.bookings.count) Buchungen, rev \(remote.rev)")
+                }
                 lastStatus = String(localized: "Abgeglichen \(Date().formatted(date: .abbreviated, time: .shortened)): \(merged.flights.count) Flüge, \(merged.trips.count) Reisen, \(merged.bookings.count) Buchungen")
                 return true
             }
