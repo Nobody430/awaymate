@@ -490,12 +490,16 @@ final class FlightStore {
             var via = "cs=\(cs)"
             // No hit under the published callsign: try the aircraft itself. While it may still be flying the
             // previous leg, only a position on the ground counts.
-            if fix == nil, let reg = f.aircraftReg, !reg.isEmpty, let byReg = await LiveADSB.lookup(registration: reg) {
-                let previousLegOver = f.inbound?.landed == true || (f.inbound == nil && (f.departure.best.map { Date() > $0 } ?? false))
-                if byReg.onGround || previousLegOver {
-                    fix = byReg
-                    via += " reg=\(reg)"
-                }
+            // The aircraft itself (transponder code, then registration). While it may still be flying the previous leg,
+            // only a position on the ground counts.
+            let previousLegOver = f.inbound?.landed == true || (f.inbound == nil && (f.departure.best.map { Date() > $0 } ?? false))
+            if fix == nil, let hex = f.icao24, !hex.isEmpty {
+                via += " hex=\(hex)"
+                if let byHex = await LiveADSB.lookup(hex: hex), byHex.onGround || previousLegOver { fix = byHex }
+            }
+            if fix == nil, let reg = f.aircraftReg, !reg.isEmpty {
+                via += " reg=\(reg)"
+                if let byReg = await LiveADSB.lookup(registration: reg), byReg.onGround || previousLegOver { fix = byReg }
             }
             guard var current = flight(id) else { return }
             DiagLog.add("adsb", "\(f.number) \(via) " + (fix.map { String(format: "%.3f/%.3f %@ boden=%@", $0.position.lat, $0.position.lon, $0.position.source, $0.onGround ? "ja" : "nein") } ?? "kein Treffer"))

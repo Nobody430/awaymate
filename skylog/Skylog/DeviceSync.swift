@@ -94,6 +94,7 @@ enum DeviceSync {
 
     private static var pending: Task<Void, Never>?
     private static var running = false
+    private static var lastUpload: Date?
 
     /// Debounced sync after local changes.
     static func scheduleSync() {
@@ -136,11 +137,19 @@ enum DeviceSync {
                     throw AIClient.Failure(message: String(localized: "Abgleich abgebrochen: das Ergebnis hätte zu viele Flüge entfernt."))
                 }
                 let text = String(decoding: try encoder.encode(merged), as: UTF8.self)
-                let unchanged = text == String(decoding: try encoder.encode(remoteDoc), as: UTF8.self)
+                var unchanged = text == String(decoding: try encoder.encode(remoteDoc), as: UTF8.self)
+                // Live data of a flight in progress changes every minute: upload such changes at most every 5 minutes.
+                // Added or removed entries and edited trips or bookings always go up at once.
+                if !unchanged, let last = lastUpload, Date().timeIntervalSince(last) < 5 * 60,
+                   Set(merged.flights.map(\.id)) == Set(remoteDoc.flights.map(\.id)),
+                   merged.trips == remoteDoc.trips, merged.bookings == remoteDoc.bookings, merged.deleted == remoteDoc.deleted {
+                    unchanged = true
+                }
                 if !unchanged, let next = try await put(rev: remote.rev, data: text) {
                     remote = next          // someone else was faster – merge again with their version
                     continue
                 }
+                if !unchanged { lastUpload = Date() }
                 FlightStore.shared.replaceAll(merged.flights)
                 TripStore.shared.replaceAll(merged.trips)
                 BookingStore.shared.replaceAll(merged.bookings)

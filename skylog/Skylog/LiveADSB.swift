@@ -52,13 +52,21 @@ enum LiveADSB {
         }
     }
 
+    /// By the aircraft's transponder code (24-bit address) – the most reliable key once it is known.
+    static func lookup(hex: String) async -> Fix? {
+        let code = hex.trimmingCharacters(in: .whitespaces).lowercased()
+        guard code.count == 6, code.allSatisfy(\.isHexDigit) else { return nil }
+        return await lookup(path: "hex/" + code) { (($0["hex"] as? String) ?? "").lowercased() == code }
+    }
+
     /// By aircraft registration – for flights whose callsign on the transponder differs from the published one.
     static func lookup(registration: String) async -> Fix? {
         let reg = registration.replacingOccurrences(of: " ", with: "").uppercased()
         guard reg.count >= 4 else { return nil }
-        return await lookup(path: "reg/" + reg) {
-            (($0["r"] as? String) ?? "").replacingOccurrences(of: " ", with: "").uppercased() == reg
-        }
+        let isMatch: ([String: Any]) -> Bool = { (($0["r"] as? String) ?? "").replacingOccurrences(of: " ", with: "").uppercased() == reg }
+        // the networks don't agree on the path name
+        if let fix = await lookup(path: "reg/" + reg, matches: isMatch) { return fix }
+        return await lookup(path: "registration/" + reg, matches: isMatch)
     }
 
     private static func lookup(path: String, matches isMatch: ([String: Any]) -> Bool) async -> Fix? {
