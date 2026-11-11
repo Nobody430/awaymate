@@ -328,6 +328,16 @@ struct Flight: Identifiable, Codable, Hashable {
         return detour < route * 1.6 + 400
     }
 
+    /// Some sources report altitude and speed but 0°/0° as coordinates: the flight data is usable, the place is not.
+    static func hasNoCoordinates(_ p: LivePosition) -> Bool { abs(p.lat) < 0.05 && abs(p.lon) < 0.05 }
+
+    /// Fresh altitude / speed data, even when the coordinates are missing (the map then shows the estimated place).
+    var liveTelemetry: LivePosition? {
+        guard let p = lastPosition, Date().timeIntervalSince(p.timestamp) < 20 * 60,
+              isPlausible(p) || Self.hasNoCoordinates(p) else { return nil }
+        return p
+    }
+
     /// Live position if it is fresh and plausible.
     var livePosition: LivePosition? {
         guard let p = lastPosition, Date().timeIntervalSince(p.timestamp) < 20 * 60, isPlausible(p) else { return nil }

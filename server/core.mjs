@@ -507,7 +507,9 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     }
     // Flight data while airborne (from the live position)
     let flightTiles = "";
-    const lp = snap.landed ? null : bestPos;
+    // altitude / speed may come without usable coordinates (then the place on the map is the estimate)
+    const tele = [snap.pos, f.pos].filter((p) => p && !p.ground && Date.now() - p.t < 20 * MIN && (p.altFt != null || p.kt != null)).sort((a, b) => b.t - a.t)[0] || null;
+    const lp = snap.landed ? null : (bestPos || tele);
     if (lp) {
       const num = (n) => Math.round(n).toLocaleString(LOCALES[lang] || "de-CH");
       const ft = (label, value, sub) => `<div class="tile"><span class="muted">${esc(label)}</span><b>${esc(value)}</b>${sub ? `<span class="muted">${esc(sub)}</span>` : ""}</div>`;
@@ -516,8 +518,11 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         flightTiles += ft(P("alt"), `${num(lp.altFt * 0.3048)} m`, `${num(lp.altFt)} ft${trend ? " · " + trend : ""}`);
       }
       if (lp.kt != null) flightTiles += ft(P("spd"), `${num(lp.kt * 1.852)} km/h`, `${num(lp.kt)} kt`);
-      if (f.toLat != null) {
-        const km = distKm(lp, { lat: f.toLat, lon: f.toLon });
+      if (f.toLat != null && (typeof lp.lat === "number" || f.fromLat != null)) {
+        const depMs2 = Date.parse(dep), arrMs2 = Date.parse(arr);
+        const done = arrMs2 > depMs2 ? Math.min(1, Math.max(0, (Date.now() - depMs2) / (arrMs2 - depMs2))) : 0;
+        const km = typeof lp.lat === "number" ? distKm(lp, { lat: f.toLat, lon: f.toLon })
+          : distKm({ lat: f.fromLat, lon: f.fromLon }, { lat: f.toLat, lon: f.toLon }) * (1 - done);
         const mins = Math.max(0, Math.round((Date.parse(arr) - Date.now()) / MIN));
         flightTiles += ft(P("left"), `${num(km)} km`, mins > 0 ? (mins >= 60 ? `${Math.floor(mins / 60)} h ${mins % 60} min` : `${mins} min`) : "");
       }

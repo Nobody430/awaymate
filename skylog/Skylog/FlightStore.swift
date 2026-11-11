@@ -278,7 +278,7 @@ final class FlightStore {
         new.inbound = cur.inbound
         new.lastUpdated = Date()
         new.fixAirlineName()
-        if let p = new.lastPosition, !new.isPlausible(p) { new.lastPosition = nil }
+        if let p = new.lastPosition, !new.isPlausible(p), !Flight.hasNoCoordinates(p) { new.lastPosition = nil }
         // No fresh airport data this time: keep the airport's gate instead of flipping back to the other source's
         if picked.adbGate == nil, let g = cur.adbGate, new.departure.runway == nil {
             new.gateConflict = (picked.departure.gate != nil && picked.departure.gate != g) ? picked.departure.gate : nil
@@ -482,7 +482,7 @@ final class FlightStore {
             positionQueries[id] = Date()
             pos = try? await FlightAware.position(faID)
         }
-        guard let pos, var current = flight(id), current.isPlausible(pos) else { return }
+        guard let pos, var current = flight(id), current.isPlausible(pos) || Flight.hasNoCoordinates(pos) else { return }
         if let old = current.lastPosition, old.timestamp >= pos.timestamp { return }
         current.lastPosition = pos
         update(current)
