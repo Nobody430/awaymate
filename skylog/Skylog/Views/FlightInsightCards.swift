@@ -255,11 +255,11 @@ struct DepartureConditionsCard: View {
                         HStack(spacing: 10) {
                             Image(systemName: delay == nil ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                                 .font(.title3).frame(width: 28)
-                                .foregroundStyle(delay == nil ? .green : .orange)
+                                .foregroundStyle(delay == nil ? .green : delay?.severe == true ? .red : .orange)
                             VStack(alignment: .leading, spacing: 1) {
                                 Text("Betrieb am Flughafen").font(.caption).foregroundStyle(.secondary)
                                 if let d = delay {
-                                    Text("Flüge starten im Schnitt ca. \(d.minutes) Min. später").font(.subheadline.weight(.medium))
+                                    Text(d.severe ? String(localized: "Grössere Verspätungen gemeldet") : String(localized: "Leichte Verspätungen gemeldet")).font(.subheadline.weight(.medium))
                                     if !d.reasons.isEmpty {
                                         Text(d.reasons.prefix(2).joined(separator: " · ")).font(.caption).foregroundStyle(.secondary)
                                     }

@@ -369,13 +369,17 @@ enum FlightAware {
     // MARK: Airport delays
 
     struct AirportDelay {
-        var minutes: Int
+        /// true = major delays ("red"), false = minor ("yellow")
+        var severe: Bool
         var reasons: [String]
     }
 
+    /// AeroAPI "Airport Delay": color red/yellow/green, reasons with a text. `delay_secs` is documented as
+    /// "not intended to be presented to users" (sorting only), so it is not shown.
     private struct DelayResponse: Decodable {
-        struct Reason: Decodable { let reason: String?; let category: String?; let delay_secs: Double? }
+        struct Reason: Decodable { let reason: String?; let category: String?; let color: String? }
         let delay_secs: Double?
+        let color: String?
         let category: String?
         let reasons: [Reason]?
     }
@@ -387,9 +391,13 @@ enum FlightAware {
         if let c = delayCache[code], Date().timeIntervalSince(c.at) < 30 * 60 { return c.value }
         var value: AirportDelay? = nil
         if let data = try? await get("/airports/\(code)/delays"),
-           let r = try? JSONDecoder().decode(DelayResponse.self, from: data), let secs = r.delay_secs, secs >= 300 {
-            let reasons = (r.reasons ?? []).compactMap { $0.reason ?? $0.category }
-            value = AirportDelay(minutes: Int(secs / 60), reasons: Array(Set(reasons)).sorted())
+           let r = try? JSONDecoder().decode(DelayResponse.self, from: data) {
+            let color = (r.color ?? "").lowercased()
+            let reasons = (r.reasons ?? []).compactMap { $0.reason ?? $0.category }.filter { !$0.isEmpty }
+            // green (or nothing reported) = normal operations
+            if color == "red" || color == "yellow" || (color.isEmpty && !reasons.isEmpty && (r.delay_secs ?? 0) >= 300) {
+                value = AirportDelay(severe: color == "red", reasons: Array(Set(reasons)).sorted())
+            }
         }
         delayCache[code] = (Date(), value)
         return value
