@@ -787,7 +787,15 @@
   "Standardliste wiederherstellen": "Ripristina la lista predefinita",
   "„Standardliste wiederherstellen“ löscht alle eigenen und von der KI ergänzten Punkte.": "«Ripristina la lista predefinita» elimina tutte le voci aggiunte da te o dall’IA.",
   "Packliste auf die Standardliste zurücksetzen?": "Ripristinare la lista bagagli a quella predefinita?",
-  "Zurücksetzen": "Ripristina"
+  "Zurücksetzen": "Ripristina",
+  "Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren.": "Outlook non è collegato. Collega la tua casella sotto Voli → + → Importa dalle e-mail.",
+  "Die Mail-Überwachung ist in den Einstellungen ausgeschaltet.": "Il controllo delle e-mail è disattivato nelle impostazioni.",
+  "Die Mails werden gerade schon geprüft.": "Le tue e-mail sono già in fase di controllo.",
+  "Die Mails konnten nicht geprüft werden: %@": "Impossibile controllare le e-mail: %@",
+  "Keine neuen Flüge oder Buchungen in deinen Mails.": "Nessun nuovo volo o prenotazione nelle tue e-mail.",
+  "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "Novità dalle tue e-mail: %lld voli, %lld prenotazioni (nuove o modificate).",
+  "Mails jetzt prüfen": "Controlla le e-mail ora",
+  "Mails geprüft": "E-mail controllate"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

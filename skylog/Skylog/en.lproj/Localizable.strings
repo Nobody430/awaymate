@@ -279,6 +279,9 @@
 "Die KI hat beim letzten Mal keinen Inhalt geliefert." = "The AI returned no content last time.";
 "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " = "The AI did not return a usable plan. Please try again or choose a different AI model in Settings.\n\nResponse: ";
 "Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten." = "The AI is planning your trip … this usually takes 30–60 seconds, a few minutes for long trips.";
+"Die Mail-Überwachung ist in den Einstellungen ausgeschaltet." = "Mail monitoring is switched off in the settings.";
+"Die Mails konnten nicht geprüft werden: %@" = "Your emails could not be checked: %@";
+"Die Mails werden gerade schon geprüft." = "Your emails are already being checked.";
 "Die Reise hat keine Tage – bitte Start und Ende prüfen." = "The trip has no days – please check start and end.";
 "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen." = "The page shows all flights and stays of this trip, where you are right now, and every flight live. Anyone with the link can see it.";
 "Die Stufe „Personal“ wählen und die Bedingungen akzeptieren." = "Choose the “Personal” tier and accept the terms.";
@@ -446,6 +449,7 @@
 "Keine allgemeinen Verspätungen gemeldet" = "No general delays reported";
 "Keine anstehenden Flüge" = "No upcoming flights";
 "Keine anstehenden Flüge." = "No upcoming flights.";
+"Keine neuen Flüge oder Buchungen in deinen Mails." = "No new flights or bookings in your emails.";
 "Kennzeichen" = "Registration";
 "Kennzeichen noch nicht bekannt – meist 1–2 Tage vor Abflug." = "Registration not known yet – usually 1–2 days before departure.";
 "Kleider" = "Clothes";
@@ -487,6 +491,8 @@
 "Längster Flug: %@ → %@ · %@" = "Longest flight: %@ → %@ · %@";
 "Löschen" = "Delete";
 "Mail-Text einfügen" = "Paste email text";
+"Mails geprüft" = "Emails checked";
+"Mails jetzt prüfen" = "Check emails now";
 "Massgeblich ist die Verspätung am ursprünglichen Ziel." = "The delay at the original destination is what counts.";
 "Medikamente" = "Medication";
 "Mehr" = "More";
@@ -513,6 +519,7 @@
 "Nach (Code, z.B. BKK)" = "To (code, e.g. BKK)";
 "Name" = "Name";
 "Name (z.B. Buenos Aires)" = "Name (e.g. Buenos Aires)";
+"Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert)." = "New from your emails: %lld flights, %lld bookings (new or changed).";
 "Neu erstellen" = "Create new";
 "Neu in deinen Mails gefunden" = "Newly found in your emails";
 "Neue Buchung: %@" = "New booking: %@";
@@ -548,6 +555,7 @@
 "Ortszeit" = "Local time";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
 "Outlook abmelden" = "Sign out of Outlook";
+"Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren." = "Outlook is not connected. Connect your mailbox under Flights → + → Import from emails.";
 "Outlook-Client-ID (Azure)" = "Outlook client ID (Azure)";
 "Outlook-Fehler (%lld). Evtl. neu verbinden." = "Outlook error (%lld). You may need to reconnect.";
 "Outlook-Zugang (Postfach durchsuchen)" = "Outlook access (search mailbox)";

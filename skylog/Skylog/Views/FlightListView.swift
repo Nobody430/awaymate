@@ -83,6 +83,7 @@ struct FlightListView: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     HStack {
+                        MailSyncButton()
                         if !items.isEmpty {
                             Button {
                                 Task {

@@ -787,7 +787,15 @@
   "Standardliste wiederherstellen": "Restore the default list",
   "„Standardliste wiederherstellen“ löscht alle eigenen und von der KI ergänzten Punkte.": "“Restore the default list” deletes all items you or the AI added.",
   "Packliste auf die Standardliste zurücksetzen?": "Reset the packing list to the default list?",
-  "Zurücksetzen": "Reset"
+  "Zurücksetzen": "Reset",
+  "Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren.": "Outlook is not connected. Connect your mailbox under Flights → + → Import from emails.",
+  "Die Mail-Überwachung ist in den Einstellungen ausgeschaltet.": "Mail monitoring is switched off in the settings.",
+  "Die Mails werden gerade schon geprüft.": "Your emails are already being checked.",
+  "Die Mails konnten nicht geprüft werden: %@": "Your emails could not be checked: %@",
+  "Keine neuen Flüge oder Buchungen in deinen Mails.": "No new flights or bookings in your emails.",
+  "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "New from your emails: %lld flights, %lld bookings (new or changed).",
+  "Mails jetzt prüfen": "Check emails now",
+  "Mails geprüft": "Emails checked"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

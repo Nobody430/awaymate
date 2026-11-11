@@ -200,3 +200,29 @@ struct FlightRouteMap: View {
         .mapStyle(.standard(elevation: .flat, emphasis: .muted, pointsOfInterest: .excludingAll))
     }
 }
+
+/// Toolbar button: check the mailbox now for new flights, hotels and other bookings.
+struct MailSyncButton: View {
+    @Environment(FlightStore.self) private var store
+    @State private var busy = false
+    @State private var result: String?
+
+    var body: some View {
+        Button {
+            Task {
+                busy = true
+                result = await MailWatcher.checkNow(store: store)
+                busy = false
+            }
+        } label: {
+            if busy { ProgressView() } else { Image(systemName: "envelope.arrow.triangle.branch") }
+        }
+        .disabled(busy)
+        .accessibilityLabel(Text("Mails jetzt prüfen"))
+        .alert("Mails geprüft", isPresented: Binding(get: { result != nil }, set: { if !$0 { result = nil } })) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(result ?? "")
+        }
+    }
+}

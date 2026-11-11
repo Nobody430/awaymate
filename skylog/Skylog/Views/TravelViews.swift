@@ -300,8 +300,11 @@ struct TripsView: View {
             }
             .navigationTitle("Reisen")
             .toolbar {
-                Button { editing = Trip(name: "", start: Date(), end: Date().addingTimeInterval(7 * 86400)) } label: {
-                    Image(systemName: "plus.circle.fill").font(.title2)
+                ToolbarItem(placement: .topBarLeading) { MailSyncButton() }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { editing = Trip(name: "", start: Date(), end: Date().addingTimeInterval(7 * 86400)) } label: {
+                        Image(systemName: "plus.circle.fill").font(.title2)
+                    }
                 }
             }
             .sheet(item: $editing) { t in TripEditor(trip: t) }

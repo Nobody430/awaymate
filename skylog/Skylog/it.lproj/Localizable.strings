@@ -279,6 +279,9 @@
 "Die KI hat beim letzten Mal keinen Inhalt geliefert." = "L’ultima volta l’IA non ha fornito alcun contenuto.";
 "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " = "L’IA non ha fornito un piano utilizzabile. Riprova oppure scegli un altro modello IA nelle Impostazioni.\n\nRisposta: ";
 "Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten." = "L’IA sta pianificando il tuo viaggio … di solito servono 30–60 secondi, per i viaggi lunghi qualche minuto.";
+"Die Mail-Überwachung ist in den Einstellungen ausgeschaltet." = "Il controllo delle e-mail è disattivato nelle impostazioni.";
+"Die Mails konnten nicht geprüft werden: %@" = "Impossibile controllare le e-mail: %@";
+"Die Mails werden gerade schon geprüft." = "Le tue e-mail sono già in fase di controllo.";
 "Die Reise hat keine Tage – bitte Start und Ende prüfen." = "Il viaggio non ha giorni – controlla inizio e fine.";
 "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen." = "La pagina mostra tutti i voli e gli alloggi di questo viaggio, dove ti trovi adesso e ogni volo in tempo reale. Chiunque abbia il link può vederla.";
 "Die Stufe „Personal“ wählen und die Bedingungen akzeptieren." = "Scegli il livello “Personal” e accetta le condizioni.";
@@ -446,6 +449,7 @@
 "Keine allgemeinen Verspätungen gemeldet" = "Nessun ritardo generale segnalato";
 "Keine anstehenden Flüge" = "Nessun volo in programma";
 "Keine anstehenden Flüge." = "Nessun volo in programma.";
+"Keine neuen Flüge oder Buchungen in deinen Mails." = "Nessun nuovo volo o prenotazione nelle tue e-mail.";
 "Kennzeichen" = "Immatricolazione";
 "Kennzeichen noch nicht bekannt – meist 1–2 Tage vor Abflug." = "Immatricolazione non ancora nota – di solito 1–2 giorni prima della partenza.";
 "Kleider" = "Vestiti";
@@ -487,6 +491,8 @@
 "Längster Flug: %@ → %@ · %@" = "Volo più lungo: %@ → %@ · %@";
 "Löschen" = "Elimina";
 "Mail-Text einfügen" = "Incolla il testo dell’e-mail";
+"Mails geprüft" = "E-mail controllate";
+"Mails jetzt prüfen" = "Controlla le e-mail ora";
 "Massgeblich ist die Verspätung am ursprünglichen Ziel." = "Fa fede il ritardo alla destinazione originaria.";
 "Medikamente" = "Medicinali";
 "Mehr" = "Di più";
@@ -513,6 +519,7 @@
 "Nach (Code, z.B. BKK)" = "A (codice, ad es. BKK)";
 "Name" = "Nome";
 "Name (z.B. Buenos Aires)" = "Nome (ad es. Buenos Aires)";
+"Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert)." = "Novità dalle tue e-mail: %lld voli, %lld prenotazioni (nuove o modificate).";
 "Neu erstellen" = "Crea di nuovo";
 "Neu in deinen Mails gefunden" = "Novità trovate nelle tue e-mail";
 "Neue Buchung: %@" = "Nuova prenotazione: %@";
@@ -548,6 +555,7 @@
 "Ortszeit" = "Ora locale";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
 "Outlook abmelden" = "Esci da Outlook";
+"Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren." = "Outlook non è collegato. Collega la tua casella sotto Voli → + → Importa dalle e-mail.";
 "Outlook-Client-ID (Azure)" = "ID client Outlook (Azure)";
 "Outlook-Fehler (%lld). Evtl. neu verbinden." = "Errore di Outlook (%lld). Prova a ricollegarlo.";
 "Outlook-Zugang (Postfach durchsuchen)" = "Accesso a Outlook (ricerca nella casella di posta)";

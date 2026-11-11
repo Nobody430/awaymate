@@ -19,8 +19,26 @@ enum MailWatcher {
         UserDefaults.standard.set("\(Date().formatted(date: .abbreviated, time: .shortened)): \(e.localizedDescription)", forKey: "mailWatchError")
     }
 
+    /// Manual check ("sync" button): reads the mails received since the last check and says what came of it.
+    static func checkNow(store: FlightStore) async -> String {
+        guard OutlookAuth.shared.isConnected else {
+            return String(localized: "Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren.")
+        }
+        guard !running else { return String(localized: "Die Mails werden gerade schon geprüft.") }
+        let flightsBefore = store.flights.count + store.pending.count
+        let known = Dictionary(uniqueKeysWithValues: BookingStore.shared.bookings.map { ($0.id, $0) })
+        let errorBefore = lastError
+        await check(store: store, force: true)
+        if let error = lastError, error != errorBefore { return String(localized: "Die Mails konnten nicht geprüft werden: \(error)") }
+        let flights = max(0, store.flights.count + store.pending.count - flightsBefore)
+        let bookings = BookingStore.shared.bookings.filter { known[$0.id] != $0 }.count
+        if flights == 0 && bookings == 0 { return String(localized: "Keine neuen Flüge oder Buchungen in deinen Mails.") }
+        return String(localized: "Neu aus deinen Mails: \(flights) Flüge, \(bookings) Buchungen (neu oder geändert).")
+    }
+
     static func check(store: FlightStore, force: Bool = false) async {
-        guard enabled, OutlookAuth.shared.isConnected, !running else { return }
+        // the manual check (force) also works when the automatic one is switched off
+        guard enabled || force, OutlookAuth.shared.isConnected, !running else { return }
         if !force, let last = lastCheck, Date().timeIntervalSince(last) < 20 * 60 { return }
         running = true
         defer { running = false }

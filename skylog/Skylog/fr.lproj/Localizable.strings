@@ -279,6 +279,9 @@
 "Die KI hat beim letzten Mal keinen Inhalt geliefert." = "La dernière fois, l'IA n'a renvoyé aucun contenu.";
 "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " = "L'IA n'a pas fourni de plan exploitable. Réessaie ou choisis un autre modèle d'IA dans les Réglages.\n\nRéponse : ";
 "Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten." = "L'IA planifie ton voyage… cela prend en général 30 à 60 secondes, quelques minutes pour les longs voyages.";
+"Die Mail-Überwachung ist in den Einstellungen ausgeschaltet." = "La surveillance des e-mails est désactivée dans les réglages.";
+"Die Mails konnten nicht geprüft werden: %@" = "Impossible de vérifier tes e-mails : %@";
+"Die Mails werden gerade schon geprüft." = "Tes e-mails sont déjà en cours de vérification.";
 "Die Reise hat keine Tage – bitte Start und Ende prüfen." = "Le voyage ne compte aucun jour – vérifie le début et la fin.";
 "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen." = "La page montre tous les vols et hébergements de ce voyage, où tu te trouves en ce moment, et chaque vol en direct. Toute personne ayant le lien peut la voir.";
 "Die Stufe „Personal“ wählen und die Bedingungen akzeptieren." = "Choisis le niveau « Personal » et accepte les conditions.";
@@ -446,6 +449,7 @@
 "Keine allgemeinen Verspätungen gemeldet" = "Aucun retard général signalé";
 "Keine anstehenden Flüge" = "Aucun vol à venir";
 "Keine anstehenden Flüge." = "Aucun vol à venir.";
+"Keine neuen Flüge oder Buchungen in deinen Mails." = "Aucun nouveau vol ni réservation dans tes e-mails.";
 "Kennzeichen" = "Immatriculation";
 "Kennzeichen noch nicht bekannt – meist 1–2 Tage vor Abflug." = "Immatriculation pas encore connue – en général 1 à 2 jours avant le départ.";
 "Kleider" = "Vêtements";
@@ -487,6 +491,8 @@
 "Längster Flug: %@ → %@ · %@" = "Vol le plus long : %@ → %@ · %@";
 "Löschen" = "Supprimer";
 "Mail-Text einfügen" = "Coller le texte de l'e-mail";
+"Mails geprüft" = "E-mails vérifiés";
+"Mails jetzt prüfen" = "Vérifier les e-mails maintenant";
 "Massgeblich ist die Verspätung am ursprünglichen Ziel." = "C'est le retard à la destination initiale qui compte.";
 "Medikamente" = "Médicaments";
 "Mehr" = "Plus";
@@ -513,6 +519,7 @@
 "Nach (Code, z.B. BKK)" = "À (code, p. ex. BKK)";
 "Name" = "Nom";
 "Name (z.B. Buenos Aires)" = "Nom (p. ex. Buenos Aires)";
+"Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert)." = "Nouveau depuis tes e-mails : %lld vols, %lld réservations (nouvelles ou modifiées).";
 "Neu erstellen" = "Recréer";
 "Neu in deinen Mails gefunden" = "Nouveau dans tes e-mails";
 "Neue Buchung: %@" = "Nouvelle réservation : %@";
@@ -548,6 +555,7 @@
 "Ortszeit" = "Heure locale";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
 "Outlook abmelden" = "Se déconnecter d'Outlook";
+"Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren." = "Outlook n’est pas connecté. Connecte ta boîte mail sous Vols → + → Importer depuis les e-mails.";
 "Outlook-Client-ID (Azure)" = "ID client Outlook (Azure)";
 "Outlook-Fehler (%lld). Evtl. neu verbinden." = "Erreur Outlook (%lld). Reconnecte-toi si nécessaire.";
 "Outlook-Zugang (Postfach durchsuchen)" = "Accès Outlook (recherche dans la boîte mail)";

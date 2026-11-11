@@ -787,7 +787,15 @@
   "Standardliste wiederherstellen": "Restaurar la lista predeterminada",
   "„Standardliste wiederherstellen“ löscht alle eigenen und von der KI ergänzten Punkte.": "«Restaurar la lista predeterminada» elimina todos los elementos añadidos por ti o por la IA.",
   "Packliste auf die Standardliste zurücksetzen?": "¿Restablecer la lista de equipaje a la predeterminada?",
-  "Zurücksetzen": "Restablecer"
+  "Zurücksetzen": "Restablecer",
+  "Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren.": "Outlook no está conectado. Conecta tu buzón en Vuelos → + → Importar desde correos.",
+  "Die Mail-Überwachung ist in den Einstellungen ausgeschaltet.": "La supervisión del correo está desactivada en los ajustes.",
+  "Die Mails werden gerade schon geprüft.": "Tus correos ya se están comprobando.",
+  "Die Mails konnten nicht geprüft werden: %@": "No se pudieron comprobar los correos: %@",
+  "Keine neuen Flüge oder Buchungen in deinen Mails.": "No hay vuelos ni reservas nuevos en tus correos.",
+  "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "Nuevo desde tus correos: %lld vuelos, %lld reservas (nuevas o modificadas).",
+  "Mails jetzt prüfen": "Comprobar correos ahora",
+  "Mails geprüft": "Correos comprobados"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Sin vuelos programados",

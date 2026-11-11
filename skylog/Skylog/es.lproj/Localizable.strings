@@ -279,6 +279,9 @@
 "Die KI hat beim letzten Mal keinen Inhalt geliefert." = "La última vez la IA no devolvió ningún contenido.";
 "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " = "La IA no ha devuelto un plan utilizable. Inténtalo de nuevo o elige otro modelo de IA en Ajustes.\n\nRespuesta: ";
 "Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten." = "La IA está planificando tu viaje… suele tardar 30–60 segundos; en viajes largos, unos minutos.";
+"Die Mail-Überwachung ist in den Einstellungen ausgeschaltet." = "La supervisión del correo está desactivada en los ajustes.";
+"Die Mails konnten nicht geprüft werden: %@" = "No se pudieron comprobar los correos: %@";
+"Die Mails werden gerade schon geprüft." = "Tus correos ya se están comprobando.";
 "Die Reise hat keine Tage – bitte Start und Ende prüfen." = "El viaje no tiene días: revisa el inicio y el final.";
 "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen." = "La página muestra todos los vuelos y alojamientos de este viaje, dónde estás ahora y cada vuelo en directo. Cualquiera que tenga el enlace puede verla.";
 "Die Stufe „Personal“ wählen und die Bedingungen akzeptieren." = "Elige el nivel «Personal» y acepta las condiciones.";
@@ -446,6 +449,7 @@
 "Keine allgemeinen Verspätungen gemeldet" = "No hay retrasos generales notificados";
 "Keine anstehenden Flüge" = "No hay próximos vuelos";
 "Keine anstehenden Flüge." = "No hay próximos vuelos.";
+"Keine neuen Flüge oder Buchungen in deinen Mails." = "No hay vuelos ni reservas nuevos en tus correos.";
 "Kennzeichen" = "Matrícula";
 "Kennzeichen noch nicht bekannt – meist 1–2 Tage vor Abflug." = "Matrícula aún desconocida: suele saberse 1–2 días antes de la salida.";
 "Kleider" = "Ropa";
@@ -487,6 +491,8 @@
 "Längster Flug: %@ → %@ · %@" = "Vuelo más largo: %@ → %@ · %@";
 "Löschen" = "Eliminar";
 "Mail-Text einfügen" = "Pegar texto del correo";
+"Mails geprüft" = "Correos comprobados";
+"Mails jetzt prüfen" = "Comprobar correos ahora";
 "Massgeblich ist die Verspätung am ursprünglichen Ziel." = "Lo que cuenta es el retraso en el destino original.";
 "Medikamente" = "Medicamentos";
 "Mehr" = "Más";
@@ -513,6 +519,7 @@
 "Nach (Code, z.B. BKK)" = "Destino (código, p. ej. BKK)";
 "Name" = "Nombre";
 "Name (z.B. Buenos Aires)" = "Nombre (p. ej. Buenos Aires)";
+"Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert)." = "Nuevo desde tus correos: %lld vuelos, %lld reservas (nuevas o modificadas).";
 "Neu erstellen" = "Crear de nuevo";
 "Neu in deinen Mails gefunden" = "Nuevo en tus correos";
 "Neue Buchung: %@" = "Nueva reserva: %@";
@@ -548,6 +555,7 @@
 "Ortszeit" = "Hora local";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
 "Outlook abmelden" = "Cerrar sesión de Outlook";
+"Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren." = "Outlook no está conectado. Conecta tu buzón en Vuelos → + → Importar desde correos.";
 "Outlook-Client-ID (Azure)" = "ID de cliente de Outlook (Azure)";
 "Outlook-Fehler (%lld). Evtl. neu verbinden." = "Error de Outlook (%lld). Quizá debas volver a conectar.";
 "Outlook-Zugang (Postfach durchsuchen)" = "Acceso a Outlook (buscar en el buzón)";
