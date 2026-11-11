@@ -137,10 +137,13 @@ struct SettingsView: View {
                 } header: {
                     Text("KI-Erkennung")
                 } footer: {
-                    if aiProvider == AIClient.Provider.openai.rawValue {
-                        Text("Wichtig: Ein ChatGPT-Abo (Plus/Pro) gilt nicht für die API. Es braucht API-Guthaben auf platform.openai.com → Billing.")
-                    } else {
-                        Text("Haiku kostet für einen kompletten Postfach-Import meist nur Rappen. Opus ist genauer, aber etwa 40× teurer.")
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Die KI wird gebraucht für: neue Reise-Mails lesen (Flüge, Hotels, Mietwagen, Züge), geteilte PDFs erkennen, Reiseplan und persönliche Packliste. Jede dieser Aktionen verbraucht Guthaben bei deinem KI-Anbieter. Die Mail-Prüfung liest nur neue Mails, die nach Reise aussehen – ohne solche Mails kostet sie nichts.")
+                        if aiProvider == AIClient.Provider.openai.rawValue {
+                            Text("Wichtig: Ein ChatGPT-Abo (Plus/Pro) gilt nicht für die API. Es braucht API-Guthaben auf platform.openai.com → Billing.")
+                        } else {
+                            Text("Haiku kostet für einen kompletten Postfach-Import meist nur Rappen. Opus ist genauer, aber etwa 40× teurer.")
+                        }
                     }
                 }
 
@@ -164,11 +167,12 @@ struct SettingsView: View {
                 } header: {
                     Text("E-Mail-Import")
                 } footer: {
+                    Text("Die Prüfung liest nur neue Mails. Mit KI-Key erkennt sie Flüge, Hotels, Mietwagen und Züge und verbraucht dafür KI-Guthaben; ohne Key erkennt sie nur Flüge und kostet nichts. Sofort prüfen: Briefumschlag-Symbol in der Flug- oder Reiseliste.")
                     Text("Einmalig: App registrieren → Kontotyp „Beliebiges Verzeichnis + persönliche Microsoft-Konten“ → Plattform „iOS/macOS“ mit Bundle-ID com.nobody430.skylog → Anwendungs-ID (Client-ID) hier einfügen. Details im README.")
                 }
 
                 Section {
-                    TextField("Server-Adresse (z.B. skylog-push-n430.fly.dev)", text: $pushServerURL)
+                    TextField("Server-Adresse (z.B. skylog-push.name.workers.dev)", text: $pushServerURL)
                         .textInputAutocapitalization(.never).autocorrectionDisabled().keyboardType(.URL)
                     SecureField("Server-Token", text: $pushServerToken)
                         .textInputAutocapitalization(.never).autocorrectionDisabled()
@@ -195,6 +199,7 @@ struct SettingsView: View {
                     Text("Echtzeit-Pushs (eigener Server)")
                 } footer: {
                     Text("Optional. Mit deinem Awaymate-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen.")
+                    Text("Mit dem Server kannst du ausserdem einen Status-Link pro Flug und einen Live-Link für eine ganze Reise mit Familie & Freunden teilen.")
                 }
 
                 Section {
@@ -225,7 +230,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Automatik")
                 } footer: {
-                    Text("24–4 h vor Abflug alle 2 h, danach alle 15 Min., ab 75 Min. vor Abflug bis zum Start alle 5 Min. (auch über die geplante Zeit hinaus, damit Verspätungen sofort auftauchen). In der Luft alle 15 Min., kurz vor Landung alle 5 Min., danach bis zum Gepäckband. Ca. 40 Abfragen pro Flug. Mit Reisemodus läuft das auch im Hintergrund.")
+                    Text("Mehr als 24 h vor Abflug alle 12 h, 24–4 h vorher alle 2 h, danach alle 15 Min., ab 75 Min. vor Abflug bis zum Start alle 5 Min. (auch über die geplante Zeit hinaus, damit Verspätungen sofort auftauchen). In der Luft alle 15 Min., kurz vor der Landung alle 5 Min., danach bis zum Gepäckband. Etwa 15–40 kostenpflichtige Abfragen pro Flug. iOS lässt die App im Hintergrund nur selten arbeiten – mit Reisemodus öfter; mit eigenem Server kommen Änderungen sofort als Mitteilung.")
                 }
 
                 Section("Daten") {
@@ -262,9 +267,9 @@ struct SettingsView: View {
 
                 Section {
                     LabeledContent("Gespeicherte Flüge", value: "\(store.flights.count)")
-                    LabeledContent("Version", value: "1.0")
+                    LabeledContent("Version", value: "\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0") (\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "–"))")
                 } footer: {
-                    Text("Awaymate – eigener Flug-Tracker. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.")
+                    Text("Awaymate – Flug- und Reise-App. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.")
                 }
             }
             .navigationTitle("Einstellungen")

@@ -210,6 +210,7 @@
 "Automatisch (%@)" = "Automatique (%@)";
 "Automatisch aktualisieren" = "Actualiser automatiquement";
 "Awaymate" = "Awaymate";
+"Awaymate – Flug- und Reise-App. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live." = "Awaymate – app de vols et de voyages. Données : FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.";
 "Awaymate – eigener Flug-Tracker. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live." = "Awaymate – ton propre suivi de vols. Données : FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.";
 "Bearbeiten" = "Modifier";
 "Beide kombiniert (empfohlen)" = "Les deux combinées (recommandé)";
@@ -281,9 +282,11 @@
 "Die KI hat beim letzten Mal keinen Inhalt geliefert." = "La dernière fois, l'IA n'a renvoyé aucun contenu.";
 "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " = "L'IA n'a pas fourni de plan exploitable. Réessaie ou choisis un autre modèle d'IA dans les Réglages.\n\nRéponse : ";
 "Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten." = "L'IA planifie ton voyage… cela prend en général 30 à 60 secondes, quelques minutes pour les longs voyages.";
+"Die KI wird gebraucht für: neue Reise-Mails lesen (Flüge, Hotels, Mietwagen, Züge), geteilte PDFs erkennen, Reiseplan und persönliche Packliste. Jede dieser Aktionen verbraucht Guthaben bei deinem KI-Anbieter. Die Mail-Prüfung liest nur neue Mails, die nach Reise aussehen – ohne solche Mails kostet sie nichts." = "L’IA sert à : lire les nouveaux e-mails de voyage (vols, hôtels, voitures de location, trains), reconnaître les PDF partagés, créer le plan de voyage et la liste de bagages personnelle. Chacune de ces actions consomme du crédit chez ton fournisseur d’IA. La vérification des e-mails ne lit que les nouveaux e-mails qui ressemblent à un voyage – sans de tels e-mails, elle ne coûte rien.";
 "Die Mail-Überwachung ist in den Einstellungen ausgeschaltet." = "La surveillance des e-mails est désactivée dans les réglages.";
 "Die Mails konnten nicht geprüft werden: %@" = "Impossible de vérifier tes e-mails : %@";
 "Die Mails werden gerade schon geprüft." = "Tes e-mails sont déjà en cours de vérification.";
+"Die Prüfung liest nur neue Mails. Mit KI-Key erkennt sie Flüge, Hotels, Mietwagen und Züge und verbraucht dafür KI-Guthaben; ohne Key erkennt sie nur Flüge und kostet nichts. Sofort prüfen: Briefumschlag-Symbol in der Flug- oder Reiseliste." = "La vérification ne lit que les nouveaux e-mails. Avec une clé d’IA, elle reconnaît vols, hôtels, voitures de location et trains et consomme pour cela du crédit d’IA ; sans clé, elle ne reconnaît que les vols et ne coûte rien. Vérifier tout de suite : symbole d’enveloppe dans la liste des vols ou des voyages.";
 "Die Reise hat keine Tage – bitte Start und Ende prüfen." = "Le voyage ne compte aucun jour – vérifie le début et la fin.";
 "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen." = "La page montre tous les vols et hébergements de ce voyage, où tu te trouves en ce moment, et chaque vol en direct. Toute personne ayant le lien peut la voir.";
 "Die Stufe „Personal“ wählen und die Bedingungen akzeptieren." = "Choisis le niveau « Personal » et accepte les conditions.";
@@ -500,6 +503,7 @@
 "Massgeblich ist die Verspätung am ursprünglichen Ziel." = "C'est le retard à la destination initiale qui compte.";
 "Medikamente" = "Médicaments";
 "Mehr" = "Plus";
+"Mehr als 24 h vor Abflug alle 12 h, 24–4 h vorher alle 2 h, danach alle 15 Min., ab 75 Min. vor Abflug bis zum Start alle 5 Min. (auch über die geplante Zeit hinaus, damit Verspätungen sofort auftauchen). In der Luft alle 15 Min., kurz vor der Landung alle 5 Min., danach bis zum Gepäckband. Etwa 15–40 kostenpflichtige Abfragen pro Flug. iOS lässt die App im Hintergrund nur selten arbeiten – mit Reisemodus öfter; mit eigenem Server kommen Änderungen sofort als Mitteilung." = "Plus de 24 h avant le départ toutes les 12 h, de 24 à 4 h avant toutes les 2 h, puis toutes les 15 min, et de 75 min avant le départ jusqu’au décollage toutes les 5 min (aussi au-delà de l’heure prévue, pour que les retards apparaissent tout de suite). En vol toutes les 15 min, peu avant l’atterrissage toutes les 5 min, puis jusqu’au tapis à bagages. Environ 15 à 40 requêtes payantes par vol. iOS laisse rarement l’app travailler en arrière-plan – plus souvent avec le mode voyage ; avec ton propre serveur, les changements arrivent aussitôt en notification.";
 "Mehrmals im selben Flugzeug" = "Plusieurs fois dans le même avion";
 "Mein Flug %@ live:" = "Mon vol %@ en direct :";
 "Mein Flug %@ nach %@ startet um %@" = "Mon vol %@ pour %@ décolle à %@";
@@ -512,6 +516,7 @@
 "Mietwagen" = "Voiture de location";
 "Mit KI-Erkennung: Die KI liest die gefundenen Mails und übernimmt nur echte Buchungen (inkl. Umbuchungen und Stornos)." = "Avec la détection IA : l'IA lit les e-mails trouvés et ne reprend que les vraies réservations (y compris modifications et annulations).";
 "Mit Outlook anmelden & durchsuchen" = "Se connecter à Outlook et rechercher";
+"Mit dem Server kannst du ausserdem einen Status-Link pro Flug und einen Live-Link für eine ganze Reise mit Familie & Freunden teilen." = "Avec le serveur, tu peux aussi partager avec ta famille et tes amis un lien de statut par vol et un lien en direct pour tout un voyage.";
 "Mit einem eigenen Push-Server (Einstellungen) kannst du einen Live-Link für die ganze Reise teilen." = "Avec ton propre serveur push (Réglages), tu peux partager un lien en direct pour tout le voyage.";
 "Mitte" = "Milieu";
 "Mitteilung bei Gate-/Zeitänderung" = "Notification en cas de changement de porte/d'horaire";
@@ -623,6 +628,7 @@
 "Server nicht erreichbar" = "Serveur injoignable";
 "Server nicht erreichbar." = "Serveur injoignable.";
 "Server-Adresse (z.B. skylog-push-n430.fly.dev)" = "Adresse du serveur (p. ex. skylog-push-n430.fly.dev)";
+"Server-Adresse (z.B. skylog-push.name.workers.dev)" = "Adresse du serveur (p. ex. skylog-push.name.workers.dev)";
 "Server-Adresse und Token eintragen." = "Saisis l'adresse du serveur et le jeton.";
 "Server-Token" = "Jeton du serveur";
 "Serverfehler (%lld)." = "Erreur du serveur (%lld).";

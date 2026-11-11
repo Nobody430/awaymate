@@ -210,6 +210,7 @@
 "Automatisch (%@)" = "Automatic (%@)";
 "Automatisch aktualisieren" = "Update automatically";
 "Awaymate" = "Awaymate";
+"Awaymate – Flug- und Reise-App. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live." = "Awaymate – flight and travel app. Data: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.";
 "Awaymate – eigener Flug-Tracker. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live." = "Awaymate – your own flight tracker. Data: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.";
 "Bearbeiten" = "Edit";
 "Beide kombiniert (empfohlen)" = "Both combined (recommended)";
@@ -281,9 +282,11 @@
 "Die KI hat beim letzten Mal keinen Inhalt geliefert." = "The AI returned no content last time.";
 "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " = "The AI did not return a usable plan. Please try again or choose a different AI model in Settings.\n\nResponse: ";
 "Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten." = "The AI is planning your trip … this usually takes 30–60 seconds, a few minutes for long trips.";
+"Die KI wird gebraucht für: neue Reise-Mails lesen (Flüge, Hotels, Mietwagen, Züge), geteilte PDFs erkennen, Reiseplan und persönliche Packliste. Jede dieser Aktionen verbraucht Guthaben bei deinem KI-Anbieter. Die Mail-Prüfung liest nur neue Mails, die nach Reise aussehen – ohne solche Mails kostet sie nichts." = "The AI is used for: reading new travel emails (flights, hotels, rental cars, trains), recognising shared PDFs, the trip plan and the personal packing list. Each of these uses credit with your AI provider. The mail check only reads new emails that look like travel – without such emails it costs nothing.";
 "Die Mail-Überwachung ist in den Einstellungen ausgeschaltet." = "Mail monitoring is switched off in the settings.";
 "Die Mails konnten nicht geprüft werden: %@" = "Your emails could not be checked: %@";
 "Die Mails werden gerade schon geprüft." = "Your emails are already being checked.";
+"Die Prüfung liest nur neue Mails. Mit KI-Key erkennt sie Flüge, Hotels, Mietwagen und Züge und verbraucht dafür KI-Guthaben; ohne Key erkennt sie nur Flüge und kostet nichts. Sofort prüfen: Briefumschlag-Symbol in der Flug- oder Reiseliste." = "The check only reads new emails. With an AI key it recognises flights, hotels, rental cars and trains and uses AI credit for that; without a key it only recognises flights and costs nothing. Check right away: envelope symbol in the flight or trips list.";
 "Die Reise hat keine Tage – bitte Start und Ende prüfen." = "The trip has no days – please check start and end.";
 "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen." = "The page shows all flights and stays of this trip, where you are right now, and every flight live. Anyone with the link can see it.";
 "Die Stufe „Personal“ wählen und die Bedingungen akzeptieren." = "Choose the “Personal” tier and accept the terms.";
@@ -500,6 +503,7 @@
 "Massgeblich ist die Verspätung am ursprünglichen Ziel." = "The delay at the original destination is what counts.";
 "Medikamente" = "Medication";
 "Mehr" = "More";
+"Mehr als 24 h vor Abflug alle 12 h, 24–4 h vorher alle 2 h, danach alle 15 Min., ab 75 Min. vor Abflug bis zum Start alle 5 Min. (auch über die geplante Zeit hinaus, damit Verspätungen sofort auftauchen). In der Luft alle 15 Min., kurz vor der Landung alle 5 Min., danach bis zum Gepäckband. Etwa 15–40 kostenpflichtige Abfragen pro Flug. iOS lässt die App im Hintergrund nur selten arbeiten – mit Reisemodus öfter; mit eigenem Server kommen Änderungen sofort als Mitteilung." = "More than 24 h before departure every 12 h, 24–4 h before every 2 h, then every 15 min, from 75 min before departure until take-off every 5 min (also beyond the scheduled time, so delays show up at once). In the air every 15 min, shortly before landing every 5 min, then until the baggage belt. About 15–40 paid queries per flight. iOS rarely lets the app work in the background – more often with travel mode; with your own server, changes arrive at once as notifications.";
 "Mehrmals im selben Flugzeug" = "More than once on the same aircraft";
 "Mein Flug %@ live:" = "My flight %@ live:";
 "Mein Flug %@ nach %@ startet um %@" = "My flight %@ to %@ departs at %@";
@@ -512,6 +516,7 @@
 "Mietwagen" = "Rental car";
 "Mit KI-Erkennung: Die KI liest die gefundenen Mails und übernimmt nur echte Buchungen (inkl. Umbuchungen und Stornos)." = "With AI recognition: the AI reads the emails found and only takes real bookings (incl. rebookings and cancellations).";
 "Mit Outlook anmelden & durchsuchen" = "Sign in with Outlook & search";
+"Mit dem Server kannst du ausserdem einen Status-Link pro Flug und einen Live-Link für eine ganze Reise mit Familie & Freunden teilen." = "With the server you can also share a status link per flight and a live link for a whole trip with family & friends.";
 "Mit einem eigenen Push-Server (Einstellungen) kannst du einen Live-Link für die ganze Reise teilen." = "With your own push server (Settings) you can share a live link for the whole trip.";
 "Mitte" = "Middle";
 "Mitteilung bei Gate-/Zeitänderung" = "Notification on gate/time change";
@@ -623,6 +628,7 @@
 "Server nicht erreichbar" = "Server unreachable";
 "Server nicht erreichbar." = "Server unreachable.";
 "Server-Adresse (z.B. skylog-push-n430.fly.dev)" = "Server address (e.g. skylog-push-n430.fly.dev)";
+"Server-Adresse (z.B. skylog-push.name.workers.dev)" = "Server address (e.g. skylog-push.name.workers.dev)";
 "Server-Adresse und Token eintragen." = "Enter server address and token.";
 "Server-Token" = "Server token";
 "Serverfehler (%lld)." = "Server error (%lld).";
