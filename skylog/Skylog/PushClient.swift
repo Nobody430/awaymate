@@ -70,12 +70,14 @@ enum PushClient {
         if let arr = f.arrival.best { p["arr"] = iso.string(from: arr) }
         // for the status page: cities and the originally planned times
         p["fromCity"] = f.departure.displayCity
+        p["state"] = f.normalizedStatus.rawValue      // language-independent status for the status page
         if let s = f.departure.scheduled { p["depPlanned"] = iso.string(from: s) }
         if let s = f.arrival.scheduled { p["arrPlanned"] = iso.string(from: s) }
         if let cs = LiveADSB.callsign(for: f) { p["callsign"] = cs }
         if let g = f.departure.gate { p["gate"] = g }
         if let t = f.departure.terminal { p["terminal"] = t }
         if let c = f.arrival.coordinate { p["toLat"] = c.latitude; p["toLon"] = c.longitude }
+        if let c = f.departure.coordinate { p["fromLat"] = c.latitude; p["fromLon"] = c.longitude }
         if let fa = f.faFlightID { p["faFlightID"] = fa }
         if let share = f.shareToken { p["share"] = share }
         return p

@@ -6,7 +6,7 @@ const MIN = 60_000;
 // Texts in the language of the device (sent by the app with each sync). {0}, {1} … are placeholders.
 const TEXTS = {
   de: {
-    scheduled: "Planmässig", cancelled: "Annulliert", diverted: "Umgeleitet", leftGate: "Gate verlassen", inAir: "In der Luft",
+    delayed: "Verspätet", scheduled: "Planmässig", cancelled: "Annulliert", diverted: "Umgeleitet", leftGate: "Gate verlassen", inAir: "In der Luft",
     landed: "Gelandet", atGate: "Am Gate", boarding: "Boarding (ca.)",
     leftGateTitle: "🛫 Gate verlassen", leftGateBody: "{0} rollt zur Startbahn.",
     departedTitle: "{0} ist gestartet", departedEta: "Ankunft ca. {0}.", departedTo: "Unterwegs nach {0}.",
@@ -20,7 +20,7 @@ const TEXTS = {
     testTitle: "Skylog-Server verbunden ✅", testBody: "Pushs funktionieren.",
   },
   en: {
-    scheduled: "On time", cancelled: "Cancelled", diverted: "Diverted", leftGate: "Left the gate", inAir: "In the air",
+    delayed: "Delayed", scheduled: "On time", cancelled: "Cancelled", diverted: "Diverted", leftGate: "Left the gate", inAir: "In the air",
     landed: "Landed", atGate: "At the gate", boarding: "Boarding (est.)",
     leftGateTitle: "🛫 Left the gate", leftGateBody: "{0} is taxiing to the runway.",
     departedTitle: "{0} has taken off", departedEta: "Arrival around {0}.", departedTo: "On the way to {0}.",
@@ -34,7 +34,7 @@ const TEXTS = {
     testTitle: "Skylog server connected ✅", testBody: "Push notifications work.",
   },
   fr: {
-    scheduled: "À l'heure", cancelled: "Annulé", diverted: "Dérouté", leftGate: "A quitté la porte", inAir: "En vol",
+    delayed: "Retardé", scheduled: "À l'heure", cancelled: "Annulé", diverted: "Dérouté", leftGate: "A quitté la porte", inAir: "En vol",
     landed: "Atterri", atGate: "À la porte", boarding: "Embarquement (env.)",
     leftGateTitle: "🛫 Porte quittée", leftGateBody: "{0} roule vers la piste.",
     departedTitle: "{0} a décollé", departedEta: "Arrivée vers {0}.", departedTo: "En route pour {0}.",
@@ -48,7 +48,7 @@ const TEXTS = {
     testTitle: "Serveur Skylog connecté ✅", testBody: "Les notifications fonctionnent.",
   },
   it: {
-    scheduled: "In orario", cancelled: "Cancellato", diverted: "Dirottato", leftGate: "Ha lasciato il gate", inAir: "In volo",
+    delayed: "In ritardo", scheduled: "In orario", cancelled: "Cancellato", diverted: "Dirottato", leftGate: "Ha lasciato il gate", inAir: "In volo",
     landed: "Atterrato", atGate: "Al gate", boarding: "Imbarco (ca.)",
     leftGateTitle: "🛫 Gate lasciato", leftGateBody: "{0} sta rullando verso la pista.",
     departedTitle: "{0} è decollato", departedEta: "Arrivo verso le {0}.", departedTo: "In viaggio verso {0}.",
@@ -62,7 +62,7 @@ const TEXTS = {
     testTitle: "Server Skylog collegato ✅", testBody: "Le notifiche funzionano.",
   },
   es: {
-    scheduled: "A tiempo", cancelled: "Cancelado", diverted: "Desviado", leftGate: "Salió de la puerta", inAir: "En vuelo",
+    delayed: "Retrasado", scheduled: "A tiempo", cancelled: "Cancelado", diverted: "Desviado", leftGate: "Salió de la puerta", inAir: "En vuelo",
     landed: "Aterrizado", atGate: "En la puerta", boarding: "Embarque (aprox.)",
     leftGateTitle: "🛫 Salió de la puerta", leftGateBody: "{0} rueda hacia la pista.",
     departedTitle: "{0} ha despegado", departedEta: "Llegada sobre las {0}.", departedTo: "Rumbo a {0}.",
@@ -78,19 +78,62 @@ const TEXTS = {
 };
 // Texts of the public status page (link shared with family & friends)
 const PAGE = {
-  de: { title: "Flugstatus", dep: "Abflug", arr: "Ankunft", gate: "Gate", terminal: "Terminal", belt: "Gepäckband", delay: "{0} Min. später",
+  de: { live: "Live-Position, Stand {0}", est: "Geschätzte Position (keine Live-Daten)", title: "Flugstatus", dep: "Abflug", arr: "Ankunft", gate: "Gate", terminal: "Terminal", belt: "Gepäckband", delay: "{0} Min. später",
         onTime: "pünktlich", updated: "Stand {0}", local: "Ortszeit", ended: "Dieser Link ist abgelaufen oder ungültig.", by: "Geteilt mit Skylog", reload: "Die Seite aktualisiert sich jede Minute." },
-  en: { title: "Flight status", dep: "Departure", arr: "Arrival", gate: "Gate", terminal: "Terminal", belt: "Baggage belt", delay: "{0} min late",
+  en: { live: "Live position as of {0}", est: "Estimated position (no live data)", title: "Flight status", dep: "Departure", arr: "Arrival", gate: "Gate", terminal: "Terminal", belt: "Baggage belt", delay: "{0} min late",
         onTime: "on time", updated: "As of {0}", local: "local time", ended: "This link has expired or is invalid.", by: "Shared with Skylog", reload: "This page refreshes every minute." },
-  fr: { title: "Statut du vol", dep: "Départ", arr: "Arrivée", gate: "Porte", terminal: "Terminal", belt: "Tapis à bagages", delay: "{0} min de retard",
+  fr: { live: "Position en direct à {0}", est: "Position estimée (pas de données en direct)", title: "Statut du vol", dep: "Départ", arr: "Arrivée", gate: "Porte", terminal: "Terminal", belt: "Tapis à bagages", delay: "{0} min de retard",
         onTime: "à l'heure", updated: "Mis à jour à {0}", local: "heure locale", ended: "Ce lien a expiré ou n'est pas valide.", by: "Partagé avec Skylog", reload: "La page s'actualise chaque minute." },
-  it: { title: "Stato del volo", dep: "Partenza", arr: "Arrivo", gate: "Gate", terminal: "Terminal", belt: "Nastro bagagli", delay: "{0} min di ritardo",
+  it: { live: "Posizione in tempo reale alle {0}", est: "Posizione stimata (nessun dato in tempo reale)", title: "Stato del volo", dep: "Partenza", arr: "Arrivo", gate: "Gate", terminal: "Terminal", belt: "Nastro bagagli", delay: "{0} min di ritardo",
         onTime: "in orario", updated: "Aggiornato alle {0}", local: "ora locale", ended: "Questo link è scaduto o non è valido.", by: "Condiviso con Skylog", reload: "La pagina si aggiorna ogni minuto." },
-  es: { title: "Estado del vuelo", dep: "Salida", arr: "Llegada", gate: "Puerta", terminal: "Terminal", belt: "Cinta de equipaje", delay: "{0} min de retraso",
+  es: { live: "Posición en directo a las {0}", est: "Posición estimada (sin datos en directo)", title: "Estado del vuelo", dep: "Salida", arr: "Llegada", gate: "Puerta", terminal: "Terminal", belt: "Cinta de equipaje", delay: "{0} min de retraso",
         onTime: "a tiempo", updated: "Actualizado a las {0}", local: "hora local", ended: "Este enlace ha caducado o no es válido.", by: "Compartido con Skylog", reload: "La página se actualiza cada minuto." },
 };
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const LOCALES = { de: "de-CH", en: "en-GB", fr: "fr-FR", it: "it-IT", es: "es-ES" };
+
+// Runs in the visitor's browser: draws the great-circle route and the plane with Leaflet / OpenStreetMap.
+function mapScript(D) {
+  if (!window.L) return;
+  var rad = Math.PI / 180;
+  function gc(a, b, f) {      // point at fraction f on the great circle a → b
+    var p1 = a[0] * rad, l1 = a[1] * rad, p2 = b[0] * rad, l2 = b[1] * rad;
+    var d = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin((p2 - p1) / 2), 2) + Math.cos(p1) * Math.cos(p2) * Math.pow(Math.sin((l2 - l1) / 2), 2)));
+    if (d < 1e-9) return a;
+    var A = Math.sin((1 - f) * d) / Math.sin(d), B = Math.sin(f * d) / Math.sin(d);
+    var x = A * Math.cos(p1) * Math.cos(l1) + B * Math.cos(p2) * Math.cos(l2);
+    var y = A * Math.cos(p1) * Math.sin(l1) + B * Math.cos(p2) * Math.sin(l2);
+    var z = A * Math.sin(p1) + B * Math.sin(p2);
+    return [Math.atan2(z, Math.sqrt(x * x + y * y)) / rad, Math.atan2(y, x) / rad];
+  }
+  function bearing(a, b) {
+    var p1 = a[0] * rad, p2 = b[0] * rad, dl = (b[1] - a[1]) * rad;
+    return (Math.atan2(Math.sin(dl) * Math.cos(p2), Math.cos(p1) * Math.sin(p2) - Math.sin(p1) * Math.cos(p2) * Math.cos(dl)) / rad + 360) % 360;
+  }
+  var pts = [], prev = null;
+  for (var i = 0; i <= 64; i++) {     // keep the line continuous across the date line
+    var p = gc(D.from, D.to, i / 64);
+    if (prev) { while (p[1] - prev[1] > 180) p[1] -= 360; while (p[1] - prev[1] < -180) p[1] += 360; }
+    pts.push(p); prev = p;
+  }
+  var map = L.map("map", { zoomControl: false, attributionControl: true, scrollWheelZoom: false });
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 10, attribution: "© OpenStreetMap" }).addTo(map);
+  L.polyline(pts, { color: "#7fb0ff", weight: 3, dashArray: "6 6" }).addTo(map);
+  function label(pos, text) {
+    L.circleMarker(pos, { radius: 5, color: "#fff", fillColor: "#7fb0ff", fillOpacity: 1, weight: 2 }).addTo(map);
+    L.marker(pos, { icon: L.divIcon({ className: "apt", html: text, iconSize: [40, 16], iconAnchor: [20, -6] }), interactive: false }).addTo(map);
+  }
+  label(pts[0], D.fromCode); label(pts[pts.length - 1], D.toCode);
+  var plane = D.pos, heading = D.track;
+  if (!plane && D.frac > 0 && D.frac < 1) { plane = pts[Math.round(D.frac * 64)]; }
+  if (plane) {
+    // put the live position on the same side of the date line as the drawn route
+    while (plane[1] - pts[0][1] > 180) plane[1] -= 360; while (plane[1] - pts[0][1] < -180) plane[1] += 360;
+    if (heading == null) heading = bearing(plane, D.to);
+    L.marker(plane, { icon: L.divIcon({ className: "plane", html: '<div style="transform:rotate(' + (heading - 90) + 'deg)">✈</div>', iconSize: [26, 26], iconAnchor: [13, 13] }), interactive: false }).addTo(map);
+  }
+  map.fitBounds(L.latLngBounds(pts).pad(0.15));
+}
 
 function t(lang, key, ...args) {
   const text = (TEXTS[lang] || TEXTS.de)[key] ?? TEXTS.de[key] ?? key;
@@ -139,7 +182,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         if (!r.ok) continue;
         const j = await r.json();
         const ac = (j.ac || []).filter((a) => (a.flight || "").trim().toUpperCase() === callsign).sort((a, b) => (a.seen ?? 99) - (b.seen ?? 99))[0];
-        if (ac && ac.lat != null) return { lat: ac.lat, lon: ac.lon, onGround: ac.alt_baro === "ground", gs: ac.gs, alt: ac.alt_baro };
+        if (ac && ac.lat != null) return { lat: ac.lat, lon: ac.lon, onGround: ac.alt_baro === "ground", gs: ac.gs, alt: ac.alt_baro, track: ac.track ?? ac.true_heading ?? null };
         return null;
       } catch {}
     }
@@ -219,6 +262,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     // Free ADS-B: from 15 min before departure while not landed (every loop = 1 min)
     if (f.callsign && now > dep - 15 * MIN && !snap.landed) {
       const p = await adsb(f.callsign);
+      if (p) snap.pos = { lat: p.lat, lon: p.lon, track: p.track, ground: !!p.onGround, t: now };
       if (p && !p.onGround && !snap.inAir) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", f.number), L("departedTo", f.toCity || f.to)]); }
       if (p && !p.onGround && f.toLat != null && p.gs > 100) {
         const km = distKm(p, { lat: f.toLat, lon: f.toLon });
@@ -368,13 +412,17 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         `.route{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}.code{font-size:34px;font-weight:800;line-height:1}` +
         `.time{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}.muted{color:#93a0b8;font-size:13px}.right{text-align:right}` +
         `.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tile{background:#172033;border-radius:14px;padding:12px}` +
-        `.tile b{display:block;font-size:20px}</style></head><body><main>${body}<p class="muted">${esc(P("by"))}</p></main></body></html>`,
+        `.tile b{display:block;font-size:20px}#map{height:260px;border-radius:18px;margin-bottom:8px;background:#172033}` +
+        `.plane{font-size:26px;line-height:26px;text-align:center;color:#ffb454;text-shadow:0 0 3px #000}.apt{font:700 12px system-ui;color:#fff;text-shadow:0 0 3px #000}</style></head><body><main>${body}<p class="muted">${esc(P("by"))}</p></main></body></html>`,
     });
     if (!found) return page(`<div class="card">${esc(P("ended"))}</div>`, false);
     const { f, snap } = found;
     const dep = snap.dep || f.dep, arr = snap.arr || f.arr;
     // statusKey = set by this server (translated here); otherwise the label the app sent
-    const status = snap.statusKey ? t(lang, snap.statusKey) : (snap.statusLabel || f.statusLabel || t(lang, "scheduled"));
+    // (viewer's language): the server's own status, else the app's status code, else the app's label
+    const APP_STATE = { scheduled: "scheduled", unknown: "scheduled", delayed: "delayed", checkIn: "scheduled", boarding: "boarding", gateClosed: "boarding",
+                        departed: "leftGate", enRoute: "inAir", approaching: "inAir", arrived: "landed", canceled: "cancelled", diverted: "diverted" };
+    const status = snap.statusKey ? t(lang, snap.statusKey) : APP_STATE[f.state] ? t(lang, APP_STATE[f.state]) : (snap.statusLabel || f.statusLabel || t(lang, "scheduled"));
     const mins = (a, b) => (a && b ? Math.round((Date.parse(a) - Date.parse(b)) / 60000) : 0);
     // delay against the originally planned time (the app sends it); fall back to what FlightAware reported
     const delay = Math.max(0, f.depPlanned ? mins(dep, f.depPlanned) : (snap.delay || 0));
@@ -384,6 +432,21 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     const planned = (iso, tz, m) => (iso && Math.abs(m) >= 5 ? `<span class="was">${esc(fmtTime(iso, tz, lang))}</span> ` : "");
     const gate = snap.landed || snap.inAir ? snap.arrGate : (snap.gate || f.gate);
     const terminal = snap.landed || snap.inAir ? null : (snap.terminal || f.terminal);
+    // Map: route, and the plane at its live position (ADS-B) or estimated along the route while in the air
+    let map = "", mapNote = "";
+    if (f.fromLat != null && f.toLat != null) {
+      const nowMs = Date.now(), depMs = Date.parse(dep), arrMs = Date.parse(arr);
+      const livePos = snap.pos && !snap.pos.ground && nowMs - snap.pos.t < 20 * MIN ? snap.pos : null;
+      const frac = snap.landed ? 1 : snap.inAir && arrMs > depMs ? Math.min(1, Math.max(0, (nowMs - depMs) / (arrMs - depMs))) : 0;
+      const data = { from: [f.fromLat, f.fromLon], to: [f.toLat, f.toLon], pos: livePos ? [livePos.lat, livePos.lon] : null,
+                     track: livePos?.track ?? null, frac, fromCode: f.from, toCode: f.to };
+      if (livePos) mapNote = P("live", fmtTime(new Date(livePos.t).toISOString(), f.depTz, lang));
+      else if (snap.inAir && !snap.landed) mapNote = P("est");
+      map = `<div id="map"></div>${mapNote ? `<p class="muted">${esc(mapNote)}</p>` : ""}` +
+        `<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">` +
+        `<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>` +
+        `<script>var D=${JSON.stringify(data).replace(/</g, "\\u003c")};(${mapScript.toString()})(D);</script>`;
+    }
     const tile = (label, value) => (value ? `<div class="tile"><span class="muted">${esc(label)}</span><b>${esc(value)}</b></div>` : "");
     const tiles = tile(P("terminal"), terminal) + tile(P("gate"), gate) + tile(P("belt"), snap.landed || snap.inAir ? snap.belt : null);
     const updated = fmtTime(new Date(snap.faAt || Date.parse(dev_updated(f)) || Date.now()).toISOString(), f.depTz, lang);
@@ -396,7 +459,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       `<div class="right"><div class="code">${esc(f.to)}</div><div class="muted">${esc(f.toCity || "")}</div>` +
       `<div class="muted lbl">${esc(P("arr"))}</div><div class="time ${cls(arrDelay)}">${planned(f.arrPlanned, f.arrTz, arrDelay)}${esc(fmtTime(arr, f.arrTz, lang))}</div></div></div>` +
       `<p class="muted">${esc(P("local"))} · ${esc(P("updated", updated))}</p></div>` +
-      (tiles ? `<div class="grid">${tiles}</div><p></p>` : "") + `<p class="muted">${esc(P("reload"))}</p>`;
+      map + (tiles ? `<div class="grid">${tiles}</div><p></p>` : "") + `<p class="muted">${esc(P("reload"))}</p>`;
     return page(body, true);
   }
   // time of the device's last sync (shown when the server has not queried anything itself yet)
