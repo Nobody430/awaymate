@@ -65,6 +65,7 @@
 "%lld" = "%lld";
 "%lld Dokumente" = "%lld documenti";
 "%lld Flug/Flüge erkannt." = "Voli riconosciuti: %lld.";
+"%lld Flug/Flüge im Kalender gefunden – prüfen und importieren." = "%lld volo/i trovato/i nel calendario – controlla e importa.";
 "%lld Flüge" = "%lld voli";
 "%lld Flüge erkannt – prüfen und importieren." = "%lld voli riconosciuti: controlla e importa.";
 "%lld Flüge importieren" = "Importa %lld voli";
@@ -297,6 +298,7 @@
 "Fehler %lld: %@" = "Errore %lld: %@";
 "Fenster" = "Finestrino";
 "Fertig" = "Fine";
+"Findet Einträge mit Flugnummer (z.B. von der Airline oder vom Reisebüro) der letzten zwei Jahre und des nächsten Jahres. Mit zwei Flughafen-Codes im Eintrag werden Zeiten und Strecke direkt übernommen." = "Trova le voci con un numero di volo (ad es. della compagnia o dell'agenzia) degli ultimi due anni e dell'anno prossimo. Se la voce contiene due codici aeroportuali, orari e tratta vengono ripresi direttamente.";
 "FlightAware API-Key" = "Chiave API FlightAware";
 "FlightAware AeroAPI, Stufe „Personal“: monatliches Gratis-Guthaben, danach Abrechnung pro Abfrage (Preis je nach Abfrage). Sehr zuverlässige Zeiten, Gates und Gepäckbänder. Jeder Flughafen wird nur einmal abgefragt und dann gespeichert. Tipp: In FlightAware ein monatliches Ausgabenlimit setzen." = "FlightAware AeroAPI, livello “Personal”: credito gratuito mensile, poi fatturazione per richiesta (prezzo in base alla richiesta). Orari, gate e nastri bagagli molto affidabili. Ogni aeroporto viene richiesto una sola volta e poi salvato. Consiglio: imposta in FlightAware un limite di spesa mensile.";
 "FlightAware-Key (5 $ Guthaben/Monat)" = "Chiave FlightAware (5 $ di credito/mese)";
@@ -400,6 +402,9 @@
 "KI-Erkennung" = "Riconoscimento IA";
 "KI-Fehler" = "Errore IA";
 "KI-Vorschlag – Öffnungszeiten, Preise und Sicherheitslage vor Ort prüfen." = "Suggerimento dell’IA – verifica sul posto orari di apertura, prezzi e situazione di sicurezza.";
+"Kalender" = "Calendario";
+"Kalender nach Flügen durchsuchen" = "Cerca voli nel calendario";
+"Kalender: %@" = "Calendario: %@";
 "Karte" = "Mappa";
 "Kein API-Key hinterlegt. Bitte in den Einstellungen eintragen." = "Nessuna chiave API salvata. Inseriscila nelle Impostazioni.";
 "Kein Anspruch bei aussergewöhnlichen Umständen (z.B. Unwetter, Fluglotsenstreik, Sicherheitsrisiko). Streiks des eigenen Airline-Personals zählen in der Regel nicht dazu." = "Nessun diritto in caso di circostanze eccezionali (ad es. maltempo, sciopero dei controllori di volo, rischi per la sicurezza). Gli scioperi del personale della compagnia aerea di norma non rientrano tra queste.";
@@ -412,6 +417,7 @@
 "Keine" = "Nessuno";
 "Keine Einträge in Apple Maps gefunden." = "Nessun risultato trovato in Mappe di Apple.";
 "Keine Flüge erkannt." = "Nessun volo riconosciuto.";
+"Keine Flüge im Kalender gefunden." = "Nessun volo trovato nel calendario.";
 "Keine Flüge in diesem Zeitraum." = "Nessun volo in questo periodo.";
 "Keine Outlook-Client-ID hinterlegt (Einstellungen)." = "Nessun ID client Outlook salvato (Impostazioni).";
 "Keine Verbindungen gefunden." = "Nessun collegamento trovato.";

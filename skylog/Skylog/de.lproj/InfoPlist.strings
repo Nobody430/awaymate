@@ -1,4 +1,4 @@
 /* Permission texts – de */
-"NSCalendarsFullAccessUsageDescription" = "Skylog trägt deine Flüge und Hotels in den Kalender ein und hält Zeiten und Gates dort aktuell.";
+"NSCalendarsFullAccessUsageDescription" = "Skylog trägt deine Flüge und Hotels in den Kalender ein, hält Zeiten und Gates dort aktuell und kann Flüge aus deinem Kalender importieren.";
 "NSLocationAlwaysAndWhenInUseUsageDescription" = "Am Reisetag hält Skylog die App über deinen ungefähren Standort wach und aktualisiert Gate, Verspätungen und Landung – auch wenn die App geschlossen ist. Am Flughafen wird automatisch aktualisiert.";
 "NSLocationWhenInUseUsageDescription" = "Skylog nutzt deinen ungefähren Standort am Reisetag, um Flugdaten im Hintergrund aktuell zu halten.";

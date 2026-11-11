@@ -65,6 +65,7 @@
 "%lld" = "%lld";
 "%lld Dokumente" = "%lld documentos";
 "%lld Flug/Flüge erkannt." = "%lld vuelo(s) detectado(s).";
+"%lld Flug/Flüge im Kalender gefunden – prüfen und importieren." = "%lld vuelo(s) encontrado(s) en el calendario – revisa e importa.";
 "%lld Flüge" = "%lld vuelos";
 "%lld Flüge erkannt – prüfen und importieren." = "%lld vuelos detectados: revísalos e impórtalos.";
 "%lld Flüge importieren" = "Importar %lld vuelos";
@@ -297,6 +298,7 @@
 "Fehler %lld: %@" = "Error %lld: %@";
 "Fenster" = "Ventanilla";
 "Fertig" = "Listo";
+"Findet Einträge mit Flugnummer (z.B. von der Airline oder vom Reisebüro) der letzten zwei Jahre und des nächsten Jahres. Mit zwei Flughafen-Codes im Eintrag werden Zeiten und Strecke direkt übernommen." = "Encuentra entradas con un número de vuelo (p. ej. de la aerolínea o de la agencia) de los dos últimos años y del próximo año. Si la entrada contiene dos códigos de aeropuerto, los horarios y la ruta se adoptan directamente.";
 "FlightAware API-Key" = "Clave de API de FlightAware";
 "FlightAware AeroAPI, Stufe „Personal“: monatliches Gratis-Guthaben, danach Abrechnung pro Abfrage (Preis je nach Abfrage). Sehr zuverlässige Zeiten, Gates und Gepäckbänder. Jeder Flughafen wird nur einmal abgefragt und dann gespeichert. Tipp: In FlightAware ein monatliches Ausgabenlimit setzen." = "FlightAware AeroAPI, nivel «Personal»: saldo gratuito mensual; después se factura por consulta (el precio depende de la consulta). Horas, puertas y cintas de equipaje muy fiables. Cada aeropuerto se consulta una sola vez y luego se guarda. Consejo: fija un límite de gasto mensual en FlightAware.";
 "FlightAware-Key (5 $ Guthaben/Monat)" = "Clave de FlightAware (5 $ de saldo/mes)";
@@ -400,6 +402,9 @@
 "KI-Erkennung" = "Detección con IA";
 "KI-Fehler" = "Error de IA";
 "KI-Vorschlag – Öffnungszeiten, Preise und Sicherheitslage vor Ort prüfen." = "Sugerencia de la IA: comprueba in situ horarios, precios y situación de seguridad.";
+"Kalender" = "Calendario";
+"Kalender nach Flügen durchsuchen" = "Buscar vuelos en el calendario";
+"Kalender: %@" = "Calendario: %@";
 "Karte" = "Mapa";
 "Kein API-Key hinterlegt. Bitte in den Einstellungen eintragen." = "No hay ninguna clave de API guardada. Introdúcela en Ajustes.";
 "Kein Anspruch bei aussergewöhnlichen Umständen (z.B. Unwetter, Fluglotsenstreik, Sicherheitsrisiko). Streiks des eigenen Airline-Personals zählen in der Regel nicht dazu." = "No hay derecho en caso de circunstancias extraordinarias (p. ej. temporal, huelga de controladores aéreos, riesgo de seguridad). Las huelgas del personal de la propia aerolínea no suelen contar como tales.";
@@ -412,6 +417,7 @@
 "Keine" = "Ninguna";
 "Keine Einträge in Apple Maps gefunden." = "No se encontraron resultados en Mapas de Apple.";
 "Keine Flüge erkannt." = "No se detectaron vuelos.";
+"Keine Flüge im Kalender gefunden." = "No se encontraron vuelos en el calendario.";
 "Keine Flüge in diesem Zeitraum." = "No hay vuelos en este periodo.";
 "Keine Outlook-Client-ID hinterlegt (Einstellungen)." = "No hay ningún ID de cliente de Outlook guardado (Ajustes).";
 "Keine Verbindungen gefunden." = "No se encontraron conexiones.";

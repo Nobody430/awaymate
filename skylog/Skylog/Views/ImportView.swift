@@ -67,6 +67,19 @@ struct ImportView: View {
                     }
                 }
 
+                Section {
+                    Button {
+                        Task { await scanCalendar() }
+                    } label: {
+                        Label("Kalender nach Flügen durchsuchen", systemImage: "calendar.badge.plus")
+                    }
+                    .disabled(busy)
+                } header: {
+                    Text("Kalender")
+                } footer: {
+                    Text("Findet Einträge mit Flugnummer (z.B. von der Airline oder vom Reisebüro) der letzten zwei Jahre und des nächsten Jahres. Mit zwei Flughafen-Codes im Eintrag werden Zeiten und Strecke direkt übernommen.")
+                }
+
                 Section("Mail-Text einfügen") {
                     TextEditor(text: $pasteText)
                         .frame(minHeight: 110)
@@ -167,6 +180,18 @@ struct ImportView: View {
             if !store.contains(number: c.number, date: c.date) && Self.isPlausible(c) { selected.insert(c.id) }
         }
         candidates.sort { $0.date > $1.date }
+    }
+
+    private func scanCalendar() async {
+        busy = true
+        defer { busy = false }
+        do {
+            let found = try await CalendarImport.scan()
+            merge(found)
+            status = found.isEmpty ? String(localized: "Keine Flüge im Kalender gefunden.") : String(localized: "\(found.count) Flug/Flüge im Kalender gefunden – prüfen und importieren.")
+        } catch {
+            status = error.localizedDescription
+        }
     }
 
     private func analyze(_ text: String, source: String) {

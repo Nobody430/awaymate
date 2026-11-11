@@ -745,7 +745,13 @@
   "Leichte Verspätungen gemeldet": "Segnalati lievi ritardi",
   "Rollt zum Start": "In rullaggio verso la pista",
   "%@: Gate verlassen": "%@: gate lasciato",
-  "Rollt zur Startbahn.": "In rullaggio verso la pista."
+  "Rollt zur Startbahn.": "In rullaggio verso la pista.",
+  "Kalender": "Calendario",
+  "Kalender nach Flügen durchsuchen": "Cerca voli nel calendario",
+  "Findet Einträge mit Flugnummer (z.B. von der Airline oder vom Reisebüro) der letzten zwei Jahre und des nächsten Jahres. Mit zwei Flughafen-Codes im Eintrag werden Zeiten und Strecke direkt übernommen.": "Trova le voci con un numero di volo (ad es. della compagnia o dell'agenzia) degli ultimi due anni e dell'anno prossimo. Se la voce contiene due codici aeroportuali, orari e tratta vengono ripresi direttamente.",
+  "Keine Flüge im Kalender gefunden.": "Nessun volo trovato nel calendario.",
+  "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld volo/i trovato/i nel calendario – controlla e importa.",
+  "Kalender: %@": "Calendario: %@"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",
@@ -775,7 +781,7 @@
   "jetzt": "ora"
  },
  "InfoPlist": {
-  "NSCalendarsFullAccessUsageDescription": "Skylog aggiunge i tuoi voli e hotel al calendario e vi mantiene aggiornati orari e gate.",
+  "NSCalendarsFullAccessUsageDescription": "Skylog inserisce voli e hotel nel calendario, vi mantiene aggiornati orari e gate e può importare voli dal tuo calendario.",
   "NSLocationWhenInUseUsageDescription": "Skylog usa la tua posizione approssimativa il giorno del viaggio per mantenere aggiornati i dati di volo in background.",
   "NSLocationAlwaysAndWhenInUseUsageDescription": "Il giorno del viaggio Skylog mantiene attiva l’app tramite la tua posizione approssimativa e aggiorna gate, ritardi e atterraggio, anche quando l’app è chiusa. In aeroporto l’aggiornamento è automatico."
  }

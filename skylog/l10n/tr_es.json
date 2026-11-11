@@ -745,7 +745,13 @@
   "Leichte Verspätungen gemeldet": "Retrasos leves notificados",
   "Rollt zum Start": "Rodando hacia la pista",
   "%@: Gate verlassen": "%@: salió de la puerta",
-  "Rollt zur Startbahn.": "Rodando hacia la pista."
+  "Rollt zur Startbahn.": "Rodando hacia la pista.",
+  "Kalender": "Calendario",
+  "Kalender nach Flügen durchsuchen": "Buscar vuelos en el calendario",
+  "Findet Einträge mit Flugnummer (z.B. von der Airline oder vom Reisebüro) der letzten zwei Jahre und des nächsten Jahres. Mit zwei Flughafen-Codes im Eintrag werden Zeiten und Strecke direkt übernommen.": "Encuentra entradas con un número de vuelo (p. ej. de la aerolínea o de la agencia) de los dos últimos años y del próximo año. Si la entrada contiene dos códigos de aeropuerto, los horarios y la ruta se adoptan directamente.",
+  "Keine Flüge im Kalender gefunden.": "No se encontraron vuelos en el calendario.",
+  "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld vuelo(s) encontrado(s) en el calendario – revisa e importa.",
+  "Kalender: %@": "Calendario: %@"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Sin vuelos programados",
@@ -775,7 +781,7 @@
   "jetzt": "ahora"
  },
  "InfoPlist": {
-  "NSCalendarsFullAccessUsageDescription": "Skylog añade tus vuelos y hoteles al calendario y mantiene allí actualizadas las horas y las puertas.",
+  "NSCalendarsFullAccessUsageDescription": "Skylog añade tus vuelos y hoteles al calendario, mantiene allí los horarios y las puertas al día y puede importar vuelos desde tu calendario.",
   "NSLocationWhenInUseUsageDescription": "Skylog usa tu ubicación aproximada el día del viaje para mantener actualizados los datos de vuelo en segundo plano.",
   "NSLocationAlwaysAndWhenInUseUsageDescription": "El día del viaje, Skylog mantiene la app activa mediante tu ubicación aproximada y actualiza la puerta, los retrasos y el aterrizaje, incluso con la app cerrada. En el aeropuerto se actualiza automáticamente."
  }

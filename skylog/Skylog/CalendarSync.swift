@@ -77,3 +77,72 @@ enum CalendarSync {
         map = [:]
     }
 }
+
+/// Finds flights in the iPhone calendar (entries made by airlines, travel agencies or by hand).
+@MainActor
+enum CalendarImport {
+    /// Calendar events from two years back to one year ahead that look like flights.
+    static func scan() async throws -> [FlightCandidate] {
+        let store = EKEventStore()
+        guard (try? await store.requestFullAccessToEvents()) == true else {
+            throw AIClient.Failure(message: String(localized: "Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Skylog → Kalender (Vollzugriff)."))
+        }
+        let now = Date()
+        let ownEvents = Set((UserDefaults.standard.dictionary(forKey: "calendarEvents") as? [String: String] ?? [:]).values)
+        let numberRegex = try NSRegularExpression(pattern: MailAI.flightNumberPattern)
+        let codeRegex = try NSRegularExpression(pattern: "\\b[A-Z]{3}\\b")
+        var found: [String: FlightCandidate] = [:]
+
+        // EventKit only searches up to four years per query – go year by year
+        for offset in [-2, -1, 0] {
+            guard let from = Calendar.current.date(byAdding: .year, value: offset, to: now),
+                  let to = Calendar.current.date(byAdding: .year, value: 1, to: from) else { continue }
+            let predicate = store.predicateForEvents(withStart: from, end: to, calendars: nil)
+            for event in store.events(matching: predicate) {
+                // skip all-day entries and the ones Skylog wrote itself
+                guard !event.isAllDay, let id = event.eventIdentifier, !ownEvents.contains(id),
+                      let title = event.title, let start = event.startDate else { continue }
+                let text = [title, event.location ?? "", event.notes ?? ""].joined(separator: "\n")
+                let range = NSRange(text.startIndex..., in: text)
+                guard let m = numberRegex.firstMatch(in: text, range: NSRange(title.startIndex..., in: title)) ?? numberRegex.firstMatch(in: text, range: range),
+                      let r = Range(m.range, in: text) else { continue }
+                let number = FlightStore.normalizedNumber(String(text[r]))
+                guard FlightTextParser.airlines.contains(String(number.prefix(2))) else { continue }
+
+                // airports: three-letter codes that really exist, in the order they appear
+                var airports: [String] = []
+                for c in codeRegex.matches(in: text, range: range) {
+                    guard let cr = Range(c.range, in: text) else { continue }
+                    let code = String(text[cr])
+                    if !airports.contains(code), AirportLookup.bundledInfo(code)?.lat != nil { airports.append(code) }
+                    if airports.count == 2 { break }
+                }
+                let depTZ = airports.first.flatMap { AirportLookup.bundledInfo($0)?.timeZone }.flatMap(TimeZone.init(identifier:)) ?? event.timeZone ?? .current
+                let arrTZ = airports.dropFirst().first.flatMap { AirportLookup.bundledInfo($0)?.timeZone }.flatMap(TimeZone.init(identifier:)) ?? depTZ
+
+                // the day of the flight is the local day at the departure airport
+                var depCal = Calendar(identifier: .gregorian)
+                depCal.timeZone = depTZ
+                let day = depCal.dateComponents([.year, .month, .day, .hour, .minute], from: start)
+                guard let noon = Calendar.current.date(from: DateComponents(year: day.year, month: day.month, day: day.day, hour: 12)) else { continue }
+                var c = FlightCandidate(number: number, date: noon, source: String(localized: "Kalender: \(title)"), airports: airports)
+                c.departureTime = String(format: "%02d:%02d", day.hour ?? 0, day.minute ?? 0)
+                if let end = event.endDate, end > start, end.timeIntervalSince(start) < 20 * 3600 {
+                    var arrCal = Calendar(identifier: .gregorian)
+                    arrCal.timeZone = arrTZ
+                    let a = arrCal.dateComponents([.year, .month, .day, .hour, .minute], from: end)
+                    c.arrivalTime = String(format: "%02d:%02d", a.hour ?? 0, a.minute ?? 0)
+                    // arrival on another local day than the departure
+                    if let d0 = depCal.date(from: DateComponents(year: day.year, month: day.month, day: day.day)),
+                       let d1 = depCal.date(from: DateComponents(year: a.year, month: a.month, day: a.day)) {
+                        c.arrivalDayOffset = Int((d1.timeIntervalSince(d0) / 86400).rounded())
+                    }
+                }
+                // an entry with both airports is good enough to import without asking the flight data service
+                c.aiVerified = airports.count == 2
+                found[c.id] = c
+            }
+        }
+        return found.values.sorted { $0.date > $1.date }
+    }
+}

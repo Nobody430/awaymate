@@ -21,7 +21,8 @@ The app is available in German, English, French, Italian and Spanish.*
 ## Funktionen
 
 **Flüge**
-- Hinzufügen per Flugnummer und Datum, von Hand oder aus E-Mails (Outlook-Postfach, eingefügter Text, PDF).
+- Hinzufügen per Flugnummer und Datum, von Hand, aus E-Mails (Outlook-Postfach, eingefügter Text, PDF) oder
+  aus dem iPhone-Kalender (Einträge mit Flugnummer).
 - Status, Verspätung, geplante / erwartete / tatsächliche Zeiten – immer in der Ortszeit des Flughafens.
 - Terminal, Gate, Check-in-Schalter, Gepäckband. Gates werden kurz vor Abflug gegen eine zweite Quelle geprüft;
   bei Widerspruch erscheint ein Hinweis.
