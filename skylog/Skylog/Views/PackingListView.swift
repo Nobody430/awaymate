@@ -38,7 +38,7 @@ struct PackingListView: View {
                         Button("Hinzufügen", action: addItem).disabled(newItem.isEmpty)
                     }
                 } header: {
-                    Text("\(done)/\(trip.packing.count) eingepackt")
+                    Text("\(done)/\(trip.packing.count) eingepackt") + Text(verbatim: " · ") + Text("Reise: \(trip.days) Tage")
                 } footer: {
                     Text("Zum Löschen eines Punkts nach links wischen.")
                 }

@@ -796,7 +796,11 @@
   "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "New from your emails: %lld flights, %lld bookings (new or changed).",
   "Mails jetzt prüfen": "Check emails now",
   "Mails geprüft": "Emails checked",
-  "Letzte 30 Tage erneut lesen": "Read the last 30 days again"
+  "Letzte 30 Tage erneut lesen": "Read the last 30 days again",
+  "%lld Tage · %lld Nächte": "%lld days · %lld nights",
+  "Erster und letzter Reisetag mitgezählt.": "First and last day of the trip included.",
+  "Reise: %lld Tage": "Trip: %lld days",
+  "%@ – %@ · %lld Tage · %lld Flüge · Packliste %lld/%lld": "%@ – %@ · %lld days · %lld flights · Packing list %lld/%lld"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

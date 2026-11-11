@@ -42,6 +42,7 @@
 "%@ öffnen (Zieladresse kopiert)" = "Ouvrir %@ (adresse de destination copiée)";
 "%@ – %@" = "%@ – %@";
 "%@ – %@ · %lld Flüge · Packliste %lld/%lld" = "%@ – %@ · %lld vols · Liste de bagages %lld/%lld";
+"%@ – %@ · %lld Tage · %lld Flüge · Packliste %lld/%lld" = "%@ – %@ · %lld jours · %lld vols · Liste de bagages %lld/%lld";
 "%@ → %@" = "%@ → %@";
 "%@ → %@ · %@" = "%@ → %@ · %@";
 "%@%@" = "%@%@";
@@ -77,6 +78,7 @@
 "%lld Mails geprüft, %lld Flüge gefunden." = "%lld e-mails vérifiés, %lld vols trouvés.";
 "%lld Nächte" = "%lld nuits";
 "%lld Reise-Mails gefunden." = "%lld e-mails de voyage trouvés.";
+"%lld Tage · %lld Nächte" = "%lld jours · %lld nuits";
 "%lld Typen · %lld Flugzeuge" = "%lld types · %lld avions";
 "%lld ausgewählt" = "%lld sélectionné(s)";
 "%lld doppelte Flüge entfernen?" = "Supprimer %lld vols en double ?";
@@ -310,6 +312,7 @@
 "Erinnerungen (Check-in, Boarding, Landung)" = "Rappels (enregistrement, embarquement, atterrissage)";
 "Ersetzen" = "Remplacer";
 "Erstellt eine Seite auf deinem Server, die den Flugstatus live zeigt. Wer den Link hat, kann sie sehen." = "Crée une page sur ton serveur qui affiche le statut du vol en direct. Toute personne ayant le lien peut la voir.";
+"Erster und letzter Reisetag mitgezählt." = "Premier et dernier jour du voyage inclus.";
 "Erstflug/Auslieferung: %@ · Seriennr. %@" = "Premier vol/livraison : %@ · N° de série %@";
 "Erwartet" = "Estimé";
 "Export teilen …" = "Partager l'export…";
@@ -592,6 +595,7 @@
 "Reise mit KI planen" = "Planifier le voyage avec l'IA";
 "Reise planen" = "Planifier le voyage";
 "Reise wirklich löschen?" = "Vraiment supprimer le voyage ?";
+"Reise: %lld Tage" = "Voyage : %lld jours";
 "Reiseadapter" = "Adaptateur de voyage";
 "Reisemodus (im Hintergrund aktualisieren)" = "Mode voyage (actualisation en arrière-plan)";
 "Reisen" = "Voyages";

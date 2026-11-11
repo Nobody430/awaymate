@@ -43,6 +43,13 @@ struct Trip: Identifiable, Codable, Hashable {
     /// Random id of the public trip page on the user's own server (nil = not shared)
     var shareToken: String? = nil
 
+    /// Calendar days of the trip, first and last day included (for counting medication, clothes …).
+    var days: Int {
+        let cal = Calendar.current
+        return max(1, (cal.dateComponents([.day], from: cal.startOfDay(for: start), to: cal.startOfDay(for: end)).day ?? 0) + 1)
+    }
+    var nights: Int { days - 1 }
+
     static func defaultPacking() -> [PackItem] {
         [String(localized: "Pass / ID"), String(localized: "Handy-Ladekabel"), String(localized: "Powerbank"), String(localized: "Kopfhörer"),
          String(localized: "Reiseadapter"), String(localized: "Medikamente"), String(localized: "Zahnbürste & Kulturbeutel"),

@@ -796,7 +796,11 @@
   "Neu aus deinen Mails: %lld Flüge, %lld Buchungen (neu oder geändert).": "Novità dalle tue e-mail: %lld voli, %lld prenotazioni (nuove o modificate).",
   "Mails jetzt prüfen": "Controlla le e-mail ora",
   "Mails geprüft": "E-mail controllate",
-  "Letzte 30 Tage erneut lesen": "Rileggi gli ultimi 30 giorni"
+  "Letzte 30 Tage erneut lesen": "Rileggi gli ultimi 30 giorni",
+  "%lld Tage · %lld Nächte": "%lld giorni · %lld notti",
+  "Erster und letzter Reisetag mitgezählt.": "Primo e ultimo giorno di viaggio inclusi.",
+  "Reise: %lld Tage": "Viaggio: %lld giorni",
+  "%@ – %@ · %lld Tage · %lld Flüge · Packliste %lld/%lld": "%@ – %@ · %lld giorni · %lld voli · Lista bagagli %lld/%lld"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

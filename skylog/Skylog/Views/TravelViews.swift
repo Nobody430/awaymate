@@ -290,7 +290,7 @@ struct TripsView: View {
                         NavigationLink { TripDetailView(tripID: t.id) } label: {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(t.name).font(.headline)
-                                Text("\(t.start.formatted(date: .abbreviated, time: .omitted)) – \(t.end.formatted(date: .abbreviated, time: .omitted)) · \(trips.flights(for: t, in: flights).count) Flüge · Packliste \(t.packing.filter(\.done).count)/\(t.packing.count)")
+                                Text("\(t.start.formatted(date: .abbreviated, time: .omitted)) – \(t.end.formatted(date: .abbreviated, time: .omitted)) · \(t.days) Tage · \(trips.flights(for: t, in: flights).count) Flüge · Packliste \(t.packing.filter(\.done).count)/\(t.packing.count)")
                                     .font(.caption).foregroundStyle(.secondary)
                             }
                         }
@@ -354,6 +354,18 @@ struct TripDetailView: View {
     var body: some View {
         if let trip = store.trips.first(where: { $0.id == tripID }) {
             List {
+                Section {
+                    HStack(spacing: 14) {
+                        Image(systemName: "calendar").font(.title2).foregroundStyle(Theme.accent)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(trip.days) Tage · \(trip.nights) Nächte").font(.headline)
+                            Text("\(trip.start.formatted(date: .abbreviated, time: .omitted)) – \(trip.end.formatted(date: .abbreviated, time: .omitted))")
+                                .font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    }
+                } footer: {
+                    Text("Erster und letzter Reisetag mitgezählt.")
+                }
                 if !trip.notes.isEmpty { Section { Text(trip.notes) } }
                 Section("Reiseplan") {
                     if trip.plan != nil {

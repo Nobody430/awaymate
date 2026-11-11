@@ -42,6 +42,7 @@
 "%@ öffnen (Zieladresse kopiert)" = "Open %@ (destination address copied)";
 "%@ – %@" = "%@ – %@";
 "%@ – %@ · %lld Flüge · Packliste %lld/%lld" = "%@ – %@ · %lld flights · Packing list %lld/%lld";
+"%@ – %@ · %lld Tage · %lld Flüge · Packliste %lld/%lld" = "%@ – %@ · %lld days · %lld flights · Packing list %lld/%lld";
 "%@ → %@" = "%@ → %@";
 "%@ → %@ · %@" = "%@ → %@ · %@";
 "%@%@" = "%@%@";
@@ -77,6 +78,7 @@
 "%lld Mails geprüft, %lld Flüge gefunden." = "%lld emails checked, %lld flights found.";
 "%lld Nächte" = "%lld nights";
 "%lld Reise-Mails gefunden." = "%lld travel emails found.";
+"%lld Tage · %lld Nächte" = "%lld days · %lld nights";
 "%lld Typen · %lld Flugzeuge" = "%lld types · %lld aircraft";
 "%lld ausgewählt" = "%lld selected";
 "%lld doppelte Flüge entfernen?" = "Remove %lld duplicate flights?";
@@ -310,6 +312,7 @@
 "Erinnerungen (Check-in, Boarding, Landung)" = "Reminders (check-in, boarding, landing)";
 "Ersetzen" = "Replace";
 "Erstellt eine Seite auf deinem Server, die den Flugstatus live zeigt. Wer den Link hat, kann sie sehen." = "Creates a page on your server that shows the flight status live. Anyone with the link can see it.";
+"Erster und letzter Reisetag mitgezählt." = "First and last day of the trip included.";
 "Erstflug/Auslieferung: %@ · Seriennr. %@" = "First flight/delivery: %@ · Serial no. %@";
 "Erwartet" = "Expected";
 "Export teilen …" = "Share export …";
@@ -592,6 +595,7 @@
 "Reise mit KI planen" = "Plan trip with AI";
 "Reise planen" = "Plan trip";
 "Reise wirklich löschen?" = "Really delete this trip?";
+"Reise: %lld Tage" = "Trip: %lld days";
 "Reiseadapter" = "Travel adapter";
 "Reisemodus (im Hintergrund aktualisieren)" = "Travel mode (update in background)";
 "Reisen" = "Trips";
