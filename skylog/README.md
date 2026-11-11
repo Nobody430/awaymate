@@ -28,7 +28,10 @@ The app is available in German, English, French, Italian and Spanish.*
 - „Zeiten im Detail“: Gate verlassen, Rollen, Start, Landung, am Gate, Flugzeit.
 - „Wo ist mein Flugzeug?“: der Zubringerflug und die Flüge davor, mit Einschätzung, ob die Zeit reicht.
 - Anschlussflug-Karte mit Umsteigezeit und Warnung, wenn es knapp wird.
-- Live-Position auf der Karte, voraussichtliche Ankunft aus Position und Geschwindigkeit.
+- Live-Position auf der Karte, voraussichtliche Ankunft aus Position und Geschwindigkeit. Unplausible Orte
+  (weit neben der Route, oder der Platzhalter 0°/0°) werden nicht gezeichnet – dann steht das Flugzeug an der
+  geschätzten Stelle, Höhe und Geschwindigkeit bleiben sichtbar.
+- Eigener Status **„Rollt zum Start“** zwischen Verlassen des Gates und Abheben; „Gestartet“ erst nach dem Abheben.
 - Änderungsprotokoll pro Flug (Gate, Zeiten, Status).
 
 **Mitteilungen und Sperrbildschirm**
@@ -104,6 +107,9 @@ Live-Aktivität aktualisiert sich von selbst.
 
 - Läuft **gratis bei Cloudflare Workers** (oder als Docker-Container überall).
 - Schreibt Mitteilungen in der Sprache des iPhones (Deutsch, Englisch, Französisch, Italienisch, Spanisch).
+- Live-Daten der Status-Seite: zuerst die Gratis-Netze (nach Rufzeichen und Transponder-Kennung), dazu die
+  Position, die die App selbst gerade sieht; findet sich nichts, fragt der Server für geteilte Flüge höchstens alle
+  5 Min. die Position bei FlightAware ab (kostet pro Abfrage etwas vom eigenen Guthaben).
 - Liefert zusätzlich die **Status-Seite** für Familie & Freunde (`/s/<zufälliger Code>`) und speichert das
   Dokument für den **Abgleich zwischen den eigenen Geräten** (`/data`, nur mit dem Server-Passwort).
 - Nutzt den **eigenen** FlightAware-Key; ohne Key meldet er Start und Landung über ADS-B.
@@ -124,7 +130,7 @@ Technik und Docker: [`../server/README.md`](../server/README.md). Relay-Adresse:
 | 3 Tage bis 24 h vor Abflug | alle 12 h |
 | 24 h bis 4 h | alle 2 h |
 | 4 h bis 75 Min. | alle 15 Min. |
-| 75 Min. vor Abflug bis zum Start | alle 5 Min. (auch über die geplante Zeit hinaus) |
+| 75 Min. vor Abflug bis zum Start | alle 5 Min. (auch über die geplante Zeit hinaus, und während des Rollens) |
 | in der Luft | alle 15 Min., in den letzten 40 Min. alle 5 Min. |
 | nach der Landung | alle 10 Min., bis das Gepäckband bekannt ist (max. 1 h) |
 
@@ -193,4 +199,8 @@ Flughafen-Datenbank: [mwgg/Airports](https://github.com/mwgg/Airports) (MIT, sie
 - **Übersetzungen** sind maschinell erstellt und automatisch auf Vollständigkeit und Platzhalter geprüft, aber
   nicht von Muttersprachlern gelesen. Korrekturen: `l10n/tr_<sprache>.json` ändern, `python3 l10n/validate.py <sprache>`
   und `python3 l10n/write_strings.py . en fr it es` ausführen.
+- **Gratis-Live-Daten** stammen von freiwilligen Empfängern und decken manche Regionen dünn ab (z.B. Teile
+  Asiens); ohne FlightAware-Key gibt es dort nur die geschätzte Position.
+- **Airline-Namen** kommen von den Datenquellen und können veraltet sein, wenn ein Airline-Code neu vergeben
+  wurde; bekannte Fälle stehen in einer kleinen Korrekturliste (`Models.swift`, `airlineNameFixes`).
 - **Einheitliche Verspätungs-Skala:** unter 5 Min. pünktlich (grün), ab 5 Min. orange, ab 15 Min. rot.

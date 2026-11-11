@@ -52,6 +52,11 @@ Mit `Authorization: Bearer <SERVER_TOKEN>`:
 Ohne Passwort: `GET /s/<Code>` – die Status-Seite eines geteilten Flugs (HTML, Sprache nach `Accept-Language`,
 Karte mit Leaflet/OpenStreetMap, aktualisiert sich jede Minute). Der Code ist 20–64 zufällige Zeichen, die die App erzeugt.
 
+Live-Position für die Status-Seite, in dieser Reihenfolge: ADS-B nach Rufzeichen, ADS-B nach Transponder-Kennung
+(`icao24`), die von der App mitgeschickte Position (`pos` im Flug), und – nur für geteilte Flüge, höchstens alle
+5 Min. – `GET /flights/{id}/position` bei FlightAware. Orte bei 0°/0° oder weit neben der Route werden verworfen;
+Höhe und Geschwindigkeit ohne Ort werden trotzdem angezeigt (das Flugzeug steht dann an der geschätzten Stelle).
+
 Mitteilungen und Status-Seite gibt es auf Deutsch, Englisch, Französisch, Italienisch und Spanisch (`core.mjs`, `TEXTS` und `PAGE`).
 
 Relay: `GET /health` · `POST /push` mit `{deviceToken, payload, type}`; sendet ausschliesslich an die Skylog-App.
