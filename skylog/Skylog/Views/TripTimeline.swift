@@ -171,10 +171,22 @@ struct TripLegRow: View {
     @State private var done = false
 
     var body: some View {
-        Button {
-            guard let entry else { return }
-            MKMapItem.openMaps(with: [entry.from, entry.to],
-                               launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeTransit])
+        Menu {
+            if let entry {
+                Button { openMaps(entry, mode: MKLaunchOptionsDirectionsModeTransit) } label: {
+                    Label("ÖV-Route in Apple Karten", systemImage: "tram.fill")
+                }
+                Button { openMaps(entry, mode: MKLaunchOptionsDirectionsModeDriving) } label: {
+                    Label("Auto-Route in Apple Karten", systemImage: "car.fill")
+                }
+                Divider()
+                Button { openUber(entry) } label: { Label("Uber bestellen", systemImage: "car.side.fill") }
+                ForEach(RideApp.others) { app in
+                    Button { app.open(destination: Self.address(entry.to)) } label: {
+                        Label("\(app.name) öffnen (Zieladresse kopiert)", systemImage: "car.side")
+                    }
+                }
+            }
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "arrow.down").font(.caption.weight(.semibold)).foregroundStyle(.tertiary).frame(width: 44)
@@ -202,7 +214,33 @@ struct TripLegRow: View {
             .padding(.vertical, 2)
         }
         .buttonStyle(.plain)
+        .disabled(entry == nil)
         .task(id: leg.id) { await load() }
+    }
+
+    private func openMaps(_ entry: TripLegCache.Entry, mode: String) {
+        MKMapItem.openMaps(with: [entry.from, entry.to], launchOptions: [MKLaunchOptionsDirectionsModeKey: mode])
+    }
+
+    private static func address(_ item: MKMapItem) -> String {
+        [item.name, item.placemark.title].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")
+    }
+
+    /// Uber's universal link: opens the app (or the website) with pickup and destination filled in.
+    private func openUber(_ entry: TripLegCache.Entry) {
+        let a = entry.from.placemark.coordinate, b = entry.to.placemark.coordinate
+        var c = URLComponents(string: "https://m.uber.com/ul/")!
+        c.queryItems = [
+            URLQueryItem(name: "action", value: "setPickup"),
+            URLQueryItem(name: "pickup[latitude]", value: "\(a.latitude)"),
+            URLQueryItem(name: "pickup[longitude]", value: "\(a.longitude)"),
+            URLQueryItem(name: "pickup[nickname]", value: entry.from.name ?? ""),
+            URLQueryItem(name: "dropoff[latitude]", value: "\(b.latitude)"),
+            URLQueryItem(name: "dropoff[longitude]", value: "\(b.longitude)"),
+            URLQueryItem(name: "dropoff[nickname]", value: entry.to.name ?? ""),
+            URLQueryItem(name: "dropoff[formatted_address]", value: Self.address(entry.to)),
+        ]
+        if let url = c.url { UIApplication.shared.open(url) }
     }
 
     private func item(_ place: TripLeg.Place) async -> MKMapItem? {
@@ -230,5 +268,29 @@ struct TripLegRow: View {
             TripLegCache.failed.insert(leg.id)
         }
         done = true
+    }
+}
+
+
+/// Ride apps without a public link format for a destination: the app is opened and the address is on the clipboard.
+struct RideApp: Identifiable {
+    let name: String
+    let scheme: String
+    let web: String
+    var id: String { name }
+
+    static let others = [
+        RideApp(name: "Bolt", scheme: "bolt://", web: "https://bolt.eu"),
+        RideApp(name: "Cabify", scheme: "cabify://", web: "https://cabify.com"),
+        RideApp(name: "FREE NOW", scheme: "mytaxi://", web: "https://www.free-now.com"),
+    ]
+
+    @MainActor
+    func open(destination: String) {
+        UIPasteboard.general.string = destination
+        guard let app = URL(string: scheme) else { return }
+        UIApplication.shared.open(app) { ok in
+            if !ok, let site = URL(string: web) { UIApplication.shared.open(site) }
+        }
     }
 }

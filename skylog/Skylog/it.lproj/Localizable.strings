@@ -39,6 +39,7 @@
 "%@ · Landung %@" = "%@ · Atterraggio %@";
 "%@ · Landung ca. %@" = "%@ · Atterraggio ca. %@";
 "%@ · ca. +%lld Min" = "%@ · ca. +%lld min";
+"%@ öffnen (Zieladresse kopiert)" = "Apri %@ (indirizzo di destinazione copiato)";
 "%@ – %@" = "%@ – %@";
 "%@ – %@ · %lld Flüge · Packliste %lld/%lld" = "%@ – %@ · %lld voli · Lista bagagli %lld/%lld";
 "%@ → %@" = "%@ → %@";
@@ -198,6 +199,7 @@
 "Aus Zwischenablage" = "Dagli appunti";
 "Ausgewogen" = "Equilibrato";
 "Ausgewählt (%lld)" = "Selezionati (%lld)";
+"Auto-Route in Apple Karten" = "Percorso in auto in Mappe di Apple";
 "Automatik" = "Auto";
 "Automatisch" = "Automatico";
 "Automatisch (%@)" = "Automatico (%@)";
@@ -645,6 +647,7 @@
 "Triebwerke" = "Motori";
 "Typ" = "Tipo";
 "Typ %@ · %lld V" = "Tipo %@ · %lld V";
+"Uber bestellen" = "Ordina un Uber";
 "Uhrzeiten eintragen" = "Inserisci gli orari";
 "Um die Erde" = "Giri della Terra";
 "Umbuchung: ersetzt %@ vom %@" = "Riprenotazione: sostituisce %@ del %@";
@@ -744,6 +747,7 @@
 "zum Umsteigen" = "per la coincidenza";
 "Änderungen" = "Modifiche";
 "ÖV %@" = "Mezzi %@";
+"ÖV-Route in Apple Karten" = "Percorso con i mezzi in Mappe di Apple";
 "Öffnen" = "Apri";
 "Über mich / KI-Erinnerungen" = "Su di me / memorie IA";
 "„%@“ ablegen bei" = "Archivia “%@” in";

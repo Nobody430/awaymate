@@ -754,7 +754,11 @@
   "Kalender: %@": "Calendar: %@",
   "Diagnose-Protokoll teilen": "Share diagnostic log",
   "Ablauf": "Itinerary",
-  "Weiter zur nächsten Unterkunft": "On to the next stay"
+  "Weiter zur nächsten Unterkunft": "On to the next stay",
+  "ÖV-Route in Apple Karten": "Transit route in Apple Maps",
+  "Auto-Route in Apple Karten": "Driving route in Apple Maps",
+  "Uber bestellen": "Order an Uber",
+  "%@ öffnen (Zieladresse kopiert)": "Open %@ (destination address copied)"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

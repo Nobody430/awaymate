@@ -39,6 +39,7 @@
 "%@ · Landung %@" = "%@ · Landing %@";
 "%@ · Landung ca. %@" = "%@ · Landing approx. %@";
 "%@ · ca. +%lld Min" = "%@ · approx. +%lld min";
+"%@ öffnen (Zieladresse kopiert)" = "Open %@ (destination address copied)";
 "%@ – %@" = "%@ – %@";
 "%@ – %@ · %lld Flüge · Packliste %lld/%lld" = "%@ – %@ · %lld flights · Packing list %lld/%lld";
 "%@ → %@" = "%@ → %@";
@@ -198,6 +199,7 @@
 "Aus Zwischenablage" = "From clipboard";
 "Ausgewogen" = "Balanced";
 "Ausgewählt (%lld)" = "Selected (%lld)";
+"Auto-Route in Apple Karten" = "Driving route in Apple Maps";
 "Automatik" = "Auto";
 "Automatisch" = "Automatic";
 "Automatisch (%@)" = "Automatic (%@)";
@@ -645,6 +647,7 @@
 "Triebwerke" = "Engines";
 "Typ" = "Type";
 "Typ %@ · %lld V" = "Type %@ · %lld V";
+"Uber bestellen" = "Order an Uber";
 "Uhrzeiten eintragen" = "Enter times";
 "Um die Erde" = "Around the Earth";
 "Umbuchung: ersetzt %@ vom %@" = "Rebooking: replaces %@ on %@";
@@ -744,6 +747,7 @@
 "zum Umsteigen" = "to connect";
 "Änderungen" = "Changes";
 "ÖV %@" = "Transit %@";
+"ÖV-Route in Apple Karten" = "Transit route in Apple Maps";
 "Öffnen" = "Open";
 "Über mich / KI-Erinnerungen" = "About me / AI memories";
 "„%@“ ablegen bei" = "File “%@” under";

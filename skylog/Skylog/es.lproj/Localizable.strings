@@ -39,6 +39,7 @@
 "%@ · Landung %@" = "%@ · Aterrizaje %@";
 "%@ · Landung ca. %@" = "%@ · Aterrizaje aprox. %@";
 "%@ · ca. +%lld Min" = "%@ · aprox. +%lld min";
+"%@ öffnen (Zieladresse kopiert)" = "Abrir %@ (dirección de destino copiada)";
 "%@ – %@" = "%@ – %@";
 "%@ – %@ · %lld Flüge · Packliste %lld/%lld" = "%@ – %@ · %lld vuelos · Lista de equipaje %lld/%lld";
 "%@ → %@" = "%@ → %@";
@@ -198,6 +199,7 @@
 "Aus Zwischenablage" = "Desde el portapapeles";
 "Ausgewogen" = "Equilibrado";
 "Ausgewählt (%lld)" = "Seleccionados (%lld)";
+"Auto-Route in Apple Karten" = "Ruta en coche en Mapas de Apple";
 "Automatik" = "Auto";
 "Automatisch" = "Automático";
 "Automatisch (%@)" = "Automático (%@)";
@@ -645,6 +647,7 @@
 "Triebwerke" = "Motores";
 "Typ" = "Tipo";
 "Typ %@ · %lld V" = "Tipo %@ · %lld V";
+"Uber bestellen" = "Pedir un Uber";
 "Uhrzeiten eintragen" = "Introducir horas";
 "Um die Erde" = "Vueltas al mundo";
 "Umbuchung: ersetzt %@ vom %@" = "Cambio de reserva: sustituye a %@ del %@";
@@ -744,6 +747,7 @@
 "zum Umsteigen" = "para la conexión";
 "Änderungen" = "Cambios";
 "ÖV %@" = "Transporte público %@";
+"ÖV-Route in Apple Karten" = "Ruta en transporte público en Mapas de Apple";
 "Öffnen" = "Abrir";
 "Über mich / KI-Erinnerungen" = "Sobre mí / memorias de IA";
 "„%@“ ablegen bei" = "Guardar «%@» en";

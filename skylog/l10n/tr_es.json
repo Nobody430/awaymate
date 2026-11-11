@@ -754,7 +754,11 @@
   "Kalender: %@": "Calendario: %@",
   "Diagnose-Protokoll teilen": "Compartir registro de diagnóstico",
   "Ablauf": "Itinerario",
-  "Weiter zur nächsten Unterkunft": "Hacia el siguiente alojamiento"
+  "Weiter zur nächsten Unterkunft": "Hacia el siguiente alojamiento",
+  "ÖV-Route in Apple Karten": "Ruta en transporte público en Mapas de Apple",
+  "Auto-Route in Apple Karten": "Ruta en coche en Mapas de Apple",
+  "Uber bestellen": "Pedir un Uber",
+  "%@ öffnen (Zieladresse kopiert)": "Abrir %@ (dirección de destino copiada)"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Sin vuelos programados",
