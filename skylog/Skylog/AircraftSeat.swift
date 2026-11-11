@@ -175,6 +175,7 @@ enum SunSide {
 
 // MARK: - Live links for family
 
+@MainActor
 enum FamilyShare {
     static func trackingLinks(_ f: Flight) -> [(String, URL)] {
         var out: [(String, URL)] = []
@@ -199,7 +200,9 @@ enum FamilyShare {
                 s += String(localized: ", Landung ca. \(Fmt.time(f.arrival.best, f.arrival.tz)) Ortszeit.")
             }
         }
-        if let link = trackingLinks(f).first?.1, !f.isPast { s += "\n" + String(localized: "Live verfolgen: \(link.absoluteString)") }
+        // own status link if there is one; the public tracking sites only for people without their own server
+        let own = PushClient.isConfigured ? f.shareToken.flatMap { PushClient.endpoint("/s/" + $0) } : trackingLinks(f).first?.1
+        if let link = own, !f.isPast { s += "\n" + String(localized: "Live verfolgen: \(link.absoluteString)") }
         return s
     }
 }

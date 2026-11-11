@@ -108,7 +108,8 @@ struct FamilyCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             Label("Familie & Freunde informieren", systemImage: "person.2.wave.2").font(.headline)
-            if !flight.isPast {
+            // with an own server the status link below replaces the public tracking sites
+            if !flight.isPast && !PushClient.isConfigured {
                 Text("Diese Links funktionieren im Browser – niemand braucht dafür eine App:")
                     .font(.caption).foregroundStyle(.secondary)
                 ForEach(FamilyShare.trackingLinks(flight), id: \.0) { name, url in
