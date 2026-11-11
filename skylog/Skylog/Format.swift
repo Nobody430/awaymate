@@ -11,7 +11,7 @@ extension FlightStatus {
         switch self {
         case .scheduled, .checkIn, .unknown: .green
         case .delayed: .orange
-        case .boarding, .gateClosed: .yellow
+        case .boarding, .gateClosed, .taxiing: .yellow
         case .departed, .enRoute, .approaching: Theme.accent
         case .arrived: .teal
         case .canceled, .diverted: .red

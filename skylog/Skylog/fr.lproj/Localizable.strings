@@ -54,6 +54,7 @@
 "%@: Flugzeug ist unterwegs" = "%@ : l'avion est en route";
 "%@: Flugzeug kommt spät" = "%@ : l'avion arrive en retard";
 "%@: Gate %@" = "%@ : porte %@";
+"%@: Gate verlassen" = "%@ : porte quittée";
 "%@: Gate-Wechsel" = "%@ : changement de porte";
 "%@: Gepäckband %@" = "%@ : tapis à bagages %@";
 "%@: Landung in ca. 20 Min." = "%@ : atterrissage dans env. 20 min";
@@ -557,6 +558,8 @@
 "Reiseversicherung" = "Assurance voyage";
 "Reisezeiten von Apple Karten, ohne Gewähr." = "Temps de trajet d'Apple Plans, sans garantie.";
 "Rollen" = "Roulage";
+"Rollt zum Start" = "Roule vers la piste";
+"Rollt zur Startbahn." = "Roule vers la piste.";
 "Rufzeichen" = "Indicatif";
 "Rückblick" = "Rétrospective";
 "Schalter aus = nicht geflogen bzw. nicht importieren." = "Interrupteur désactivé = vol non effectué ou à ne pas importer.";

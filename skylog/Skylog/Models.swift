@@ -151,7 +151,7 @@ struct InboundFlight: Codable, Hashable {
 }
 
 enum FlightStatus: String {
-    case scheduled, delayed, checkIn, boarding, gateClosed, departed, enRoute, approaching, arrived, canceled, diverted, unknown
+    case scheduled, delayed, checkIn, boarding, gateClosed, taxiing, departed, enRoute, approaching, arrived, canceled, diverted, unknown
 
     init(raw: String?) {
         switch raw?.lowercased() ?? "" {
@@ -160,6 +160,7 @@ enum FlightStatus: String {
         case "checkin": self = .checkIn
         case "boarding": self = .boarding
         case "gateclosed": self = .gateClosed
+        case "taxiing": self = .taxiing
         case "departed": self = .departed
         case "enroute": self = .enRoute
         case "approaching": self = .approaching
@@ -177,6 +178,7 @@ enum FlightStatus: String {
         case .checkIn: String(localized: "Check-in")
         case .boarding: String(localized: "Boarding")
         case .gateClosed: String(localized: "Gate geschlossen")
+        case .taxiing: String(localized: "Rollt zum Start")
         case .departed: String(localized: "Gestartet")
         case .enRoute: String(localized: "In der Luft")
         case .approaching: String(localized: "Im Anflug")
@@ -294,6 +296,7 @@ struct Flight: Identifiable, Codable, Hashable {
 
     var isInAir: Bool {
         if isPast { return false }
+        if normalizedStatus == .taxiing { return false }     // left the gate, still on the ground
         if normalizedStatus.isAirborne { return true }
         if normalizedStatus.isFinal { return false }
         if [.scheduled, .delayed, .checkIn, .boarding, .gateClosed].contains(normalizedStatus),

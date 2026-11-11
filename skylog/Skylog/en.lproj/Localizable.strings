@@ -54,6 +54,7 @@
 "%@: Flugzeug ist unterwegs" = "%@: Aircraft is on its way";
 "%@: Flugzeug kommt spät" = "%@: Aircraft arriving late";
 "%@: Gate %@" = "%@: Gate %@";
+"%@: Gate verlassen" = "%@: left the gate";
 "%@: Gate-Wechsel" = "%@: Gate change";
 "%@: Gepäckband %@" = "%@: Baggage belt %@";
 "%@: Landung in ca. 20 Min." = "%@: Landing in approx. 20 min";
@@ -557,6 +558,8 @@
 "Reiseversicherung" = "Travel insurance";
 "Reisezeiten von Apple Karten, ohne Gewähr." = "Travel times from Apple Maps, no guarantee.";
 "Rollen" = "Taxiing";
+"Rollt zum Start" = "Taxiing to the runway";
+"Rollt zur Startbahn." = "Taxiing to the runway.";
 "Rufzeichen" = "Callsign";
 "Rückblick" = "Recap";
 "Schalter aus = nicht geflogen bzw. nicht importieren." = "Switch off = not flown / don't import.";

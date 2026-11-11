@@ -54,6 +54,7 @@
 "%@: Flugzeug ist unterwegs" = "%@: el avión está en camino";
 "%@: Flugzeug kommt spät" = "%@: el avión llega tarde";
 "%@: Gate %@" = "%@: puerta %@";
+"%@: Gate verlassen" = "%@: salió de la puerta";
 "%@: Gate-Wechsel" = "%@: cambio de puerta";
 "%@: Gepäckband %@" = "%@: cinta de equipaje %@";
 "%@: Landung in ca. 20 Min." = "%@: aterrizaje en unos 20 min";
@@ -557,6 +558,8 @@
 "Reiseversicherung" = "Seguro de viaje";
 "Reisezeiten von Apple Karten, ohne Gewähr." = "Tiempos de trayecto de Mapas de Apple, sin garantía.";
 "Rollen" = "Rodaje";
+"Rollt zum Start" = "Rodando hacia la pista";
+"Rollt zur Startbahn." = "Rodando hacia la pista.";
 "Rufzeichen" = "Indicativo";
 "Rückblick" = "Resumen";
 "Schalter aus = nicht geflogen bzw. nicht importieren." = "Interruptor apagado = no volado / no importar.";

@@ -742,7 +742,10 @@
   "Status-Link erstellen": "Create status link",
   "Status-Link teilen": "Share status link",
   "Grössere Verspätungen gemeldet": "Major delays reported",
-  "Leichte Verspätungen gemeldet": "Minor delays reported"
+  "Leichte Verspätungen gemeldet": "Minor delays reported",
+  "Rollt zum Start": "Taxiing to the runway",
+  "%@: Gate verlassen": "%@: left the gate",
+  "Rollt zur Startbahn.": "Taxiing to the runway."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

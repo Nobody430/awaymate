@@ -742,7 +742,10 @@
   "Status-Link erstellen": "Crea link di stato",
   "Status-Link teilen": "Condividi link di stato",
   "Grössere Verspätungen gemeldet": "Segnalati forti ritardi",
-  "Leichte Verspätungen gemeldet": "Segnalati lievi ritardi"
+  "Leichte Verspätungen gemeldet": "Segnalati lievi ritardi",
+  "Rollt zum Start": "In rullaggio verso la pista",
+  "%@: Gate verlassen": "%@: gate lasciato",
+  "Rollt zur Startbahn.": "In rullaggio verso la pista."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

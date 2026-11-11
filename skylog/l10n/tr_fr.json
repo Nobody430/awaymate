@@ -742,7 +742,10 @@
   "Status-Link erstellen": "Créer un lien de statut",
   "Status-Link teilen": "Partager le lien de statut",
   "Grössere Verspätungen gemeldet": "Retards importants signalés",
-  "Leichte Verspätungen gemeldet": "Légers retards signalés"
+  "Leichte Verspätungen gemeldet": "Légers retards signalés",
+  "Rollt zum Start": "Roule vers la piste",
+  "%@: Gate verlassen": "%@ : porte quittée",
+  "Rollt zur Startbahn.": "Roule vers la piste."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Aucun vol prévu",

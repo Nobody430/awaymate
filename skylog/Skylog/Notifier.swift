@@ -71,6 +71,8 @@ enum Notifier {
             switch newStatus {
             case .boarding:
                 result.append(Change(title: String(localized: "\(n): Boarding"), body: String(localized: "Boarding hat begonnen") + (new.departure.gate.map { String(localized: " an Gate \($0)") } ?? "") + "."))
+            case .taxiing:
+                result.append(Change(title: String(localized: "\(n): Gate verlassen"), body: String(localized: "Rollt zur Startbahn.")))
             case .departed, .enRoute:
                 if !oldStatus.isAirborne {
                     result.append(Change(title: String(localized: "\(n) ist gestartet"), body: String(localized: "Ankunft in \(new.arrival.displayCity) um \(Fmt.time(new.arrival.best, new.arrival.tz)).")))

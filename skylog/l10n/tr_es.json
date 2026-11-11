@@ -742,7 +742,10 @@
   "Status-Link erstellen": "Crear enlace de estado",
   "Status-Link teilen": "Compartir enlace de estado",
   "Grössere Verspätungen gemeldet": "Retrasos importantes notificados",
-  "Leichte Verspätungen gemeldet": "Retrasos leves notificados"
+  "Leichte Verspätungen gemeldet": "Retrasos leves notificados",
+  "Rollt zum Start": "Rodando hacia la pista",
+  "%@: Gate verlassen": "%@: salió de la puerta",
+  "Rollt zur Startbahn.": "Rodando hacia la pista."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Sin vuelos programados",

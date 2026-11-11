@@ -343,7 +343,7 @@ enum FlightAware {
         else if fa.diverted == true { status = "Diverted" }
         else if fa.actual_in != nil || fa.actual_on != nil { status = "Arrived" }
         else if fa.actual_off != nil { status = "EnRoute" }
-        else if fa.actual_out != nil { status = "Departed" }
+        else if fa.actual_out != nil { status = "Taxiing" }      // left the gate but not yet airborne
         else if (dep.delayMinutes ?? 0) >= 15 { status = "Delayed" }
         else { status = "Expected" }
 

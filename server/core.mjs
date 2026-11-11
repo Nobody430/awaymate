@@ -248,8 +248,8 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       snap.faAt = now;
       fetched = true;
       if (x) {
-        snap.dep = x.estimated_out || x.scheduled_out || snap.dep;
-        snap.arr = x.estimated_in || x.scheduled_in || snap.arr;
+        snap.dep = x.actual_out || x.estimated_out || x.scheduled_out || snap.dep;
+        snap.arr = x.actual_in || x.estimated_in || x.scheduled_in || snap.arr;
         snap.gate = x.gate_origin || snap.gate;
         snap.terminal = x.terminal_origin || snap.terminal;
         snap.arrGate = x.gate_destination || snap.arrGate;
@@ -409,7 +409,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     if (/^[A-Za-z0-9_-]{20,64}$/.test(id)) {
       for (const dev of Object.values(state.devices)) {
         const f = (dev.flights || []).find((x) => x.share === id);
-        if (f) { found = { f, snap: (dev.last || {})[f.id] || {} }; break; }
+        if (f) { found = { f, snap: (dev.last || {})[f.id] || {}, dev }; break; }
       }
     }
     const page = (body, refresh) => ({
@@ -427,18 +427,28 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         `.plane{font-size:26px;line-height:26px;text-align:center;color:#ffb454;text-shadow:0 0 3px #000}.apt{font:700 12px system-ui;color:#fff;text-shadow:0 0 3px #000}</style></head><body><main>${body}<p class="muted">${esc(P("by"))}</p></main></body></html>`,
     });
     if (!found) return page(`<div class="card">${esc(P("ended"))}</div>`, false);
-    const { f, snap } = found;
-    const dep = snap.dep || f.dep, arr = snap.arr || f.arr;
+    const { f, snap, dev } = found;
+    // Times: whoever looked last knows best – the app (at its last sync) or this server's own query
+    const appNewer = Date.parse(dev.updated || 0) > (snap.faAt || 0);
+    const dep = (appNewer ? f.dep : snap.dep) || snap.dep || f.dep;
+    const arr = (snap.inAir && snap.arr) || (appNewer ? f.arr : snap.arr) || snap.arr || f.arr;
+    // on the ground before leaving the gate? (server's view, or the app's status if that is newer)
+    const moving = snap.leftGate || snap.inAir || snap.landed || ["taxiing", "departed", "enRoute", "approaching", "arrived"].includes(f.state);
     // statusKey = set by this server (translated here); otherwise the label the app sent
     // (viewer's language): the server's own status, else the app's status code, else the app's label
-    const APP_STATE = { scheduled: "scheduled", unknown: "scheduled", delayed: "delayed", checkIn: "scheduled", boarding: "boarding", gateClosed: "boarding",
-                        departed: "leftGate", enRoute: "inAir", approaching: "inAir", arrived: "landed", canceled: "cancelled", diverted: "diverted" };
-    const status = snap.statusKey ? t(lang, snap.statusKey) : APP_STATE[f.state] ? t(lang, APP_STATE[f.state]) : (snap.statusLabel || f.statusLabel || t(lang, "scheduled"));
+    const APP_STATE = { scheduled: "scheduled", unknown: "scheduled", delayed: "delayed", checkIn: "scheduled", boarding: "boarding", gateClosed: "boarding", taxiing: "leftGate",
+                        departed: "inAir", enRoute: "inAir", approaching: "inAir", arrived: "landed", canceled: "cancelled", diverted: "diverted" };
+    const order = ["scheduled", "delayed", "boarding", "leftGate", "inAir", "landed", "atGate"];
+    const appKey = APP_STATE[f.state];
+    // take the further-along of the two views (the app may already know about the takeoff, or the server about the landing)
+    let key = snap.statusKey || appKey;
+    if (snap.statusKey && appKey && order.indexOf(appKey) > order.indexOf(snap.statusKey) && order.includes(snap.statusKey)) key = appKey;
+    const status = key ? t(lang, key) : (snap.statusLabel || f.statusLabel || t(lang, "scheduled"));
     const mins = (a, b) => (a && b ? Math.round((Date.parse(a) - Date.parse(b)) / 60000) : 0);
     // delay against the originally planned time (the app sends it); fall back to what FlightAware reported
     const delay = Math.max(0, f.depPlanned ? mins(dep, f.depPlanned) : (snap.delay || 0));
     const arrDelay = f.arrPlanned ? mins(arr, f.arrPlanned) : 0;
-    const late = delay >= 5 && !snap.inAir && !snap.landed;
+    const late = delay >= 5 && !moving;
     const cls = (m) => (m >= 15 ? "bad" : m >= 5 ? "late" : "ok");
     const planned = (iso, tz, m) => (iso && Math.abs(m) >= 5 ? `<span class="was">${esc(fmtTime(iso, tz, lang))}</span> ` : "");
     const gate = snap.landed || snap.inAir ? snap.arrGate : (snap.gate || f.gate);
@@ -448,11 +458,12 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     if (f.fromLat != null && f.toLat != null) {
       const nowMs = Date.now(), depMs = Date.parse(dep), arrMs = Date.parse(arr);
       const livePos = snap.pos && !snap.pos.ground && nowMs - snap.pos.t < 20 * MIN ? snap.pos : null;
-      const frac = snap.landed ? 1 : snap.inAir && arrMs > depMs ? Math.min(1, Math.max(0, (nowMs - depMs) / (arrMs - depMs))) : 0;
+      const airborne = snap.inAir || ["departed", "enRoute", "approaching"].includes(f.state);
+      const frac = snap.landed ? 1 : airborne && arrMs > depMs ? Math.min(1, Math.max(0, (nowMs - depMs) / (arrMs - depMs))) : 0;
       const data = { from: [f.fromLat, f.fromLon], to: [f.toLat, f.toLon], pos: livePos ? [livePos.lat, livePos.lon] : null,
                      track: livePos?.track ?? null, frac, fromCode: f.from, toCode: f.to };
       if (livePos) mapNote = P("live", fmtTime(new Date(livePos.t).toISOString(), f.depTz, lang));
-      else if (snap.inAir && !snap.landed) mapNote = P("est");
+      else if (airborne && !snap.landed) mapNote = P("est");
       map = `<div id="map"></div>${mapNote ? `<p class="muted">${esc(mapNote)}</p>` : ""}` +
         `<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">` +
         `<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>` +

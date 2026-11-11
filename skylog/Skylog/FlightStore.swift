@@ -291,7 +291,7 @@ final class FlightStore {
             new.status = "Arrived"
             new.arrival.runway = new.arrival.runway ?? cur.arrival.runway
             new.departure.runway = new.departure.runway ?? cur.departure.runway
-        } else if (curStatus.isAirborne || cur.departure.runway != nil) && !newStatus.isAirborne && !newStatus.isFinal {
+        } else if curStatus.isAirborne && !newStatus.isAirborne && !newStatus.isFinal {
             new.status = cur.status
             new.departure.runway = new.departure.runway ?? cur.departure.runway
         }
@@ -332,6 +332,7 @@ final class FlightStore {
             if f.arrival.baggageBelt != nil, let last = f.lastUpdated, last > arr { return .infinity }
             return 10 * 60
         }
+        if status == .taxiing { return 5 * 60 }      // rolling: takeoff is minutes away
         if f.isInAir || f.departure.runway != nil {
             return arr.timeIntervalSince(now) < 40 * 60 ? 5 * 60 : 15 * 60
         }
