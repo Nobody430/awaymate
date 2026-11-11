@@ -314,10 +314,27 @@ struct Flight: Identifiable, Codable, Hashable {
         }
     }
 
+    /// A reported position we can trust: not the "0°/0°" placeholder some sources send when they have no fix,
+    /// and somewhere near the route (not another aircraft or a stale leg on the other side of the world).
+    func isPlausible(_ p: LivePosition) -> Bool {
+        if abs(p.lat) < 0.05 && abs(p.lon) < 0.05 { return false }
+        guard (-90...90).contains(p.lat), (-180...180).contains(p.lon) else { return false }
+        guard let a = departure.coordinate, let b = arrival.coordinate else { return true }
+        let route = Geo.distanceKm(a, b)
+        let detour = Geo.distanceKm(a, p.coordinate) + Geo.distanceKm(p.coordinate, b)
+        return detour < route * 1.6 + 400
+    }
+
+    /// Live position if it is fresh and plausible.
+    var livePosition: LivePosition? {
+        guard let p = lastPosition, Date().timeIntervalSince(p.timestamp) < 20 * 60, isPlausible(p) else { return nil }
+        return p
+    }
+
     /// Current plane position: live data if fresh, otherwise estimated along the great circle.
     func planePosition(at now: Date = Date()) -> (coordinate: CLLocationCoordinate2D, heading: Double)? {
         guard isInAir else { return nil }
-        if let p = lastPosition, now.timeIntervalSince(p.timestamp) < 20 * 60 {
+        if let p = lastPosition, now.timeIntervalSince(p.timestamp) < 20 * 60, isPlausible(p) {
             return (p.coordinate, p.heading ?? 0)
         }
         guard let a = departure.coordinate, let b = arrival.coordinate else { return nil }

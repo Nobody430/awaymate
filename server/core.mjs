@@ -266,7 +266,12 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
 
     // Free ADS-B: from 15 min before departure while not landed (every loop = 1 min)
     if (f.callsign && now > dep - 15 * MIN && !snap.landed) {
-      const p = await adsb(f.callsign);
+      let p = await adsb(f.callsign);
+      // ignore the 0°/0° placeholder and fixes far off the route (another aircraft with the same callsign)
+      const sane = p && (Math.abs(p.lat) > 0.05 || Math.abs(p.lon) > 0.05) &&
+        (f.fromLat == null || f.toLat == null ||
+         distKm({ lat: f.fromLat, lon: f.fromLon }, p) + distKm(p, { lat: f.toLat, lon: f.toLon }) < distKm({ lat: f.fromLat, lon: f.fromLon }, { lat: f.toLat, lon: f.toLon }) * 1.6 + 400);
+      if (p && !sane) p = null;
       if (p) snap.pos = { lat: p.lat, lon: p.lon, track: p.track, ground: !!p.onGround, t: now,
                           altFt: typeof p.alt === "number" ? p.alt : null, kt: typeof p.gs === "number" ? p.gs : null, fpm: typeof p.rate === "number" ? p.rate : null };
       if (p && !p.onGround && !snap.inAir) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", f.number), L("departedTo", f.toCity || f.to)]); }

@@ -92,6 +92,8 @@ enum LiveADSB {
             }
             return notes
         }
+        // another aircraft with the same callsign, or a bogus fix: ignore
+        guard f.isPlausible(fix.position) else { return notes }
         f.lastPosition = fix.position
         let p = fix.position.coordinate
         let distToDest = f.arrival.coordinate.map { Geo.distanceKm(p, $0) } ?? .infinity

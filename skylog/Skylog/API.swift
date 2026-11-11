@@ -94,7 +94,8 @@ struct ADBFlight: Decodable {
         flight.icao24 = aircraft?.modeS?.lowercased()
         flight.distanceKm = greatCircleDistance?.km
         flight.lastUpdated = Date()
-        if let loc = location, let lat = loc.lat, let lon = loc.lon {
+        // AeroDataBox sends 0/0 when it has no position – that is not a position
+        if let loc = location, let lat = loc.lat, let lon = loc.lon, abs(lat) > 0.05 || abs(lon) > 0.05 {
             flight.lastPosition = LivePosition(
                 lat: lat, lon: lon,
                 altitudeM: loc.altitude?.meter,

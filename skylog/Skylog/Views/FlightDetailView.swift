@@ -46,7 +46,7 @@ struct FlightDetailView: View {
                 PlaneHistoryCard(flight: f)
                 DepartureConditionsCard(flight: f)
                 TimetableCard(flight: f)
-                if f.isInAir, let p = f.lastPosition { live(p) }
+                if f.isInAir, let p = f.livePosition { live(p) }
                 if f.isPast || f.normalizedStatus.isFinal || (f.arrival.delayMinutes ?? 0) >= 120 {
                     CompensationCard(flight: f)
                 }
