@@ -85,9 +85,9 @@ struct NextFlightView: View {
                 HStack {
                     Text(f.number).font(.caption.weight(.semibold))
                     Spacer()
-                    Text(f.delayMinutes >= 15 ? String(localized: "+\(f.delayMinutes) Min") : f.status)
+                    Text(f.delayMinutes >= 5 ? String(localized: "+\(f.delayMinutes) Min") : f.status)
                         .font(.caption2.weight(.semibold))
-                        .foregroundStyle(f.delayMinutes >= 15 ? .orange : accent)
+                        .foregroundStyle(f.delayMinutes >= 15 ? .red : f.delayMinutes >= 5 ? .orange : accent)
                 }
                 HStack {
                     Text(f.from).font(.title2.bold())

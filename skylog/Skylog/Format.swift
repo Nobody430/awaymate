@@ -87,9 +87,9 @@ enum Fmt {
 
     static func delayColor(_ minutes: Int?) -> Color {
         guard let minutes else { return .secondary }
-        if minutes >= 45 { return .red }
-        if minutes >= 15 { return .orange }
-        if minutes <= -5 { return .green }
+        // one scale everywhere (app, widgets, status page): from 5 min orange, from 15 min red
+        if minutes >= 15 { return .red }
+        if minutes >= 5 { return .orange }
         return .green
     }
 
