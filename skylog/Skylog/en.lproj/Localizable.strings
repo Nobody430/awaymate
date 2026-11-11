@@ -86,6 +86,7 @@
 "%lld unvollständige Flüge entfernt." = "%lld incomplete flights removed.";
 "%lld unvollständige Flüge löschen?" = "Delete %lld incomplete flights?";
 "%lld%%" = "%lld%%";
+"%lld/%lld eingepackt" = "%lld/%lld packed";
 "%lldT %lldh" = "%lldd %lldh";
 "%lld×" = "%lld×";
 "+%lld" = "+%lld";
@@ -145,6 +146,7 @@
 "Alle" = "All";
 "Alle %lld anzeigen" = "Show all %lld";
 "Alle Flüge löschen" = "Delete all flights";
+"Alle Häkchen entfernen" = "Untick everything";
 "Alle Notizen" = "All notes";
 "Alle Zeiten in Ortszeit des jeweiligen Flughafens. Stand: %@ · erstellt mit Awaymate" = "All times in the local time of each airport. As of: %@ · created with Awaymate";
 "Alle anzeigen" = "Show all";
@@ -550,7 +552,9 @@
 "Outlook-Fehler (%lld). Evtl. neu verbinden." = "Outlook error (%lld). You may need to reconnect.";
 "Outlook-Zugang (Postfach durchsuchen)" = "Outlook access (search mailbox)";
 "PDF / E-Mail-Datei wählen" = "Choose PDF / email file";
+"Packliste" = "Packing list";
 "Packliste %lld/%lld" = "Packing list %lld/%lld";
+"Packliste auf die Standardliste zurücksetzen?" = "Reset the packing list to the default list?";
 "Packliste in Obsidian speichern" = "Save packing list to Obsidian";
 "Packliste – %@" = "Packing list – %@";
 "Packliste-Vorschläge" = "Packing list suggestions";
@@ -628,6 +632,7 @@
 "Sonne meist RECHTS ☀️ – für Aussicht ohne Blendung links sitzen" = "Sun mostly on the RIGHT ☀️ – sit on the left for a view without glare";
 "Sonne wechselt die Seite – beide Seiten ähnlich" = "Sun changes sides – both sides similar";
 "Sprache" = "Language";
+"Standardliste wiederherstellen" = "Restore the default list";
 "Start" = "Takeoff";
 "Statistik" = "Statistics";
 "Status per WhatsApp" = "Status via WhatsApp";
@@ -737,6 +742,7 @@
 "Zug & Bus" = "Train & bus";
 "Zuhause" = "Home";
 "Zuletzt: %@ am %@" = "Last: %@ on %@";
+"Zum Löschen eines Punkts nach links wischen." = "Swipe left to delete an item.";
 "Zur Packliste hinzufügen" = "Add to packing list";
 "Zurück in Awaymate: Einstellungen → E-Mail-Import → Client-ID einfügen." = "Back in Awaymate: Settings → Email import → paste the client ID.";
 "Zurück in Awaymate: Einstellungen → Flugdaten → „AeroDataBox“ wählen → Key einfügen." = "Back in Awaymate: Settings → Flight data → choose “AeroDataBox” → paste the key.";
@@ -744,6 +750,7 @@
 "Zurück in Awaymate: Einstellungen → KI-Erkennung → Key einfügen." = "Back in Awaymate: Settings → AI recognition → paste the key.";
 "Zurück in Awaymate: Einstellungen → KI-Erkennung → „OpenAI“ wählen → Key einfügen." = "Back in Awaymate: Settings → AI recognition → choose “OpenAI” → paste the key.";
 "Zurück: %@ → %@, ab %@" = "Return: %@ → %@, from %@";
+"Zurücksetzen" = "Reset";
 "Zusätzlich: Recht auf Erstattung des Tickets oder Ersatzflug sowie Verpflegung/Hotel." = "In addition: right to a ticket refund or replacement flight, plus meals/hotel.";
 "Zügig umsteigen." = "Connect quickly.";
 "eSIM / Roaming geprüft" = "eSIM / roaming checked";
@@ -773,6 +780,7 @@
 "Über mich / KI-Erinnerungen" = "About me / AI memories";
 "„%@“ ablegen bei" = "File “%@” under";
 "„Neue Registrierung“ → Name: Awaymate." = "“New registration” → Name: Awaymate.";
+"„Standardliste wiederherstellen“ löscht alle eigenen und von der KI ergänzten Punkte." = "“Restore the default list” deletes all items you or the AI added.";
 "„default-application“ → „Authorization“ → den „Application Key“ kopieren." = "“default-application” → “Authorization” → copy the “Application Key”.";
 "✈️ %@ storniert" = "✈️ %@ cancelled";
 "✈️ Flug umgebucht" = "✈️ Flight rebooked";

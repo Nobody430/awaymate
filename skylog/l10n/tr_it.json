@@ -779,7 +779,15 @@
   "Link entfernen": "Rimuovi link",
   "Live-Link für die Reise erstellen": "Crea link live per il viaggio",
   "Familie & Freunde": "Famiglia e amici",
-  "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen.": "La pagina mostra tutti i voli e gli alloggi di questo viaggio, dove ti trovi adesso e ogni volo in tempo reale. Chiunque abbia il link può vederla."
+  "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen.": "La pagina mostra tutti i voli e gli alloggi di questo viaggio, dove ti trovi adesso e ogni volo in tempo reale. Chiunque abbia il link può vederla.",
+  "Packliste": "Lista bagagli",
+  "%lld/%lld eingepackt": "%lld/%lld in valigia",
+  "Zum Löschen eines Punkts nach links wischen.": "Scorri verso sinistra per eliminare una voce.",
+  "Alle Häkchen entfernen": "Togli tutte le spunte",
+  "Standardliste wiederherstellen": "Ripristina la lista predefinita",
+  "„Standardliste wiederherstellen“ löscht alle eigenen und von der KI ergänzten Punkte.": "«Ripristina la lista predefinita» elimina tutte le voci aggiunte da te o dall’IA.",
+  "Packliste auf die Standardliste zurücksetzen?": "Ripristinare la lista bagagli a quella predefinita?",
+  "Zurücksetzen": "Ripristina"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

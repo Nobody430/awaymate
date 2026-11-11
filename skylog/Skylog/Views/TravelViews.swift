@@ -342,12 +342,9 @@ struct TripDetailView: View {
     @Environment(FlightStore.self) private var flights
     @State private var store = TripStore.shared
     let tripID: UUID
-    @State private var newItem = ""
     @State private var editing = false
     @State private var planning = false
     @State private var bookingStore = BookingStore.shared
-    @State private var packingBusy = false
-    @State private var packingMessage: String?
     @State private var editingBooking: TravelBooking?
     @State private var addingBooking = false
 
@@ -406,49 +403,14 @@ struct TripDetailView: View {
                     .listRowSeparator(.hidden)
                 }
                 TripShareSection(trip: trip)
-                Section("Packliste \(trip.packing.filter(\.done).count)/\(trip.packing.count)") {
-                    ForEach(trip.packing) { item in
-                        Button {
-                            var t = trip
-                            if let i = t.packing.firstIndex(where: { $0.id == item.id }) { t.packing[i].done.toggle() }
-                            store.upsert(t)
-                        } label: {
-                            Label(item.name, systemImage: item.done ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(item.done ? .secondary : .primary)
-                        }
-                    }
-                    .onDelete { idx in
-                        var t = trip
-                        t.packing.remove(atOffsets: idx)
-                        store.upsert(t)
-                    }
-                    HStack {
-                        TextField("Hinzufügen …", text: $newItem).onSubmit(addItem)
-                        Button("Hinzufügen", action: addItem).disabled(newItem.isEmpty)
-                    }
-                    Button("Alle zurücksetzen") {
-                        var t = trip
-                        for i in t.packing.indices { t.packing[i].done = false }
-                        store.upsert(t)
-                    }
-                    Button {
-                        Task { await personalPacking(trip) }
-                    } label: {
+                Section {
+                    NavigationLink { PackingListView(tripID: trip.id) } label: {
                         HStack {
-                            Label("Persönliche Packliste mit KI", systemImage: "sparkles")
-                            if packingBusy { Spacer(); ProgressView() }
+                            Label("Packliste", systemImage: "checklist")
+                            Spacer()
+                            Text("\(trip.packing.filter(\.done).count)/\(trip.packing.count)").foregroundStyle(.secondary)
                         }
                     }
-                    .disabled(packingBusy || !AIClient.hasKey)
-                    if ObsidianVault.isConnected {
-                        Button {
-                            do {
-                                let path = try ObsidianVault.write(name: "\(trip.name) – Packliste", markdown: PackingAI.markdown(trip: trip))
-                                packingMessage = String(localized: "In Obsidian gespeichert: \(path)")
-                            } catch { packingMessage = error.localizedDescription }
-                        } label: { Label("Packliste in Obsidian speichern", systemImage: "square.and.arrow.down") }
-                    }
-                    if let packingMessage { Text(packingMessage).font(.caption).foregroundStyle(.secondary) }
                 }
             }
             .navigationTitle(trip.name)
@@ -459,29 +421,5 @@ struct TripDetailView: View {
             .sheet(item: $editingBooking) { BookingEditor(booking: $0) }
             .sheet(isPresented: $addingBooking) { BookingEditor(start: max(trip.start, Date()) > trip.end ? trip.start : max(trip.start, Date())) }
         }
-    }
-
-    private func personalPacking(_ trip: Trip) async {
-        packingBusy = true
-        defer { packingBusy = false }
-        do {
-            let items = try await PackingAI.generate(trip: trip, flights: store.flights(for: trip, in: flights),
-                                                     bookings: bookingStore.bookings(for: trip))
-            guard var t = store.trips.first(where: { $0.id == tripID }) else { return }
-            let existing = Set(t.packing.map { $0.name.lowercased() })
-            let new = items.filter { !existing.contains($0.name.lowercased()) }
-            t.packing += new.map { PackItem(name: $0.name) }
-            store.upsert(t)
-            packingMessage = String(localized: "\(new.count) persönliche Punkte hinzugefügt") + (PersonalProfile.text.isEmpty ? String(localized: " (Tipp: Profil/Obsidian in den Einstellungen ergänzen).") : ".")
-        } catch {
-            packingMessage = error.localizedDescription
-        }
-    }
-
-    private func addItem() {
-        guard !newItem.isEmpty, var t = store.trips.first(where: { $0.id == tripID }) else { return }
-        t.packing.append(PackItem(name: newItem))
-        store.upsert(t)
-        newItem = ""
     }
 }

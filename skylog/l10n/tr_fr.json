@@ -779,7 +779,15 @@
   "Link entfernen": "Supprimer le lien",
   "Live-Link für die Reise erstellen": "Créer un lien en direct pour le voyage",
   "Familie & Freunde": "Famille et amis",
-  "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen.": "La page montre tous les vols et hébergements de ce voyage, où tu te trouves en ce moment, et chaque vol en direct. Toute personne ayant le lien peut la voir."
+  "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen.": "La page montre tous les vols et hébergements de ce voyage, où tu te trouves en ce moment, et chaque vol en direct. Toute personne ayant le lien peut la voir.",
+  "Packliste": "Liste de bagages",
+  "%lld/%lld eingepackt": "%lld/%lld dans la valise",
+  "Zum Löschen eines Punkts nach links wischen.": "Balaye vers la gauche pour supprimer un élément.",
+  "Alle Häkchen entfernen": "Tout décocher",
+  "Standardliste wiederherstellen": "Rétablir la liste par défaut",
+  "„Standardliste wiederherstellen“ löscht alle eigenen und von der KI ergänzten Punkte.": "« Rétablir la liste par défaut » supprime tous les éléments ajoutés par toi ou par l’IA.",
+  "Packliste auf die Standardliste zurücksetzen?": "Réinitialiser la liste de bagages à la liste par défaut ?",
+  "Zurücksetzen": "Réinitialiser"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Aucun vol prévu",

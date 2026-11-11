@@ -86,6 +86,7 @@
 "%lld unvollständige Flüge entfernt." = "%lld voli incompleti rimossi.";
 "%lld unvollständige Flüge löschen?" = "Eliminare %lld voli incompleti?";
 "%lld%%" = "%lld%%";
+"%lld/%lld eingepackt" = "%lld/%lld in valigia";
 "%lldT %lldh" = "%lldg %lldh";
 "%lld×" = "%lld×";
 "+%lld" = "+%lld";
@@ -145,6 +146,7 @@
 "Alle" = "Tutti";
 "Alle %lld anzeigen" = "Mostra tutti (%lld)";
 "Alle Flüge löschen" = "Elimina tutti i voli";
+"Alle Häkchen entfernen" = "Togli tutte le spunte";
 "Alle Notizen" = "Tutte le note";
 "Alle Zeiten in Ortszeit des jeweiligen Flughafens. Stand: %@ · erstellt mit Awaymate" = "Tutti gli orari sono nell’ora locale del rispettivo aeroporto. Aggiornato al: %@ · creato con Awaymate";
 "Alle anzeigen" = "Mostra tutti";
@@ -550,7 +552,9 @@
 "Outlook-Fehler (%lld). Evtl. neu verbinden." = "Errore di Outlook (%lld). Prova a ricollegarlo.";
 "Outlook-Zugang (Postfach durchsuchen)" = "Accesso a Outlook (ricerca nella casella di posta)";
 "PDF / E-Mail-Datei wählen" = "Scegli PDF / file e-mail";
+"Packliste" = "Lista bagagli";
 "Packliste %lld/%lld" = "Lista bagagli %lld/%lld";
+"Packliste auf die Standardliste zurücksetzen?" = "Ripristinare la lista bagagli a quella predefinita?";
 "Packliste in Obsidian speichern" = "Salva lista bagagli in Obsidian";
 "Packliste – %@" = "Lista bagagli – %@";
 "Packliste-Vorschläge" = "Suggerimenti per la lista bagagli";
@@ -628,6 +632,7 @@
 "Sonne meist RECHTS ☀️ – für Aussicht ohne Blendung links sitzen" = "Sole per lo più a DESTRA ☀️ – siediti a sinistra per una vista senza riflessi";
 "Sonne wechselt die Seite – beide Seiten ähnlich" = "Il sole cambia lato – i due lati sono simili";
 "Sprache" = "Lingua";
+"Standardliste wiederherstellen" = "Ripristina la lista predefinita";
 "Start" = "Decollo";
 "Statistik" = "Statistiche";
 "Status per WhatsApp" = "Stato via WhatsApp";
@@ -737,6 +742,7 @@
 "Zug & Bus" = "Treno e autobus";
 "Zuhause" = "Casa";
 "Zuletzt: %@ am %@" = "Ultimo: %@ il %@";
+"Zum Löschen eines Punkts nach links wischen." = "Scorri verso sinistra per eliminare una voce.";
 "Zur Packliste hinzufügen" = "Aggiungi alla lista bagagli";
 "Zurück in Awaymate: Einstellungen → E-Mail-Import → Client-ID einfügen." = "Di nuovo in Awaymate: Impostazioni → Importazione e-mail → incolla l’ID client.";
 "Zurück in Awaymate: Einstellungen → Flugdaten → „AeroDataBox“ wählen → Key einfügen." = "Di nuovo in Awaymate: Impostazioni → Dati di volo → scegli “AeroDataBox” → incolla la chiave.";
@@ -744,6 +750,7 @@
 "Zurück in Awaymate: Einstellungen → KI-Erkennung → Key einfügen." = "Di nuovo in Awaymate: Impostazioni → Riconoscimento IA → incolla la chiave.";
 "Zurück in Awaymate: Einstellungen → KI-Erkennung → „OpenAI“ wählen → Key einfügen." = "Di nuovo in Awaymate: Impostazioni → Riconoscimento IA → scegli “OpenAI” → incolla la chiave.";
 "Zurück: %@ → %@, ab %@" = "Ritorno: %@ → %@, dalle %@";
+"Zurücksetzen" = "Ripristina";
 "Zusätzlich: Recht auf Erstattung des Tickets oder Ersatzflug sowie Verpflegung/Hotel." = "Inoltre: diritto al rimborso del biglietto o a un volo alternativo, oltre a pasti/hotel.";
 "Zügig umsteigen." = "Cambia in fretta.";
 "eSIM / Roaming geprüft" = "eSIM / roaming verificati";
@@ -773,6 +780,7 @@
 "Über mich / KI-Erinnerungen" = "Su di me / memorie IA";
 "„%@“ ablegen bei" = "Archivia “%@” in";
 "„Neue Registrierung“ → Name: Awaymate." = "“Nuova registrazione” → Nome: Awaymate.";
+"„Standardliste wiederherstellen“ löscht alle eigenen und von der KI ergänzten Punkte." = "«Ripristina la lista predefinita» elimina tutte le voci aggiunte da te o dall’IA.";
 "„default-application“ → „Authorization“ → den „Application Key“ kopieren." = "“default-application” → “Authorization” → copia l’“Application Key”.";
 "✈️ %@ storniert" = "✈️ %@ annullato";
 "✈️ Flug umgebucht" = "✈️ Volo riprenotato";
