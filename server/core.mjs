@@ -93,8 +93,12 @@ const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const LOCALES = { de: "de-CH", en: "en-GB", fr: "fr-FR", it: "it-IT", es: "es-ES" };
 
 // Runs in the visitor's browser: draws the great-circle route and the plane with Leaflet / OpenStreetMap.
-function mapScript(D) {
-  if (!window.L) return;
+// Kept as text on purpose: bundlers rewrite real functions (helper calls that don't exist in the browser).
+const MAP_JS = String.raw`function mapScript(D) {
+  var box = document.getElementById("map");
+  // no map library (blocked or offline): show no empty box
+  if (!window.L) { box.style.display = "none"; return; }
+  try {
   var rad = Math.PI / 180;
   function gc(a, b, f) {      // point at fraction f on the great circle a → b
     var p1 = a[0] * rad, l1 = a[1] * rad, p2 = b[0] * rad, l2 = b[1] * rad;
@@ -133,7 +137,8 @@ function mapScript(D) {
     L.marker(plane, { icon: L.divIcon({ className: "plane", html: '<div style="transform:rotate(' + (heading - 90) + 'deg)">✈</div>', iconSize: [26, 26], iconAnchor: [13, 13] }), interactive: false }).addTo(map);
   }
   map.fitBounds(L.latLngBounds(pts).pad(0.15));
-}
+  } catch (e) { box.style.display = "none"; }
+}`;
 
 function t(lang, key, ...args) {
   const text = (TEXTS[lang] || TEXTS.de)[key] ?? TEXTS.de[key] ?? key;
@@ -446,7 +451,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       map = `<div id="map"></div>${mapNote ? `<p class="muted">${esc(mapNote)}</p>` : ""}` +
         `<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">` +
         `<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>` +
-        `<script>var D=${JSON.stringify(data).replace(/</g, "\\u003c")};(${mapScript.toString()})(D);</script>`;
+        `<script>var D=${JSON.stringify(data).replace(/</g, "\\u003c")};(${MAP_JS})(D);</script>`;
     }
     // Flight data while airborne (from the live position)
     let flightTiles = "";
