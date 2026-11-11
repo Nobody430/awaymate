@@ -39,6 +39,8 @@ struct TravelBooking: Identifiable, Codable, Hashable {
     var bookingReference: String = ""
     var provider: String = ""
     var cancelled = false
+    /// Last change on any device (for the sync between devices)
+    var modified: Date? = nil
 
     var key: String { kind.rawValue + "|" + (bookingReference.isEmpty ? name.lowercased() : bookingReference.uppercased()) + "|" + Fmt.apiDate.string(from: start) }
     var nights: Int { max(0, Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: start), to: Calendar.current.startOfDay(for: end)).day ?? 0) }
@@ -73,6 +75,8 @@ final class BookingStore {
     func upsert(_ b: TravelBooking) -> Bool {
         if b.cancelled {
             let before = bookings.count
+            let gone = bookings.filter { $0.kind == b.kind && ((!b.bookingReference.isEmpty && $0.bookingReference.uppercased() == b.bookingReference.uppercased()) || $0.key == b.key) }
+            DeviceSync.noteDeleted(gone.map(\.id))
             bookings.removeAll { $0.kind == b.kind && ((!b.bookingReference.isEmpty && $0.bookingReference.uppercased() == b.bookingReference.uppercased()) || $0.key == b.key) }
             save()
             return bookings.count != before
@@ -80,23 +84,38 @@ final class BookingStore {
         if let i = bookings.firstIndex(where: { $0.key == b.key || (!b.bookingReference.isEmpty && $0.kind == b.kind && $0.bookingReference.uppercased() == b.bookingReference.uppercased()) }) {
             var updated = b
             updated.id = bookings[i].id
+            updated.modified = bookings[i].modified
             if updated == bookings[i] { return false }     // nothing new – no second notification
+            updated.modified = Date()
             bookings[i] = updated
         } else {
-            bookings.append(b)
+            var new = b
+            new.modified = Date()
+            bookings.append(new)
         }
         bookings.sort { $0.start < $1.start }
         save()
+        DeviceSync.scheduleSync()
         return true
     }
 
     func delete(_ ids: [UUID]) {
         bookings.removeAll { ids.contains($0.id) }
         save()
+        DeviceSync.noteDeleted(ids)
     }
 
     func deleteAll() {
+        DeviceSync.noteDeleted(bookings.map(\.id))
         bookings = []
+        save()
+    }
+
+    /// Result of a sync with the other devices.
+    func replaceAll(_ merged: [TravelBooking]) {
+        let sorted = merged.sorted { $0.start < $1.start }
+        guard sorted != bookings else { return }
+        bookings = sorted
         save()
     }
 

@@ -51,7 +51,7 @@ enum PushClient {
         }
     }
 
-    private static func endpoint(_ path: String) -> URL? {
+    static func endpoint(_ path: String) -> URL? {
         var base = serverURL
         if !base.hasPrefix("http") { base = "https://" + base }
         while base.hasSuffix("/") { base.removeLast() }
@@ -73,6 +73,7 @@ enum PushClient {
         if let t = f.departure.terminal { p["terminal"] = t }
         if let c = f.arrival.coordinate { p["toLat"] = c.latitude; p["toLon"] = c.longitude }
         if let fa = f.faFlightID { p["faFlightID"] = fa }
+        if let share = f.shareToken { p["share"] = share }
         return p
     }
 

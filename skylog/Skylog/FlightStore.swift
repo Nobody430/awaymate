@@ -167,6 +167,7 @@ final class FlightStore {
 
     func add(_ flight: Flight) {
         var f = flight
+        f.modified = Date()
         if let i = flights.firstIndex(where: { Self.isSameFlight($0, f) }) {
             guard Self.quality(f) >= Self.quality(flights[i]) else { return }   // keep the better existing entry
             f.id = flights[i].id
@@ -178,13 +179,26 @@ final class FlightStore {
         }
         save()
         Notifier.scheduleReminders(for: f)
+        DeviceSync.scheduleSync()
     }
 
     func update(_ flight: Flight) {
         guard let i = flights.firstIndex(where: { $0.id == flight.id }) else { return }
-        flights[i] = flight
+        var f = flight
+        f.modified = Date()
+        flights[i] = f
         save()
-        Task { await LiveFlight.update(flight) }
+        Task { await LiveFlight.update(f) }
+    }
+
+    /// Result of a sync with the other devices.
+    func replaceAll(_ merged: [Flight]) {
+        guard merged != flights else { return }
+        let before = Dictionary(uniqueKeysWithValues: flights.map { ($0.id, $0) })
+        for f in flights where !merged.contains(where: { $0.id == f.id }) { Notifier.cancelReminders(for: f) }
+        flights = merged
+        save()
+        for f in merged where before[f.id] != f { Notifier.scheduleReminders(for: f) }
     }
 
     func delete(_ ids: [UUID]) {
@@ -192,6 +206,7 @@ final class FlightStore {
         flights.removeAll { ids.contains($0.id) }
         for id in ids { attempts[id] = nil; inboundAttempts[id] = nil; positionQueries[id] = nil }
         save()
+        DeviceSync.noteDeleted(ids)
     }
 
     /// Flights without times and without resolvable airports (typically false matches from mail import).
@@ -210,6 +225,7 @@ final class FlightStore {
     }
 
     func deleteAll() {
+        DeviceSync.noteDeleted(flights.map(\.id))
         flights.forEach { Notifier.cancelReminders(for: $0) }
         flights = []
         save()

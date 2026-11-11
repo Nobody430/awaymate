@@ -16,8 +16,8 @@ final class TravelMode: NSObject, CLLocationManagerDelegate {
     override init() {
         super.init()
         manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyThreeKilometers
-        manager.distanceFilter = 1000
+        manager.desiredAccuracy = kCLLocationAccuracyReduced      // coarse position is enough and saves battery
+        manager.distanceFilter = 3000
         manager.pausesLocationUpdatesAutomatically = false
         manager.activityType = .otherNavigation
     }
@@ -61,7 +61,11 @@ final class TravelMode: NSObject, CLLocationManagerDelegate {
             while !Task.isCancelled {
                 await store.refreshActive(notify: true)
                 guard let self, !self.flightsInWindow(store).isEmpty else { break }
-                try? await Task.sleep(for: .seconds(60))
+                // In the air (usually no network) there is nothing to gain from checking every minute
+                let cruising = self.flightsInWindow(store).allSatisfy { f in
+                    f.isInAir && (f.arrival.best.map { $0.timeIntervalSinceNow > 45 * 60 } ?? true)
+                }
+                try? await Task.sleep(for: .seconds(cruising ? 600 : 60))
             }
             self?.stop()
         }

@@ -38,6 +38,8 @@ struct Trip: Identifiable, Codable, Hashable {
     var notes = ""
     var packing: [PackItem] = Trip.defaultPacking()
     var plan: TripPlan? = nil
+    /// Last change on any device (for the sync between devices)
+    var modified: Date? = nil
 
     static func defaultPacking() -> [PackItem] {
         [String(localized: "Pass / ID"), String(localized: "Handy-Ladekabel"), String(localized: "Powerbank"), String(localized: "Kopfhörer"),
@@ -72,14 +74,26 @@ final class TripStore {
         try? e.encode(trips).write(to: file, options: .atomic)
     }
 
-    func upsert(_ t: Trip) {
+    func upsert(_ trip: Trip) {
+        var t = trip
+        t.modified = Date()
         if let i = trips.firstIndex(where: { $0.id == t.id }) { trips[i] = t } else { trips.append(t) }
         trips.sort { $0.start > $1.start }
         save()
+        DeviceSync.scheduleSync()
     }
 
     func delete(_ ids: [UUID]) {
         trips.removeAll { ids.contains($0.id) }
+        save()
+        DeviceSync.noteDeleted(ids)
+    }
+
+    /// Result of a sync with the other devices.
+    func replaceAll(_ merged: [Trip]) {
+        let sorted = merged.sorted { $0.start > $1.start }
+        guard sorted != trips else { return }
+        trips = sorted
         save()
     }
 
@@ -94,17 +108,28 @@ final class TripStore {
     func suggestions(from store: FlightStore) -> [Trip] {
         let covered = Set(trips.flatMap { flights(for: $0, in: store).map(\.id) })
         let free = store.flights.filter { !covered.contains($0.id) }.sorted { $0.sortDate < $1.sortDate }
+        let home = HotelRoute.homeAirport
         var groups: [[Flight]] = []
+        var closed = true
         for f in free {
-            if let last = groups.last?.last, f.sortDate.timeIntervalSince(last.sortDate) < 21 * 86400 {
+            if !closed, let last = groups.last?.last, f.sortDate.timeIntervalSince(last.sortDate) < 21 * 86400 {
                 groups[groups.count - 1].append(f)
             } else {
                 groups.append([f])
             }
+            // back home (or back where the trip started): the trip is complete, the next flight starts a new one
+            let origin = groups[groups.count - 1][0].departure.code
+            closed = f.arrival.code == origin || (!home.isEmpty && f.arrival.code == home)
         }
         return groups.map { g in
-            let destination = g.count > 1 ? g[g.count / 2 - (g.count % 2 == 0 ? 1 : 0)].arrival.displayCity : g[0].arrival.displayCity
-            return Trip(name: destination, start: g.first!.sortDate, end: g.last!.arrival.best ?? g.last!.sortDate)
+            // name: where you stayed longest (largest gap between landing and the next departure), not just the middle flight
+            var best = g[0].arrival.displayCity
+            var longest: TimeInterval = -1
+            for (i, f) in g.enumerated() where i + 1 < g.count {
+                let stay = g[i + 1].sortDate.timeIntervalSince(f.arrival.best ?? f.sortDate)
+                if stay > longest && f.arrival.code != g[0].departure.code { longest = stay; best = f.arrival.displayCity }
+            }
+            return Trip(name: best, start: g.first!.sortDate, end: g.last!.arrival.best ?? g.last!.sortDate)
         }
     }
 }

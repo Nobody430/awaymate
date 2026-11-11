@@ -217,6 +217,10 @@ struct Flight: Identifiable, Codable, Hashable {
     var inbound: InboundFlight? = nil
     /// Departure time the user was last told about (so creeping delays are noticed)
     var lastNotifiedDeparture: Date? = nil
+    /// Last change on any device (for the sync between devices)
+    var modified: Date? = nil
+    /// Random id of the public status link shared with family & friends (nil = not shared)
+    var shareToken: String? = nil
     /// Booking code (PNR) from the mail – links re-bookings to the flight they replace
     var bookingReference: String? = nil
     /// For a suggestion from a re-booking mail: the stored flight it replaces

@@ -30,8 +30,10 @@ struct SkylogApp: App {
             switch phase {
             case .background:
                 BackgroundRefresh.schedule()
+                Task { await DeviceSync.sync() }
             case .active:
                 Task {
+                    await DeviceSync.sync()
                     await store.refreshActive()
                     TravelMode.shared.evaluate(store)
                     await MailWatcher.check(store: store)

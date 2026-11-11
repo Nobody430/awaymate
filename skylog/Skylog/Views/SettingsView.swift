@@ -30,6 +30,8 @@ struct SettingsView: View {
     @State private var confirmWipe = false
     @State private var message: String?
     @AppStorage("calendarSync") private var calendarSync = false
+    @AppStorage("deviceSync") private var deviceSync = false
+    @State private var syncStatus: String?
     @State private var exportFile: URL?
     @State private var confirmDupes = false
     @State private var confirmJunk = false
@@ -174,13 +176,24 @@ struct SettingsView: View {
                     }
                     .disabled(pushServerURL.isEmpty || pushServerToken.isEmpty)
                     if let s = pushStatus ?? PushClient.lastStatus { Text(s).font(.caption).foregroundStyle(.secondary) }
+                    Toggle("Geräte abgleichen (iPhone, iPad)", isOn: $deviceSync)
+                        .disabled(pushServerURL.isEmpty || pushServerToken.isEmpty)
+                        .onChange(of: deviceSync) { _, on in
+                            if on { Task { await DeviceSync.sync(); syncStatus = DeviceSync.lastStatus } }
+                        }
+                    if deviceSync {
+                        Button("Jetzt abgleichen") {
+                            Task { await DeviceSync.sync(); syncStatus = DeviceSync.lastStatus }
+                        }
+                        if let s = syncStatus ?? DeviceSync.lastStatus { Text(s).font(.caption).foregroundStyle(.secondary) }
+                    }
                     NavigationLink { KeyGuideView(guide: .pushServer) } label: {
                         Label("So richtest du den Server ein", systemImage: "questionmark.circle")
                     }
                 } header: {
                     Text("Echtzeit-Pushs (eigener Server)")
                 } footer: {
-                    Text("Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys.")
+                    Text("Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen.")
                 }
 
                 Section {

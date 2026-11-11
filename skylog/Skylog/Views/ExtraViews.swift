@@ -81,6 +81,29 @@ struct AircraftSeatCard: View {
 
 struct FamilyCard: View {
     let flight: Flight
+    @Environment(FlightStore.self) private var store
+
+    /// Public status page on the user's own server (only with a push server).
+    private var statusLink: URL? {
+        guard let token = flight.shareToken else { return nil }
+        return PushClient.endpoint("/s/" + token)
+    }
+
+    private func createLink() {
+        guard var f = store.flight(flight.id), f.shareToken == nil else { return }
+        // 32 random characters – the link can't be guessed
+        let alphabet = Array("ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789")
+        f.shareToken = String((0..<32).map { _ in alphabet[Int.random(in: 0..<alphabet.count)] })
+        store.update(f)
+        PushClient.scheduleSync()
+    }
+
+    private func removeLink() {
+        guard var f = store.flight(flight.id) else { return }
+        f.shareToken = nil
+        store.update(f)
+        PushClient.scheduleSync()
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -96,6 +119,29 @@ struct FamilyCard: View {
                     }
                     .font(.subheadline)
                 }
+            }
+            if PushClient.isConfigured && !flight.isPast {
+                Divider()
+                if let link = statusLink {
+                    Text("Dein Status-Link zeigt Zeiten, Gate und Verspätung immer aktuell – ohne App, in der Sprache des Empfängers.")
+                        .font(.caption).foregroundStyle(.secondary)
+                    HStack {
+                        ShareLink(item: link, message: Text("Mein Flug \(flight.number) live:")) {
+                            Label("Status-Link teilen", systemImage: "link").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        Button(role: .destructive) { removeLink() } label: { Image(systemName: "xmark.circle") }
+                            .buttonStyle(.bordered)
+                    }
+                } else {
+                    Button { createLink() } label: {
+                        Label("Status-Link erstellen", systemImage: "link.badge.plus").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    Text("Erstellt eine Seite auf deinem Server, die den Flugstatus live zeigt. Wer den Link hat, kann sie sehen.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                Divider()
             }
             let message = FamilyShare.statusMessage(flight)
             HStack {
