@@ -126,6 +126,7 @@
 "Abgleich abgebrochen: das Ergebnis hätte zu viele Flüge entfernt." = "Synchronisation interrompue : le résultat aurait supprimé trop de vols.";
 "Abgleich fehlgeschlagen: %@" = "Échec de la synchronisation : %@";
 "Abgleich im Moment nicht möglich – bitte später nochmal." = "Synchronisation impossible pour le moment – réessaie plus tard.";
+"Ablauf" = "Déroulement";
 "Achtung: %lld V – Ladegeräte sind meist ok, Föhn/Glätteisen aus der Schweiz oft nicht." = "Attention : %lld V – les chargeurs passent en général, les sèche-cheveux/lisseurs venant de Suisse souvent pas.";
 "Achtung: Ein ChatGPT-Abo (Plus/Pro) gilt NICHT für die API. Die API wird separat über Guthaben abgerechnet." = "Attention : un abonnement ChatGPT (Plus/Pro) ne vaut PAS pour l'API. L'API est facturée séparément, sur du crédit.";
 "Adresse" = "Adresse";

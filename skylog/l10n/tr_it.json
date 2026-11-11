@@ -752,7 +752,8 @@
   "Keine Flüge im Kalender gefunden.": "Nessun volo trovato nel calendario.",
   "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld volo/i trovato/i nel calendario – controlla e importa.",
   "Kalender: %@": "Calendario: %@",
-  "Diagnose-Protokoll teilen": "Condividi registro diagnostico"
+  "Diagnose-Protokoll teilen": "Condividi registro diagnostico",
+  "Ablauf": "Programma"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

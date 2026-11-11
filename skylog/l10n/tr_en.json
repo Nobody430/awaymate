@@ -752,7 +752,8 @@
   "Keine Flüge im Kalender gefunden.": "No flights found in the calendar.",
   "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld flight(s) found in the calendar – review and import.",
   "Kalender: %@": "Calendar: %@",
-  "Diagnose-Protokoll teilen": "Share diagnostic log"
+  "Diagnose-Protokoll teilen": "Share diagnostic log",
+  "Ablauf": "Itinerary"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

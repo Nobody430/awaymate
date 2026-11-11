@@ -126,6 +126,7 @@
 "Abgleich abgebrochen: das Ergebnis hätte zu viele Flüge entfernt." = "Sincronización cancelada: el resultado habría eliminado demasiados vuelos.";
 "Abgleich fehlgeschlagen: %@" = "Error de sincronización: %@";
 "Abgleich im Moment nicht möglich – bitte später nochmal." = "La sincronización no es posible ahora – inténtalo más tarde.";
+"Ablauf" = "Itinerario";
 "Achtung: %lld V – Ladegeräte sind meist ok, Föhn/Glätteisen aus der Schweiz oft nicht." = "Atención: %lld V – los cargadores suelen funcionar; los secadores y planchas de pelo de Suiza, a menudo no.";
 "Achtung: Ein ChatGPT-Abo (Plus/Pro) gilt NICHT für die API. Die API wird separat über Guthaben abgerechnet." = "Atención: una suscripción a ChatGPT (Plus/Pro) NO sirve para la API. La API se factura aparte mediante saldo.";
 "Adresse" = "Dirección";

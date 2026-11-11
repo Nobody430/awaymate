@@ -752,7 +752,8 @@
   "Keine Flüge im Kalender gefunden.": "Aucun vol trouvé dans le calendrier.",
   "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld vol(s) trouvé(s) dans le calendrier – vérifie et importe.",
   "Kalender: %@": "Calendrier : %@",
-  "Diagnose-Protokoll teilen": "Partager le journal de diagnostic"
+  "Diagnose-Protokoll teilen": "Partager le journal de diagnostic",
+  "Ablauf": "Déroulement"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Aucun vol prévu",

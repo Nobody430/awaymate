@@ -338,6 +338,46 @@ struct TripEditor: View {
     }
 }
 
+/// One row of a trip's timeline – a flight or a booking – in the order they happen: flight, hotel, flight, hotel …
+private enum TripStep: Identifiable {
+    case flight(Flight)
+    case booking(TravelBooking)
+
+    var id: UUID {
+        switch self {
+        case .flight(let f): f.id
+        case .booking(let b): b.id
+        }
+    }
+
+    private static func day(_ date: Date, _ tz: TimeZone) -> Int {
+        Int(floor((date.timeIntervalSince1970 + Double(tz.secondsFromGMT(for: date))) / 86400))
+    }
+
+    static func timeline(flights: [Flight], bookings: [TravelBooking]) -> [TripStep] {
+        var rows: [(at: Date, rank: Int, step: TripStep)] = flights.map {
+            (at: $0.departure.best ?? $0.sortDate, rank: 0, step: TripStep.flight($0))
+        }
+        for b in bookings {
+            var at = b.start
+            if b.kind == .hotel {
+                // A stay follows the last flight that lands on the check-in day (or shortly after midnight the next day).
+                let checkIn = day(b.start, .current)
+                let landings = flights.compactMap { f -> Date? in
+                    guard let arr = f.arrival.best ?? f.arrival.scheduled else { return nil }
+                    let d = day(arr, f.arrival.tz)
+                    let hour = Calendar.current.dateComponents(in: f.arrival.tz, from: arr).hour ?? 12
+                    return d == checkIn || (d == checkIn + 1 && hour < 6) ? arr : nil
+                }
+                at = landings.max()?.addingTimeInterval(60)
+                    ?? Calendar.current.date(bySettingHour: 15, minute: 0, second: 0, of: b.start) ?? b.start
+            }
+            rows.append((at: at, rank: 1, step: TripStep.booking(b)))
+        }
+        return rows.sorted { $0.at != $1.at ? $0.at < $1.at : $0.rank < $1.rank }.map { $0.step }
+    }
+}
+
 struct TripDetailView: View {
     @Environment(FlightStore.self) private var flights
     @State private var store = TripStore.shared
@@ -363,20 +403,23 @@ struct TripDetailView: View {
                         Label(trip.plan == nil ? String(localized: "Reise mit KI planen") : String(localized: "Plan neu erstellen"), systemImage: "sparkles")
                     }
                 }
-                Section("Flüge") {
-                    let list = store.flights(for: trip, in: flights)
-                    if list.isEmpty { Text("Keine Flüge in diesem Zeitraum.").foregroundStyle(.secondary) }
-                    ForEach(list) { f in
-                        NavigationLink { FlightDetailView(flightID: f.id) } label: { FlightCard(flight: f) }
-                            .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
-                            .listRowBackground(Color.clear)
-                    }
-                }
-                let stays = bookingStore.bookings(for: trip)
-                if !stays.isEmpty {
-                    Section("Unterkünfte & Buchungen") {
-                        ForEach(stays) { BookingRow(booking: $0) }
-                            .onDelete { idx in bookingStore.delete(idx.map { stays[$0].id }) }
+                Section("Ablauf") {
+                    let steps = TripStep.timeline(flights: store.flights(for: trip, in: flights), bookings: bookingStore.bookings(for: trip))
+                    if steps.isEmpty { Text("Keine Flüge in diesem Zeitraum.").foregroundStyle(.secondary) }
+                    ForEach(steps) { step in
+                        switch step {
+                        case .flight(let f):
+                            NavigationLink { FlightDetailView(flightID: f.id) } label: { FlightCard(flight: f) }
+                                .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                                .listRowBackground(Color.clear)
+                        case .booking(let b):
+                            BookingRow(booking: b)
+                                .swipeActions {
+                                    Button(role: .destructive) { bookingStore.delete([b.id]) } label: {
+                                        Label("Löschen", systemImage: "trash")
+                                    }
+                                }
+                        }
                     }
                 }
                 Section("Packliste \(trip.packing.filter(\.done).count)/\(trip.packing.count)") {

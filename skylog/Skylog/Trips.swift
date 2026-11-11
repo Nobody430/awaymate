@@ -131,6 +131,8 @@ final class TripStore {
             }
             return Trip(name: best, start: g.first!.sortDate, end: g.last!.arrival.best ?? g.last!.sortDate)
         }
+        // only trips that are still ahead or running – past flights need no suggestion
+        .filter { $0.end >= Date() }
     }
 }
 
