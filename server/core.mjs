@@ -194,6 +194,20 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     return null;
   }
 
+  /** Same networks, looked up by the aircraft's transponder code (works when the callsign differs). */
+  async function adsbHex(hex) {
+    if (!/^[0-9a-f]{6}$/i.test(hex)) return null;
+    for (const base of ["https://api.adsb.lol/v2/hex/", "https://api.airplanes.live/v2/hex/"]) {
+      try {
+        const r = await fetch(base + hex.toLowerCase(), { headers: { "User-Agent": "Skylog push server (personal)" }, signal: AbortSignal.timeout(8000) });
+        if (!r.ok) continue;
+        const ac = ((await r.json()).ac || [])[0];
+        if (ac && ac.lat != null) return { lat: ac.lat, lon: ac.lon, onGround: ac.alt_baro === "ground", gs: ac.gs, alt: ac.alt_baro, track: ac.track ?? ac.true_heading ?? null, rate: ac.baro_rate ?? ac.geom_rate ?? null };
+      } catch {}
+    }
+    return null;
+  }
+
   async function flightAware(f, key) {
     if (!key) return null;
     try {
@@ -265,8 +279,9 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     }
 
     // Free ADS-B: from 15 min before departure while not landed (every loop = 1 min)
-    if (f.callsign && now > dep - 15 * MIN && !snap.landed) {
-      let p = await adsb(f.callsign);
+    if ((f.callsign || f.icao24) && now > dep - 15 * MIN && !snap.landed) {
+      let p = f.callsign ? await adsb(f.callsign) : null;
+      if (!p && f.icao24) p = await adsbHex(f.icao24);
       // ignore the 0°/0° placeholder and fixes far off the route (another aircraft with the same callsign)
       const sane = p && (Math.abs(p.lat) > 0.05 || Math.abs(p.lon) > 0.05) &&
         (f.fromLat == null || f.toLat == null ||
@@ -285,6 +300,22 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         snap.inAir = false; snap.landed = true; snap.statusKey = "landed";
         msgs.push([L("landedTitle", f.number), L("landedBody", f.toCity || f.to)]);
       }
+    }
+
+    // Paid fallback, only for flights shared via status link: FlightAware's last position (at most every 5 min)
+    if (f.share && faKey && f.faFlightID && snap.inAir && !snap.landed &&
+        !(snap.pos && now - snap.pos.t < 5 * MIN) && now - (snap.faPosAt || 0) > 5 * MIN) {
+      snap.faPosAt = now;
+      try {
+        const r = await fetch(`https://aeroapi.flightaware.com/aeroapi/flights/${encodeURIComponent(f.faFlightID)}/position`,
+                              { headers: { "x-apikey": faKey }, signal: AbortSignal.timeout(15000) });
+        const lp = r.ok ? (await r.json()).last_position : null;
+        if (lp && lp.latitude != null) {
+          snap.pos = { lat: lp.latitude, lon: lp.longitude, track: lp.heading ?? null, ground: false, t: Date.parse(lp.timestamp) || now,
+                       altFt: lp.altitude != null ? lp.altitude * 100 : null, kt: lp.groundspeed ?? null,
+                       fpm: lp.altitude_change === "C" ? 500 : lp.altitude_change === "D" ? -500 : 0 };
+        }
+      } catch (e) { log("fa pos", e.message); }
     }
 
     // Change notifications
@@ -453,11 +484,16 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     const planned = (iso, tz, m) => (iso && Math.abs(m) >= 5 ? `<span class="was">${esc(fmtTime(iso, tz, lang))}</span> ` : "");
     const gate = snap.landed || snap.inAir ? snap.arrGate : (snap.gate || f.gate);
     const terminal = snap.landed || snap.inAir ? null : (snap.terminal || f.terminal);
+    // Live position: the newer of this server's own fix and the one the app sent with its last sync
+    const onRoute = (p) => p && typeof p.lat === "number" && typeof p.lon === "number" && (Math.abs(p.lat) > 0.05 || Math.abs(p.lon) > 0.05) &&
+      (f.fromLat == null || f.toLat == null ||
+       distKm({ lat: f.fromLat, lon: f.fromLon }, p) + distKm(p, { lat: f.toLat, lon: f.toLon }) < distKm({ lat: f.fromLat, lon: f.fromLon }, { lat: f.toLat, lon: f.toLon }) * 1.6 + 400);
+    const bestPos = [snap.pos, f.pos].filter((p) => onRoute(p) && !p.ground && Date.now() - p.t < 20 * MIN).sort((a, b) => b.t - a.t)[0] || null;
     // Map: route, and the plane at its live position (ADS-B) or estimated along the route while in the air
     let map = "", mapNote = "";
     if (f.fromLat != null && f.toLat != null) {
       const nowMs = Date.now(), depMs = Date.parse(dep), arrMs = Date.parse(arr);
-      const livePos = snap.pos && !snap.pos.ground && nowMs - snap.pos.t < 20 * MIN ? snap.pos : null;
+      const livePos = bestPos;
       const airborne = snap.inAir || ["departed", "enRoute", "approaching"].includes(f.state);
       const frac = snap.landed ? 1 : airborne && arrMs > depMs ? Math.min(1, Math.max(0, (nowMs - depMs) / (arrMs - depMs))) : 0;
       const data = { from: [f.fromLat, f.fromLon], to: [f.toLat, f.toLon], pos: livePos ? [livePos.lat, livePos.lon] : null,
@@ -471,7 +507,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     }
     // Flight data while airborne (from the live position)
     let flightTiles = "";
-    const lp = snap.pos && !snap.pos.ground && Date.now() - snap.pos.t < 20 * MIN && !snap.landed ? snap.pos : null;
+    const lp = snap.landed ? null : bestPos;
     if (lp) {
       const num = (n) => Math.round(n).toLocaleString(LOCALES[lang] || "de-CH");
       const ft = (label, value, sub) => `<div class="tile"><span class="muted">${esc(label)}</span><b>${esc(value)}</b>${sub ? `<span class="muted">${esc(sub)}</span>` : ""}</div>`;

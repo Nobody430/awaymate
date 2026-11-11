@@ -80,6 +80,16 @@ enum PushClient {
         if let c = f.departure.coordinate { p["fromLat"] = c.latitude; p["fromLon"] = c.longitude }
         if let fa = f.faFlightID { p["faFlightID"] = fa }
         if let share = f.shareToken { p["share"] = share }
+        if let hex = f.icao24, !hex.isEmpty { p["icao24"] = hex.lowercased() }
+        // what the app itself sees right now – the status page shows the newer of this and the server's own data
+        if let pos = f.livePosition, f.isInAir {
+            var q: [String: Any] = ["lat": pos.lat, "lon": pos.lon, "t": Int(pos.timestamp.timeIntervalSince1970 * 1000), "ground": pos.onGround]
+            if let a = pos.altitudeM { q["altFt"] = a / 0.3048 }
+            if let v = pos.speedKmh { q["kt"] = v / 1.852 }
+            if let h = pos.heading { q["track"] = h }
+            if let r = pos.verticalRate { q["fpm"] = r * 196.85 }
+            p["pos"] = q
+        }
         return p
     }
 
