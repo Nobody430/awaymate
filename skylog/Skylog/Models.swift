@@ -238,6 +238,15 @@ struct Flight: Identifiable, Codable, Hashable {
     /// The aircraft's previous legs, newest first ("Wo ist mein Flugzeug?")
     var planeLegs: [InboundFlight]? = nil
 
+    /// Airline codes that were reassigned: the data source still returns the previous owner's name.
+    private static let airlineNameFixes: [String: String] = ["QP": "Akasa Air"]
+
+    /// Corrects a known outdated airline name (by the code in the flight number).
+    mutating func fixAirlineName() {
+        let code = String(number.replacingOccurrences(of: " ", with: "").uppercased().prefix(2))
+        if let name = Self.airlineNameFixes[code] { airlineName = name }
+    }
+
     mutating func log(_ text: String, at date: Date = Date()) {
         var list = updates ?? []
         if list.last?.text == text { return }

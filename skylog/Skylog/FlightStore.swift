@@ -168,6 +168,7 @@ final class FlightStore {
     func add(_ flight: Flight) {
         var f = flight
         f.modified = Date()
+        f.fixAirlineName()
         if let i = flights.firstIndex(where: { Self.isSameFlight($0, f) }) {
             guard Self.quality(f) >= Self.quality(flights[i]) else { return }   // keep the better existing entry
             f.id = flights[i].id
@@ -276,6 +277,7 @@ final class FlightStore {
         new.date = cur.date
         new.inbound = cur.inbound
         new.lastUpdated = Date()
+        new.fixAirlineName()
         // No fresh airport data this time: keep the airport's gate instead of flipping back to the other source's
         if picked.adbGate == nil, let g = cur.adbGate, new.departure.runway == nil {
             new.gateConflict = (picked.departure.gate != nil && picked.departure.gate != g) ? picked.departure.gate : nil

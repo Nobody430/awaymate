@@ -363,7 +363,8 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         `<meta name="robots" content="noindex,nofollow">${refresh ? '<meta http-equiv="refresh" content="60">' : ""}<title>${esc(P("title"))}</title>` +
         `<style>:root{color-scheme:light dark}body{margin:0;font:16px/1.4 -apple-system,system-ui,sans-serif;background:#0b1220;color:#f2f4f8}` +
         `main{max-width:460px;margin:0 auto;padding:24px 16px}.card{background:#172033;border-radius:18px;padding:20px;margin-bottom:14px}` +
-        `.top{display:flex;justify-content:space-between;align-items:center;font-weight:600}.status{color:#7fb0ff}.late{color:#ffb454}` +
+        `.top{display:flex;justify-content:space-between;align-items:center;font-weight:600}.status{color:#7fb0ff}.late{color:#ffb454}.bad{color:#ff6b6b}` +
+        `.time.ok{color:#f2f4f8}.was{font-size:14px;font-weight:500;color:#93a0b8;text-decoration:line-through}.lbl{margin-top:10px}` +
         `.route{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}.code{font-size:34px;font-weight:800;line-height:1}` +
         `.time{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}.muted{color:#93a0b8;font-size:13px}.right{text-align:right}` +
         `.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tile{background:#172033;border-radius:14px;padding:12px}` +
@@ -374,17 +375,26 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     const dep = snap.dep || f.dep, arr = snap.arr || f.arr;
     // statusKey = set by this server (translated here); otherwise the label the app sent
     const status = snap.statusKey ? t(lang, snap.statusKey) : (snap.statusLabel || f.statusLabel || t(lang, "scheduled"));
-    const delay = Math.max(0, snap.delay || 0);
+    const mins = (a, b) => (a && b ? Math.round((Date.parse(a) - Date.parse(b)) / 60000) : 0);
+    // delay against the originally planned time (the app sends it); fall back to what FlightAware reported
+    const delay = Math.max(0, f.depPlanned ? mins(dep, f.depPlanned) : (snap.delay || 0));
+    const arrDelay = f.arrPlanned ? mins(arr, f.arrPlanned) : 0;
+    const late = delay >= 5 && !snap.inAir && !snap.landed;
+    const cls = (m) => (m >= 15 ? "bad" : m >= 5 ? "late" : "ok");
+    const planned = (iso, tz, m) => (iso && Math.abs(m) >= 5 ? `<span class="was">${esc(fmtTime(iso, tz, lang))}</span> ` : "");
     const gate = snap.landed || snap.inAir ? snap.arrGate : (snap.gate || f.gate);
     const terminal = snap.landed || snap.inAir ? null : (snap.terminal || f.terminal);
     const tile = (label, value) => (value ? `<div class="tile"><span class="muted">${esc(label)}</span><b>${esc(value)}</b></div>` : "");
     const tiles = tile(P("terminal"), terminal) + tile(P("gate"), gate) + tile(P("belt"), snap.landed || snap.inAir ? snap.belt : null);
     const updated = fmtTime(new Date(snap.faAt || Date.parse(dev_updated(f)) || Date.now()).toISOString(), f.depTz, lang);
     const body =
-      `<div class="card"><div class="top"><span>${esc(f.number)}</span><span class="${delay >= 5 && !snap.inAir && !snap.landed ? "late" : "status"}">` +
-      `${esc(status)}${delay >= 5 && !snap.inAir && !snap.landed ? " · " + esc(P("delay", delay)) : ""}</span></div>` +
-      `<div class="route"><div><div class="code">${esc(f.from)}</div><div class="muted">${esc(P("dep"))}</div><div class="time">${esc(fmtTime(dep, f.depTz, lang))}</div></div>` +
-      `<div class="right"><div class="code">${esc(f.to)}</div><div class="muted">${esc(f.toCity || P("arr"))}</div><div class="time">${esc(fmtTime(arr, f.arrTz, lang))}</div></div></div>` +
+      // a delayed flight shows the delay instead of a contradicting "on time"
+      `<div class="card"><div class="top"><span>${esc(f.number)}</span><span class="${late ? cls(delay) : "status"}">` +
+      `${late ? esc(P("delay", delay)) : esc(status)}</span></div>` +
+      `<div class="route"><div><div class="code">${esc(f.from)}</div><div class="muted">${esc(f.fromCity || "")}</div>` +
+      `<div class="muted lbl">${esc(P("dep"))}</div><div class="time ${cls(delay)}">${planned(f.depPlanned, f.depTz, delay)}${esc(fmtTime(dep, f.depTz, lang))}</div></div>` +
+      `<div class="right"><div class="code">${esc(f.to)}</div><div class="muted">${esc(f.toCity || "")}</div>` +
+      `<div class="muted lbl">${esc(P("arr"))}</div><div class="time ${cls(arrDelay)}">${planned(f.arrPlanned, f.arrTz, arrDelay)}${esc(fmtTime(arr, f.arrTz, lang))}</div></div></div>` +
       `<p class="muted">${esc(P("local"))} · ${esc(P("updated", updated))}</p></div>` +
       (tiles ? `<div class="grid">${tiles}</div><p></p>` : "") + `<p class="muted">${esc(P("reload"))}</p>`;
     return page(body, true);
