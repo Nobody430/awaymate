@@ -40,5 +40,18 @@ Sind diese gesetzt, sendet auch der eigene Server direkt an Apple.
 
 ## Schnittstelle
 
-`GET /health` · `POST /sync` · `POST /test` (jeweils mit `Authorization: Bearer <SERVER_TOKEN>`).
+Mit `Authorization: Bearer <SERVER_TOKEN>`:
+
+| Aufruf | Zweck |
+|---|---|
+| `GET /health` | Zustand (ohne Passwort) |
+| `POST /sync` | die App meldet Gerät, Sprache, anstehende Flüge, Live-Aktivitäts-Tokens und optional den FlightAware-Key |
+| `POST /test` | Test-Mitteilung |
+| `GET /data`, `PUT /data` | ein Dokument für den Abgleich zwischen den eigenen Geräten; `PUT` mit `rev`, bei veralteter `rev` Antwort 409 mit dem aktuellen Stand – zusammengeführt wird in der App |
+
+Ohne Passwort: `GET /s/<Code>` – die Status-Seite eines geteilten Flugs (HTML, Sprache nach `Accept-Language`,
+Karte mit Leaflet/OpenStreetMap, aktualisiert sich jede Minute). Der Code ist 20–64 zufällige Zeichen, die die App erzeugt.
+
+Mitteilungen und Status-Seite gibt es auf Deutsch, Englisch, Französisch, Italienisch und Spanisch (`core.mjs`, `TEXTS` und `PAGE`).
+
 Relay: `GET /health` · `POST /push` mit `{deviceToken, payload, type}`; sendet ausschliesslich an die Skylog-App.

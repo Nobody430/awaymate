@@ -42,7 +42,7 @@ The app is available in German, English, French, Italian and Spanish.*
 - Reisen werden aus den Flügen vorgeschlagen; Hotels, Mietwagen, Züge aus Mails werden zugeordnet.
 - Weg Flughafen ↔ Hotel mit ÖV- und Taxi-Zeit und „Losgehen spätestens …“.
 - Reisetag-Plan (am Flughafen sein, Gepäckaufgabe, Boarding, Abflug, Landung, Gepäck) mit automatischem Puffer.
-- Lage am Abflughafen: Wetter zur Abflugzeit, allgemeine Verspätungen.
+- Lage am Abflughafen: Wetter zur Abflugzeit; gemeldete Verspätungen am Flughafen (leicht / grösser, mit Grund).
 - Zielinfos: Ortszeit, Zeitverschiebung, Wetter bei Ankunft, Wechselkurs, Steckdosen.
 - Zug & Bus von und zur Heimat-Haltestelle (Schweiz).
 - KI-Reiseplan Tag für Tag und persönliche Packliste (optional mit Notizen aus einem Obsidian-Vault).
@@ -56,6 +56,11 @@ The app is available in German, English, French, Italian and Spanish.*
 - Rückblick als Bild zum Teilen, Pünktlichkeit pro Airline, Flugzeug-Sammlung, „Meine Flüge auf dieser Strecke“.
 - Entschädigung nach EU 261/2004: Einschätzung und Antragstext (Deutsch / Englisch).
 - Familie & Freunde informieren: Live-Links und Statusnachricht; Flug oder Reiseplan als PDF.
+- **Status-Link** (mit eigenem Push-Server): eine Seite im Browser, ohne App, in der Sprache des Empfängers –
+  Zeiten mit Verspätung, Gate, Terminal, Gepäckband, Live-Karte mit Flugzeugposition sowie Höhe, Geschwindigkeit
+  und Reststrecke während des Flugs. Der Link ist nicht erratbar und lässt sich wieder ungültig machen.
+- **Abgleich zwischen eigenen Geräten** (mit eigenem Push-Server): Flüge, Reisen und Buchungen bleiben auf iPhone
+  und iPad gleich. Dokumente und Keys werden nicht übertragen.
 - Export und Import aller Flüge als JSON.
 
 **Sprachen:** Deutsch, Englisch, Französisch, Italienisch, Spanisch (folgt der Sprache des iPhones).
@@ -98,6 +103,9 @@ Ohne Server aktualisiert sich Skylog, wenn die App offen ist oder iOS sie im Hin
 Live-Aktivität aktualisiert sich von selbst.
 
 - Läuft **gratis bei Cloudflare Workers** (oder als Docker-Container überall).
+- Schreibt Mitteilungen in der Sprache des iPhones (Deutsch, Englisch, Französisch, Italienisch, Spanisch).
+- Liefert zusätzlich die **Status-Seite** für Familie & Freunde (`/s/<zufälliger Code>`) und speichert das
+  Dokument für den **Abgleich zwischen den eigenen Geräten** (`/data`, nur mit dem Server-Passwort).
 - Nutzt den **eigenen** FlightAware-Key; ohne Key meldet er Start und Landung über ADS-B.
 - Mitteilungen gehen über ein **Relay** des App-Herausgebers an Apple (Apple nimmt sie nur vom Herausgeber an).
   Das Relay sieht weder Keys noch Fluglisten.
@@ -131,6 +139,9 @@ Mit eigenem Push-Server prüft dieser jede Minute.
 - Abfragen gehen direkt vom Gerät an die Dienste, deren Keys eingetragen sind.
 - Für die KI-Erkennung werden die Texte der Reise-Mails an den gewählten KI-Anbieter geschickt.
 - Der eigene Push-Server bekommt die anstehenden Flüge und – falls eingetragen – den FlightAware-Key.
+- Mit „Geräte abgleichen“ liegen Flüge, Reisen und Buchungen zusätzlich auf dem eigenen Server.
+- Ein Status-Link zeigt den betreffenden Flug jedem, der den Link hat; die Karte darauf lädt Kartenbilder von
+  OpenStreetMap und die Kartenbibliothek von unpkg.com.
 - Die Daten sind im normalen iPhone-Backup enthalten; zusätzlich gibt es den JSON-Export.
 
 ## Selbst bauen
@@ -160,6 +171,8 @@ Nötig ist ein Apple-Developer-Konto.
 | `Skylog/MailAI.swift`, `OutlookMail.swift`, `MailWatcher.swift` | Mail-Import mit KI, Abgleich von Umbuchungen und Stornos |
 | `Skylog/LiveFlight.swift`, `SkylogWidgets/` | Live-Aktivität und Widgets |
 | `Skylog/PushClient.swift`, `../server/`, `../relay/` | eigener Push-Server und Relay |
+| `Skylog/DeviceSync.swift` | Abgleich zwischen den eigenen Geräten über den eigenen Server |
+| `l10n/` | Übersetzungen als JSON, Prüfwerkzeug und Generator für die `.lproj`-Dateien |
 | `Skylog/Trips.swift`, `Bookings.swift`, `HotelRoute.swift`, `TripPlanner.swift` | Reisen, Buchungen, Weg zum Hotel, KI-Reiseplan |
 | `Skylog/Views/` | alle Ansichten; `KeyGuides.swift` enthält die Anleitungen in der App |
 | `Skylog/*.lproj/` | Übersetzungen (Schlüssel = deutscher Text) |
@@ -175,3 +188,9 @@ Flughafen-Datenbank: [mwgg/Airports](https://github.com/mwgg/Airports) (MIT, sie
 - **Hintergrund ohne Server:** iOS entscheidet, wie oft die App laufen darf. Zuverlässig sofort geht es nur mit
   dem eigenen Push-Server.
 - Die Gratis-Live-Daten sind für private, nicht-kommerzielle Nutzung gedacht.
+- **Verspätungen am Flughafen** liefert FlightAware nicht für alle Flughäfen; ausserhalb der USA bleibt die
+  Anzeige oft bei „keine Verspätungen“.
+- **Übersetzungen** sind maschinell erstellt und automatisch auf Vollständigkeit und Platzhalter geprüft, aber
+  nicht von Muttersprachlern gelesen. Korrekturen: `l10n/tr_<sprache>.json` ändern, `python3 l10n/validate.py <sprache>`
+  und `python3 l10n/write_strings.py . en fr it es` ausführen.
+- **Einheitliche Verspätungs-Skala:** unter 5 Min. pünktlich (grün), ab 5 Min. orange, ab 15 Min. rot.

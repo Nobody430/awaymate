@@ -5,7 +5,7 @@ Keine Abos, kein zentraler Dienst: Alle Keys werden in den Apps auf dem Gerät e
 
 | App | Ordner | Inhalt |
 |---|---|---|
-| ✈️ **Skylog** | [`skylog/`](skylog/README.md) | Flug- und Reise-App: Live-Status, Zubringer, Mail-Import mit KI, Reisen und Hotels, Live-Aktivität, optionaler eigener Push-Server. Deutsch, Englisch, Französisch, Italienisch, Spanisch. |
+| ✈️ **Skylog** | [`skylog/`](skylog/README.md) | Flug- und Reise-App: Live-Status, Zubringer, Mail-Import mit KI, Reisen und Hotels, Live-Aktivität, optionaler eigener Push-Server mit Status-Link (Live-Karte) für Familie & Freunde und Abgleich zwischen den eigenen Geräten. Deutsch, Englisch, Französisch, Italienisch, Spanisch. |
 | 💪 **Vital** | `vital/` | Training mit KI-Coach, Ernährung, Gewicht, Medikamenten-Erinnerung |
 | 💰 **Saldo** | `saldo/` | Finanzen: Apple-Pay-Erfassung, Bankimport, Budgets, Krypto |
 
