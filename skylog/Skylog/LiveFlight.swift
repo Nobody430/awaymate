@@ -114,7 +114,7 @@ enum LiveFlight {
         let now = Date()
         for a in Activity<FlightActivityAttributes>.activities where a.activityState == .active || a.activityState == .stale {
             let f = flights.first { $0.id.uuidString == a.attributes.flightID }
-                ?? flights.first { $0.number == a.attributes.flightNumber && $0.departure.code == a.attributes.from && !$0.isPast }
+                ?? flights.first { FlightStore.normalizedNumber($0.number) == FlightStore.normalizedNumber(a.attributes.flightNumber) && $0.departure.code == a.attributes.from && !$0.isPast }
             guard let f, let s = state(for: f) else {
                 await a.end(nil, dismissalPolicy: .immediate)
                 continue

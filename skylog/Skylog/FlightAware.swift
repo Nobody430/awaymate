@@ -349,7 +349,7 @@ enum FlightAware {
         else if (dep.delayMinutes ?? 0) >= 15 { status = "Delayed" }
         else { status = "Expected" }
 
-        var flight = Flight(number: fa.ident_iata ?? fallbackNumber, date: date, departure: dep, arrival: arr)
+        var flight = Flight(number: FlightStore.displayNumber(fa.ident_iata ?? fallbackNumber), date: date, departure: dep, arrival: arr)
         flight.callSign = fa.atc_ident ?? fa.ident
         flight.status = status
         flight.airlineIata = fa.operator_iata
@@ -435,7 +435,7 @@ enum FlightAware {
     private static func inbound(from fa: FAFlight) -> InboundFlight {
         let landed = fa.actual_on != nil || fa.actual_in != nil
         return InboundFlight(
-            number: fa.ident_iata ?? fa.ident ?? "?",
+            number: FlightStore.displayNumber(fa.ident_iata ?? fa.ident ?? "?"),
             fromCode: fa.origin?.code_iata ?? fa.origin?.code ?? "?",
             fromCity: fa.origin?.city,
             status: fa.cancelled == true ? "Canceled" : landed ? "Arrived" : fa.actual_off != nil ? "EnRoute" : nil,

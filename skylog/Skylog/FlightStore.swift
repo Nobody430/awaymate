@@ -141,6 +141,23 @@ final class FlightStore {
         return flights.contains { $0.date == d && Self.normalizedNumber($0.number) == n }
     }
 
+    /// One spelling for display: "lx092", "LX92", "LX 92" → "LX 92" (airline code, space, number without leading zeros).
+    nonisolated static func displayNumber(_ n: String) -> String {
+        let t = n.replacingOccurrences(of: " ", with: "").uppercased()
+        let rest = t.dropFirst(2)
+        guard t.count > 2, t.count <= 7, t.prefix(2).contains(where: \.isLetter),
+              let first = rest.first, first.isNumber,
+              rest.dropLast().allSatisfy(\.isNumber), rest.last.map({ $0.isNumber || $0.isLetter }) == true else { return n }
+        let digits = rest.drop { $0 == "0" }
+        return String(t.prefix(2)) + " " + (digits.isEmpty ? "0" : String(digits))
+    }
+
+    private static func tidied(_ flight: Flight) -> Flight {
+        var f = flight
+        f.number = displayNumber(f.number)
+        return f
+    }
+
     // MARK: Mutations
 
     /// "lx 092" → "LX92"
@@ -166,7 +183,7 @@ final class FlightStore {
     }
 
     func add(_ flight: Flight) {
-        var f = flight
+        var f = Self.tidied(flight)
         f.modified = Date()
         f.fixAirlineName()
         if let i = flights.firstIndex(where: { Self.isSameFlight($0, f) }) {
@@ -185,7 +202,7 @@ final class FlightStore {
 
     func update(_ flight: Flight) {
         guard let i = flights.firstIndex(where: { $0.id == flight.id }) else { return }
-        var f = flight
+        var f = Self.tidied(flight)
         f.modified = Date()
         flights[i] = f
         save()
@@ -194,6 +211,7 @@ final class FlightStore {
 
     /// Result of a sync with the other devices.
     func replaceAll(_ merged: [Flight]) {
+        let merged = merged.map(Self.tidied)
         guard merged != flights else { return }
         let before = Dictionary(uniqueKeysWithValues: flights.map { ($0.id, $0) })
         for f in flights where !merged.contains(where: { $0.id == f.id }) { Notifier.cancelReminders(for: f) }
@@ -532,7 +550,7 @@ final class FlightStore {
     private func load() {
         let loaded = SafeFile.load([Flight].self, from: fileURL, decoder: Self.decoder)
         writable = loaded.writable
-        flights = loaded.value ?? []
+        flights = (loaded.value ?? []).map(Self.tidied)
     }
 
     private func save() {
@@ -556,7 +574,7 @@ final class FlightStore {
         let imported = try Self.decoder.decode([Flight].self, from: data)
         var added = 0
         for f in imported where !flights.contains(where: { $0.id == f.id || Self.isSameFlight($0, f) }) {
-            flights.append(f)
+            flights.append(Self.tidied(f))
             added += 1
         }
         save()

@@ -79,7 +79,7 @@ struct ADBFlight: Decodable {
 
     func toFlight(fallbackNumber: String, date: String) -> Flight {
         var flight = Flight(
-            number: number ?? fallbackNumber,
+            number: FlightStore.displayNumber(number ?? fallbackNumber),
             date: date,
             departure: departure?.endpoint ?? FlightEndpoint(),
             arrival: arrival?.endpoint ?? FlightEndpoint()
