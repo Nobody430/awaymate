@@ -348,6 +348,8 @@ struct TripDetailView: View {
     @State private var bookingStore = BookingStore.shared
     @State private var packingBusy = false
     @State private var packingMessage: String?
+    @State private var editingBooking: TravelBooking?
+    @State private var addingBooking = false
 
     var body: some View {
         if let trip = store.trips.first(where: { $0.id == tripID }) {
@@ -374,7 +376,8 @@ struct TripDetailView: View {
                             case .step(.flight(let f)):
                                 NavigationLink { FlightDetailView(flightID: f.id) } label: { FlightCard(flight: f) }
                             case .step(.booking(let b)):
-                                StayCard(booking: b)
+                                Button { editingBooking = b } label: { StayCard(booking: b) }
+                                    .buttonStyle(.plain)
                                     .swipeActions {
                                         Button(role: .destructive) { bookingStore.delete([b.id]) } label: {
                                             Label("Löschen", systemImage: "trash")
@@ -385,6 +388,9 @@ struct TripDetailView: View {
                         .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
+                    }
+                    Button { addingBooking = true } label: {
+                        Label("Unterkunft oder Buchung hinzufügen", systemImage: "plus")
                     }
                 }
                 Section("Packliste \(trip.packing.filter(\.done).count)/\(trip.packing.count)") {
@@ -437,6 +443,8 @@ struct TripDetailView: View {
             .toolbar { Button("Bearbeiten") { editing = true } }
             .sheet(isPresented: $editing) { TripEditor(trip: trip) }
             .sheet(isPresented: $planning) { TripPlannerView(trip: trip) }
+            .sheet(item: $editingBooking) { BookingEditor(booking: $0) }
+            .sheet(isPresented: $addingBooking) { BookingEditor(start: max(trip.start, Date()) > trip.end ? trip.start : max(trip.start, Date())) }
         }
     }
 

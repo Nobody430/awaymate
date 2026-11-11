@@ -98,7 +98,10 @@ struct RootView: View {
             ImportView(initialFile: file.url)
         }
         .sheet(item: $attachFile) { file in
-            AttachDocumentView(url: file.url)
+            AttachDocumentView(url: file.url) {
+                // let the first sheet close before the import opens
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) { importFile = ImportFile(url: file.url) }
+            }
         }
     }
 }

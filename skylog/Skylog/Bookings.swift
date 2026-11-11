@@ -41,6 +41,8 @@ struct TravelBooking: Identifiable, Codable, Hashable {
     var cancelled = false
     /// Last change on any device (for the sync between devices)
     var modified: Date? = nil
+    /// Link to manage the booking (entered by hand; otherwise derived from the provider)
+    var manageURL: String? = nil
 
     var key: String { kind.rawValue + "|" + (bookingReference.isEmpty ? name.lowercased() : bookingReference.uppercased()) + "|" + Fmt.apiDate.string(from: start) }
     var nights: Int { max(0, Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: start), to: Calendar.current.startOfDay(for: end)).day ?? 0) }
@@ -84,6 +86,7 @@ final class BookingStore {
         if let i = bookings.firstIndex(where: { $0.key == b.key || (!b.bookingReference.isEmpty && $0.kind == b.kind && $0.bookingReference.uppercased() == b.bookingReference.uppercased()) }) {
             var updated = b
             updated.id = bookings[i].id
+            if updated.manageURL == nil { updated.manageURL = bookings[i].manageURL }   // keep what was entered by hand
             updated.modified = bookings[i].modified
             if updated == bookings[i] { return false }     // nothing new – no second notification
             updated.modified = Date()
@@ -97,6 +100,16 @@ final class BookingStore {
         save()
         DeviceSync.scheduleSync()
         return true
+    }
+
+    /// Saves a booking that was entered or edited by hand (matched by its id, not by name or code).
+    func store(_ booking: TravelBooking) {
+        var b = booking
+        b.modified = Date()
+        if let i = bookings.firstIndex(where: { $0.id == b.id }) { bookings[i] = b } else { bookings.append(b) }
+        bookings.sort { $0.start < $1.start }
+        save()
+        DeviceSync.scheduleSync()
     }
 
     func delete(_ ids: [UUID]) {

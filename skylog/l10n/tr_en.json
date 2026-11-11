@@ -758,7 +758,22 @@
   "ÖV-Route in Apple Karten": "Transit route in Apple Maps",
   "Auto-Route in Apple Karten": "Driving route in Apple Maps",
   "Uber bestellen": "Order an Uber",
-  "%@ öffnen (Zieladresse kopiert)": "Open %@ (destination address copied)"
+  "%@ öffnen (Zieladresse kopiert)": "Open %@ (destination address copied)",
+  "Buchung verwalten": "Manage booking",
+  "Code %@ kopiert": "Code %@ copied",
+  "Check-in, Sitzplatz, Umbuchung bei der Airline": "Check-in, seat, rebooking with the airline",
+  "Im Web suchen": "Search the web",
+  "Der Buchungscode wird dabei kopiert.": "The booking code is copied when you open it.",
+  "Art": "Type",
+  "Ort": "City",
+  "Gebucht über (z.B. Booking.com)": "Booked via (e.g. Booking.com)",
+  "Link zur Buchung": "Link to the booking",
+  "Den Link findest du in der Bestätigungsmail („Buchung verwalten“). Ohne Link öffnet die App die Buchungsseite des Anbieters.": "You’ll find the link in the confirmation email (“Manage booking”). Without a link the app opens the provider’s bookings page.",
+  "Buchung löschen": "Delete booking",
+  "Buchung hinzufügen": "Add booking",
+  "Unterkunft oder Buchung hinzufügen": "Add a stay or booking",
+  "Flug oder Buchung daraus erkennen": "Detect a flight or booking in it",
+  "Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen.": "For booking confirmations of hotels, rental cars or flights."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

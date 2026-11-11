@@ -193,6 +193,7 @@
 "Antrag – Gesamt %lld €" = "Claim – total €%lld";
 "Antwort zu lang – bitte nochmal versuchen." = "Response too long – please try again.";
 "Apple Karten" = "Apple Maps";
+"Art" = "Type";
 "Auf Sperrbildschirm verfolgen" = "Track on Lock Screen";
 "Aufräumen: %lld unvollständige Flüge löschen" = "Clean up: delete %lld incomplete flights";
 "Aus E-Mails importieren" = "Import from emails";
@@ -222,17 +223,22 @@
 "Bordkarte öffnen" = "Open boarding pass";
 "Buchung" = "Booking";
 "Buchung %@" = "Booking %@";
+"Buchung hinzufügen" = "Add booking";
+"Buchung löschen" = "Delete booking";
+"Buchung verwalten" = "Manage booking";
 "Buchungscode" = "Booking code";
 "Buchungscode: %@" = "Booking code: %@";
 "Budget" = "Budget";
 "Bus" = "Bus";
 "Check-in" = "Check-in";
+"Check-in, Sitzplatz, Umbuchung bei der Airline" = "Check-in, seat, rebooking with the airline";
 "Check-out am Abflugtag – Gepäckaufbewahrung im Hotel fragen, falls der Flug spät ist." = "Check-out on departure day – ask the hotel about luggage storage if your flight is late.";
 "Claude Haiku – günstig (empfohlen)" = "Claude Haiku – low-cost (recommended)";
 "Claude Opus – am genausten" = "Claude Opus – most accurate";
 "Claude-API-Key (sk-ant-…)" = "Claude API key (sk-ant-…)";
 "Claude-Key (KI-Erkennung)" = "Claude key (AI recognition)";
 "Code %@" = "Code %@";
+"Code %@ kopiert" = "Code %@ copied";
 "Damit Awaymate Flüge in deinen Mails zuverlässig erkennt. Du zahlst nur, was du nutzt – mit dem günstigen Modell (Haiku) kostet ein kompletter Postfach-Import meist nur Rappen. Du kannst denselben Key wie in Vital verwenden." = "So that Awaymate reliably recognises flights in your emails. You only pay for what you use – with the low-cost model (Haiku), a complete mailbox import usually costs just a few cents. You can use the same key as in Vital.";
 "Damit Awaymate dein ganzes Outlook/Hotmail/MSN-Postfach nach Flügen durchsuchen darf (auch alte Flüge). Private Microsoft-Konten brauchen dafür einmalig ein kostenloses Azure-Konto. Ca. 10 Minuten." = "So that Awaymate may search your whole Outlook/Hotmail/MSN mailbox for flights (including old ones). Personal Microsoft accounts need a free Azure account for this, set up once. About 10 minutes.";
 "Dann: Flugliste → + → „Aus E-Mails importieren“ → Postfach durchsuchen → „KI-Analyse starten“." = "Then: flight list → + → “Import from emails” → search mailbox → “Start AI analysis”.";
@@ -260,6 +266,8 @@
 "Deine Angaben" = "Your details";
 "Deine Apps auf RapidAPI öffnen." = "Open your apps on RapidAPI.";
 "Deine Heimat-Haltestelle (z.B. Frauenfeld)" = "Your home stop (e.g. Frauenfeld)";
+"Den Link findest du in der Bestätigungsmail („Buchung verwalten“). Ohne Link öffnet die App die Buchungsseite des Anbieters." = "You’ll find the link in the confirmation email (“Manage booking”). Without a link the app opens the provider’s bookings page.";
+"Der Buchungscode wird dabei kopiert." = "The booking code is copied when you open it.";
 "Der Flug %@, der dein Flugzeug bringen sollte, ist annulliert. Mögliche Verspätung oder Flugzeugwechsel." = "Flight %@, which was due to bring your aircraft, has been cancelled. Possible delay or aircraft change.";
 "Der Flug wurde umgeleitet." = "The flight was diverted.";
 "Deutsch" = "Deutsch";
@@ -313,6 +321,7 @@
 "Flug löschen?" = "Delete flight?";
 "Flug manuell eintragen" = "Enter flight manually";
 "Flug nicht gefunden" = "Flight not found";
+"Flug oder Buchung daraus erkennen" = "Detect a flight or booking in it";
 "Flug suchen" = "Search flight";
 "Flug wirklich löschen?" = "Really delete this flight?";
 "Flugdaten" = "Flight data";
@@ -340,6 +349,7 @@
 "Funktioniert auch für vergangene Flüge – so baust du deine Flughistorie auf." = "Also works for past flights – a good way to build up your flight history.";
 "Fähre" = "Ferry";
 "Für Bastler. Mit einem eigenen kleinen Server kommen Gate-Wechsel, Verspätungen, Start und Landung sofort – auch wenn das iPhone gesperrt ist – und die Live-Aktivität aktualisiert sich von selbst. Der Server läuft gratis bei Cloudflare und nutzt deine eigenen Flugdaten-Keys. Einmalig ca. 20 Minuten, am besten am Computer. Ohne Server funktioniert Awaymate ganz normal weiter." = "For tinkerers. With a small server of your own, gate changes, delays, takeoff and landing arrive instantly – even when the iPhone is locked – and the Live Activity updates by itself. The server runs for free on Cloudflare and uses your own flight data keys. A one-time setup of about 20 minutes, best done on a computer. Without a server, Awaymate keeps working as usual.";
+"Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen." = "For booking confirmations of hotels, rental cars or flights.";
 "Für Grossbritannien gelten ähnliche Regeln (UK261) – prüfe diese separat." = "Similar rules apply in the United Kingdom (UK261) – check these separately.";
 "Für Zugverbindungen zum/vom Flughafen und als Vorschlag beim manuellen Eintragen. Unterwegs erkennt Awaymate gebuchte Hotels und zeigt den Weg Flughafen ↔ Hotel." = "For train connections to/from the airport and as a suggestion when entering flights manually. While travelling, Awaymate recognises booked hotels and shows the route airport ↔ hotel.";
 "Für alte Flüge oder wenn das API-Kontingent leer ist – braucht keine Abfrage." = "For old flights or when the API quota is used up – needs no request.";
@@ -352,6 +362,7 @@
 "Gate geschlossen" = "Gate closed";
 "Gate verlassen" = "Left the gate";
 "Gates können kurzfristig wechseln – die Anzeige am Flughafen gilt." = "Gates can change at short notice – the airport displays take precedence.";
+"Gebucht über (z.B. Booking.com)" = "Booked via (e.g. Booking.com)";
 "Gefunden – zum Hinzufügen antippen" = "Found – tap to add";
 "Gefundene Flüge (%lld)" = "Flights found (%lld)";
 "Gefundene Flüge ohne Nachfrage hinzufügen" = "Add found flights without asking";
@@ -390,6 +401,7 @@
 "Ignorieren" = "Ignore";
 "Im Anflug" = "On approach";
 "Im Dashboard einmal „Workers & Pages“ öffnen (legt deine workers.dev-Adresse an). Rechts steht die „Account ID“ – kopieren." = "In the dashboard, open “Workers & Pages” once (this creates your workers.dev address). The “Account ID” is shown on the right – copy it.";
+"Im Web suchen" = "Search the web";
 "Import fehlgeschlagen: %@" = "Import failed: %@";
 "Importiere %lld/%lld: %@ …" = "Importing %lld/%lld: %@ …";
 "In %@" = "In %@";
@@ -451,6 +463,7 @@
 "Leere Antwort erhalten." = "Empty response received.";
 "Leichte Verspätungen gemeldet" = "Minor delays reported";
 "Letzte Mail-Prüfung fehlgeschlagen – %@" = "Last email check failed – %@";
+"Link zur Buchung" = "Link to the booking";
 "Links „API-Berechtigungen“ → „Berechtigung hinzufügen“ → Microsoft Graph → Delegiert → „Mail.Read“ → Hinzufügen." = "On the left, “API permissions” → “Add a permission” → Microsoft Graph → Delegated permissions → “Mail.Read” → Add permissions.";
 "Links „Authentifizierung“ → „Plattform hinzufügen“ → „iOS/macOS“ → Bundle-ID: com.nobody430.skylog → Konfigurieren." = "On the left, “Authentication” → “Add a platform” → “iOS/macOS” → Bundle ID: com.nobody430.skylog → Configure.";
 "Links „Übersicht“ → „Anwendungs-ID (Client-ID)“ kopieren." = "On the left, “Overview” → copy the “Application (client) ID”.";
@@ -522,6 +535,7 @@
 "OpenAI-Key" = "OpenAI key";
 "OpenAI-Plattform öffnen und mit deinem ChatGPT-/OpenAI-Konto anmelden." = "Open the OpenAI Platform and sign in with your ChatGPT/OpenAI account.";
 "Optional. Mit deinem Awaymate-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen." = "Optional. With your own Awaymate server, gate changes, delays, boarding (approx.), leaving the gate, takeoff, landing and baggage belt arrive instantly – and the Live Activity updates in real time. Runs for free on Cloudflare, with your own keys. With “Sync devices”, the same server keeps flights, trips and bookings identical on all your devices (enter the same address and token on each device). Documents and keys are not transferred.";
+"Ort" = "City";
 "Orte" = "Places";
 "Ortszeit" = "Local time";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
@@ -664,6 +678,7 @@
 "Unter „Billing“ ein monatliches Limit von 5 $ setzen, dann kann nie etwas anfallen." = "Under “Billing”, set a monthly limit of $5 – then no charges can ever arise.";
 "Unter „Billing“ prüfen, ob API-Guthaben vorhanden ist – sonst z.B. 5 $ aufladen." = "Under “Billing”, check whether you have API credit – otherwise top up, e.g. $5.";
 "Unterkunft" = "Accommodation";
+"Unterkunft oder Buchung hinzufügen" = "Add a stay or booking";
 "Unterkünfte & Buchungen" = "Accommodation & bookings";
 "Unterwegs nach %@." = "On the way to %@.";
 "Vault" = "Vault";

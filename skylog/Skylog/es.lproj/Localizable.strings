@@ -193,6 +193,7 @@
 "Antrag – Gesamt %lld €" = "Reclamación – Total %lld €";
 "Antwort zu lang – bitte nochmal versuchen." = "Respuesta demasiado larga: inténtalo de nuevo.";
 "Apple Karten" = "Mapas de Apple";
+"Art" = "Tipo";
 "Auf Sperrbildschirm verfolgen" = "Seguir en la pantalla de bloqueo";
 "Aufräumen: %lld unvollständige Flüge löschen" = "Limpiar: eliminar %lld vuelos incompletos";
 "Aus E-Mails importieren" = "Importar desde correos";
@@ -222,17 +223,22 @@
 "Bordkarte öffnen" = "Abrir tarjeta de embarque";
 "Buchung" = "Reserva";
 "Buchung %@" = "Reserva %@";
+"Buchung hinzufügen" = "Añadir reserva";
+"Buchung löschen" = "Eliminar reserva";
+"Buchung verwalten" = "Gestionar reserva";
 "Buchungscode" = "Código de reserva";
 "Buchungscode: %@" = "Código de reserva: %@";
 "Budget" = "Presupuesto";
 "Bus" = "Autobús";
 "Check-in" = "Check-in";
+"Check-in, Sitzplatz, Umbuchung bei der Airline" = "Check-in, asiento y cambios con la aerolínea";
 "Check-out am Abflugtag – Gepäckaufbewahrung im Hotel fragen, falls der Flug spät ist." = "Check-out el día de la salida: pregunta en el hotel por la consigna de equipaje si el vuelo es tarde.";
 "Claude Haiku – günstig (empfohlen)" = "Claude Haiku – económico (recomendado)";
 "Claude Opus – am genausten" = "Claude Opus – el más preciso";
 "Claude-API-Key (sk-ant-…)" = "Clave de API de Claude (sk-ant-…)";
 "Claude-Key (KI-Erkennung)" = "Clave de Claude (detección con IA)";
 "Code %@" = "Código %@";
+"Code %@ kopiert" = "Código %@ copiado";
 "Damit Awaymate Flüge in deinen Mails zuverlässig erkennt. Du zahlst nur, was du nutzt – mit dem günstigen Modell (Haiku) kostet ein kompletter Postfach-Import meist nur Rappen. Du kannst denselben Key wie in Vital verwenden." = "Para que Awaymate detecte de forma fiable los vuelos en tus correos. Solo pagas lo que usas: con el modelo económico (Haiku), importar un buzón completo suele costar solo unos céntimos. Puedes usar la misma clave que en Vital.";
 "Damit Awaymate dein ganzes Outlook/Hotmail/MSN-Postfach nach Flügen durchsuchen darf (auch alte Flüge). Private Microsoft-Konten brauchen dafür einmalig ein kostenloses Azure-Konto. Ca. 10 Minuten." = "Para que Awaymate pueda buscar vuelos en todo tu buzón de Outlook/Hotmail/MSN (también vuelos antiguos). Las cuentas personales de Microsoft necesitan para ello, una sola vez, una cuenta gratuita de Azure. Unos 10 minutos.";
 "Dann: Flugliste → + → „Aus E-Mails importieren“ → Postfach durchsuchen → „KI-Analyse starten“." = "Después: lista de vuelos → + → «Importar desde correos» → Buscar vuelos en el buzón → «Iniciar análisis con IA».";
@@ -260,6 +266,8 @@
 "Deine Angaben" = "Tus datos";
 "Deine Apps auf RapidAPI öffnen." = "Abre tus apps en RapidAPI.";
 "Deine Heimat-Haltestelle (z.B. Frauenfeld)" = "Tu parada de casa (p. ej. Frauenfeld)";
+"Den Link findest du in der Bestätigungsmail („Buchung verwalten“). Ohne Link öffnet die App die Buchungsseite des Anbieters." = "Encontrarás el enlace en el correo de confirmación («Gestionar reserva»). Sin enlace, la app abre la página de reservas del proveedor.";
+"Der Buchungscode wird dabei kopiert." = "El código de reserva se copia al abrirlo.";
 "Der Flug %@, der dein Flugzeug bringen sollte, ist annulliert. Mögliche Verspätung oder Flugzeugwechsel." = "El vuelo %@, que debía traer tu avión, ha sido cancelado. Posible retraso o cambio de avión.";
 "Der Flug wurde umgeleitet." = "El vuelo ha sido desviado.";
 "Deutsch" = "Deutsch";
@@ -313,6 +321,7 @@
 "Flug löschen?" = "¿Eliminar vuelo?";
 "Flug manuell eintragen" = "Introducir vuelo manualmente";
 "Flug nicht gefunden" = "Vuelo no encontrado";
+"Flug oder Buchung daraus erkennen" = "Detectar un vuelo o una reserva";
 "Flug suchen" = "Buscar vuelo";
 "Flug wirklich löschen?" = "¿Seguro que quieres eliminar el vuelo?";
 "Flugdaten" = "Datos de vuelo";
@@ -340,6 +349,7 @@
 "Funktioniert auch für vergangene Flüge – so baust du deine Flughistorie auf." = "También funciona con vuelos pasados: así creas tu historial de vuelos.";
 "Fähre" = "Ferri";
 "Für Bastler. Mit einem eigenen kleinen Server kommen Gate-Wechsel, Verspätungen, Start und Landung sofort – auch wenn das iPhone gesperrt ist – und die Live-Aktivität aktualisiert sich von selbst. Der Server läuft gratis bei Cloudflare und nutzt deine eigenen Flugdaten-Keys. Einmalig ca. 20 Minuten, am besten am Computer. Ohne Server funktioniert Awaymate ganz normal weiter." = "Para manitas. Con un pequeño servidor propio, los cambios de puerta, los retrasos, el despegue y el aterrizaje llegan al instante, incluso con el iPhone bloqueado, y la Actividad en directo se actualiza sola. El servidor funciona gratis en Cloudflare y usa tus propias claves de datos de vuelo. Una sola vez, unos 20 minutos, mejor desde el ordenador. Sin servidor, Awaymate sigue funcionando con total normalidad.";
+"Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen." = "Para confirmaciones de reserva de hoteles, coches de alquiler o vuelos.";
 "Für Grossbritannien gelten ähnliche Regeln (UK261) – prüfe diese separat." = "En el Reino Unido se aplican normas similares (UK261); compruébalas por separado.";
 "Für Zugverbindungen zum/vom Flughafen und als Vorschlag beim manuellen Eintragen. Unterwegs erkennt Awaymate gebuchte Hotels und zeigt den Weg Flughafen ↔ Hotel." = "Para las conexiones de tren hacia/desde el aeropuerto y como sugerencia al introducir datos manualmente. Durante el viaje, Awaymate detecta los hoteles reservados y muestra el trayecto aeropuerto ↔ hotel.";
 "Für alte Flüge oder wenn das API-Kontingent leer ist – braucht keine Abfrage." = "Para vuelos antiguos o si la cuota de API está agotada: no necesita ninguna consulta.";
@@ -352,6 +362,7 @@
 "Gate geschlossen" = "Puerta cerrada";
 "Gate verlassen" = "Salida de la puerta";
 "Gates können kurzfristig wechseln – die Anzeige am Flughafen gilt." = "Las puertas pueden cambiar a última hora: manda la información de las pantallas del aeropuerto.";
+"Gebucht über (z.B. Booking.com)" = "Reservado a través de (p. ej. Booking.com)";
 "Gefunden – zum Hinzufügen antippen" = "Encontrado: toca para añadir";
 "Gefundene Flüge (%lld)" = "Vuelos encontrados (%lld)";
 "Gefundene Flüge ohne Nachfrage hinzufügen" = "Añadir los vuelos encontrados sin preguntar";
@@ -390,6 +401,7 @@
 "Ignorieren" = "Ignorar";
 "Im Anflug" = "En aproximación";
 "Im Dashboard einmal „Workers & Pages“ öffnen (legt deine workers.dev-Adresse an). Rechts steht die „Account ID“ – kopieren." = "En el dashboard, abre una vez «Workers & Pages» (así se crea tu dirección workers.dev). A la derecha aparece el «Account ID»: cópialo.";
+"Im Web suchen" = "Buscar en la web";
 "Import fehlgeschlagen: %@" = "Error al importar: %@";
 "Importiere %lld/%lld: %@ …" = "Importando %lld/%lld: %@…";
 "In %@" = "En %@";
@@ -451,6 +463,7 @@
 "Leere Antwort erhalten." = "Se recibió una respuesta vacía.";
 "Leichte Verspätungen gemeldet" = "Retrasos leves notificados";
 "Letzte Mail-Prüfung fehlgeschlagen – %@" = "Falló la última comprobación del correo: %@";
+"Link zur Buchung" = "Enlace a la reserva";
 "Links „API-Berechtigungen“ → „Berechtigung hinzufügen“ → Microsoft Graph → Delegiert → „Mail.Read“ → Hinzufügen." = "A la izquierda, «Permisos de API» → «Agregar un permiso» → Microsoft Graph → Permisos delegados → «Mail.Read» → Agregar.";
 "Links „Authentifizierung“ → „Plattform hinzufügen“ → „iOS/macOS“ → Bundle-ID: com.nobody430.skylog → Konfigurieren." = "A la izquierda, «Autenticación» → «Agregar una plataforma» → «iOS/macOS» → ID de paquete: com.nobody430.skylog → Configurar.";
 "Links „Übersicht“ → „Anwendungs-ID (Client-ID)“ kopieren." = "A la izquierda, «Información general» → copia el «Id. de aplicación (cliente)».";
@@ -522,6 +535,7 @@
 "OpenAI-Key" = "Clave de OpenAI";
 "OpenAI-Plattform öffnen und mit deinem ChatGPT-/OpenAI-Konto anmelden." = "Abre la plataforma de OpenAI e inicia sesión con tu cuenta de ChatGPT/OpenAI.";
 "Optional. Mit deinem Awaymate-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen." = "Opcional. Con tu servidor de Awaymate, los cambios de puerta, los retrasos, el embarque (aprox.), la salida de la puerta, el despegue, el aterrizaje y la cinta de equipaje llegan al instante, y la Actividad en directo se actualiza en tiempo real. Funciona gratis en Cloudflare, con tus propias claves. Con «Sincronizar dispositivos», el mismo servidor mantiene vuelos, viajes y reservas iguales en todos tus dispositivos (introduce la misma dirección y el mismo token en cada uno). Los documentos y las claves no se transfieren.";
+"Ort" = "Lugar";
 "Orte" = "Lugares";
 "Ortszeit" = "Hora local";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
@@ -664,6 +678,7 @@
 "Unter „Billing“ ein monatliches Limit von 5 $ setzen, dann kann nie etwas anfallen." = "En «Billing», fija un límite mensual de 5 $; así nunca se generará ningún cargo.";
 "Unter „Billing“ prüfen, ob API-Guthaben vorhanden ist – sonst z.B. 5 $ aufladen." = "En «Billing», comprueba si hay saldo de API; si no, recarga p. ej. 5 $.";
 "Unterkunft" = "Alojamiento";
+"Unterkunft oder Buchung hinzufügen" = "Añadir alojamiento o reserva";
 "Unterkünfte & Buchungen" = "Alojamientos y reservas";
 "Unterwegs nach %@." = "De camino a %@.";
 "Vault" = "Vault";

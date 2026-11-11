@@ -206,6 +206,19 @@ struct ImportView: View {
             return
         }
         analyze(text, source: url.lastPathComponent)
+        // With an AI key the document is also read for hotels, rental cars and trains (and flights the pattern search missed)
+        if AIClient.hasKey { Task { await analyzeWithAI(text, source: url.lastPathComponent) } }
+    }
+
+    private func analyzeWithAI(_ text: String, source: String) async {
+        busy = true
+        defer { busy = false }
+        let document = OutlookMail.MailItem(id: "file-" + source, subject: source, from: "", received: Date(), text: String(text.prefix(20_000)))
+        guard let result = try? await MailAI.extractAll([document], progress: { _ in }) else { return }
+        merge(result.flights)
+        var stays = 0
+        for b in result.bookings where BookingStore.shared.upsert(b) && !b.cancelled { stays += 1 }
+        if stays > 0 { status = (status ?? "") + String(localized: " \(stays) Hotels/Mietwagen/Züge wurden direkt den Reisen hinzugefügt.") }
     }
 
     private func scanOutlook() async {

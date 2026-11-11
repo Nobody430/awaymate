@@ -758,7 +758,22 @@
   "ÖV-Route in Apple Karten": "Itinéraire en transports dans Plans",
   "Auto-Route in Apple Karten": "Itinéraire en voiture dans Plans",
   "Uber bestellen": "Commander un Uber",
-  "%@ öffnen (Zieladresse kopiert)": "Ouvrir %@ (adresse de destination copiée)"
+  "%@ öffnen (Zieladresse kopiert)": "Ouvrir %@ (adresse de destination copiée)",
+  "Buchung verwalten": "Gérer la réservation",
+  "Code %@ kopiert": "Code %@ copié",
+  "Check-in, Sitzplatz, Umbuchung bei der Airline": "Enregistrement, siège, modification auprès de la compagnie",
+  "Im Web suchen": "Rechercher sur le web",
+  "Der Buchungscode wird dabei kopiert.": "Le code de réservation est copié à l’ouverture.",
+  "Art": "Type",
+  "Ort": "Lieu",
+  "Gebucht über (z.B. Booking.com)": "Réservé via (p. ex. Booking.com)",
+  "Link zur Buchung": "Lien vers la réservation",
+  "Den Link findest du in der Bestätigungsmail („Buchung verwalten“). Ohne Link öffnet die App die Buchungsseite des Anbieters.": "Tu trouveras le lien dans l’e-mail de confirmation (« Gérer la réservation »). Sans lien, l’app ouvre la page des réservations du prestataire.",
+  "Buchung löschen": "Supprimer la réservation",
+  "Buchung hinzufügen": "Ajouter une réservation",
+  "Unterkunft oder Buchung hinzufügen": "Ajouter un hébergement ou une réservation",
+  "Flug oder Buchung daraus erkennen": "Y détecter un vol ou une réservation",
+  "Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen.": "Pour les confirmations de réservation d’hôtels, de voitures de location ou de vols."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Aucun vol prévu",

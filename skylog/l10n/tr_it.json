@@ -758,7 +758,22 @@
   "ÖV-Route in Apple Karten": "Percorso con i mezzi in Mappe di Apple",
   "Auto-Route in Apple Karten": "Percorso in auto in Mappe di Apple",
   "Uber bestellen": "Ordina un Uber",
-  "%@ öffnen (Zieladresse kopiert)": "Apri %@ (indirizzo di destinazione copiato)"
+  "%@ öffnen (Zieladresse kopiert)": "Apri %@ (indirizzo di destinazione copiato)",
+  "Buchung verwalten": "Gestisci prenotazione",
+  "Code %@ kopiert": "Codice %@ copiato",
+  "Check-in, Sitzplatz, Umbuchung bei der Airline": "Check-in, posto, cambio presso la compagnia",
+  "Im Web suchen": "Cerca sul web",
+  "Der Buchungscode wird dabei kopiert.": "Il codice di prenotazione viene copiato all’apertura.",
+  "Art": "Tipo",
+  "Ort": "Località",
+  "Gebucht über (z.B. Booking.com)": "Prenotato tramite (ad es. Booking.com)",
+  "Link zur Buchung": "Link alla prenotazione",
+  "Den Link findest du in der Bestätigungsmail („Buchung verwalten“). Ohne Link öffnet die App die Buchungsseite des Anbieters.": "Trovi il link nell’e-mail di conferma («Gestisci prenotazione»). Senza link l’app apre la pagina delle prenotazioni del fornitore.",
+  "Buchung löschen": "Elimina prenotazione",
+  "Buchung hinzufügen": "Aggiungi prenotazione",
+  "Unterkunft oder Buchung hinzufügen": "Aggiungi alloggio o prenotazione",
+  "Flug oder Buchung daraus erkennen": "Riconosci un volo o una prenotazione",
+  "Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen.": "Per conferme di prenotazione di hotel, auto a noleggio o voli."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

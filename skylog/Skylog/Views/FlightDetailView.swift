@@ -39,6 +39,7 @@ struct FlightDetailView: View {
                 }
                 BoardingPassButton(flight: f)
                 LiveActivityButton(flight: f)
+                FlightBookingCard(flight: f)
                 times(f)
                 gates(f)
                 if let i = f.inbound, !f.isInAir, !f.normalizedStatus.isFinal { inbound(i, f) }

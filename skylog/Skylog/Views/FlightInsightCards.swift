@@ -379,12 +379,24 @@ struct BoardingPassButton: View {
 /// Sheet for a file shared to Awaymate: attach it to one of the upcoming flights.
 struct AttachDocumentView: View {
     let url: URL
+    /// Called when the user wants the document read as a booking instead of filing it with a flight
+    var onImport: (() -> Void)? = nil
     @Environment(FlightStore.self) private var store
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
             List {
+                if let onImport, url.pathExtension.lowercased() == "pdf" {
+                    Section {
+                        Button {
+                            dismiss()
+                            onImport()
+                        } label: { Label("Flug oder Buchung daraus erkennen", systemImage: "sparkles") }
+                    } footer: {
+                        Text("Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen.")
+                    }
+                }
                 Section {
                     ForEach(store.upcoming.prefix(12)) { f in
                         Button {
