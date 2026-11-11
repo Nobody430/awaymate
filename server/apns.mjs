@@ -1,4 +1,4 @@
-// Sending pushes: directly to Apple (needs the publisher's APNs key) or through the Skylog relay.
+// Sending pushes: directly to Apple (needs the publisher's APNs key) or through the Awaymate relay.
 // Uses only WebCrypto + fetch, so it runs in Node 20+ and in Cloudflare Workers.
 
 const b64url = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");

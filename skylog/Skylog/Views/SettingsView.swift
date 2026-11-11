@@ -112,7 +112,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Zuhause")
                 } footer: {
-                    Text("Für Zugverbindungen zum/vom Flughafen und als Vorschlag beim manuellen Eintragen. Unterwegs erkennt Skylog gebuchte Hotels und zeigt den Weg Flughafen ↔ Hotel.")
+                    Text("Für Zugverbindungen zum/vom Flughafen und als Vorschlag beim manuellen Eintragen. Unterwegs erkennt Awaymate gebuchte Hotels und zeigt den Weg Flughafen ↔ Hotel.")
                 }
 
                 Section {
@@ -194,7 +194,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Echtzeit-Pushs (eigener Server)")
                 } footer: {
-                    Text("Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen.")
+                    Text("Optional. Mit deinem Awaymate-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen.")
                 }
 
                 Section {
@@ -211,7 +211,7 @@ struct SettingsView: View {
                                         await CalendarSync.sync(store.flights, bookings: BookingStore.shared.bookings)
                                     } else {
                                         calendarSync = false
-                                        message = String(localized: "Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Skylog → Kalender (Vollzugriff).")
+                                        message = String(localized: "Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Awaymate → Kalender (Vollzugriff).")
                                     }
                                 } else {
                                     CalendarSync.removeAll()
@@ -264,7 +264,7 @@ struct SettingsView: View {
                     LabeledContent("Gespeicherte Flüge", value: "\(store.flights.count)")
                     LabeledContent("Version", value: "1.0")
                 } footer: {
-                    Text("Skylog – eigener Flug-Tracker. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.")
+                    Text("Awaymate – eigener Flug-Tracker. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.")
                 }
             }
             .navigationTitle("Einstellungen")

@@ -1,4 +1,4 @@
-/* Skylog – en. Keys are the German source texts. */
+/* Awaymate – en. Keys are the German source texts. */
 " %lld Hotels/Mietwagen/Züge wurden direkt den Reisen hinzugefügt." = " %lld hotels/rental cars/trains were added directly to your trips.";
 " (%@ verspätet)" = " (%@ late)";
 " (+%lld zurück)" = " (+%lld return)";
@@ -96,7 +96,7 @@
 ", Terminal %@" = ", Terminal %@";
 ". Ersetzen?" = ". Replace?";
 ". Hinzufügen?" = ". Add?";
-". In Skylog ersetzt." = ". Replaced in Skylog.";
+". In Awaymate ersetzt." = ". Replaced in Awaymate.";
 "1 CHF =" = "1 CHF =";
 "24–4 h vor Abflug alle 2 h, danach alle 15 Min., ab 75 Min. vor Abflug bis zum Start alle 5 Min. (auch über die geplante Zeit hinaus, damit Verspätungen sofort auftauchen). In der Luft alle 15 Min., kurz vor Landung alle 5 Min., danach bis zum Gepäckband. Ca. 40 Abfragen pro Flug. Mit Reisemodus läuft das auch im Hintergrund." = "From 24 to 4 h before departure every 2 h, then every 15 min, and from 75 min before departure until takeoff every 5 min (even past the scheduled time, so delays show up right away). In the air every 15 min, shortly before landing every 5 min, then until the baggage belt. About 40 requests per flight. With Travel mode this also runs in the background.";
 "3-Buchstaben-Code des Flughafens. Den findest du auf Ticket oder Bordkarte." = "3-letter airport code. You'll find it on your ticket or boarding pass.";
@@ -144,7 +144,7 @@
 "Alle %lld anzeigen" = "Show all %lld";
 "Alle Flüge löschen" = "Delete all flights";
 "Alle Notizen" = "All notes";
-"Alle Zeiten in Ortszeit des jeweiligen Flughafens. Stand: %@ · erstellt mit Skylog" = "All times in the local time of each airport. As of: %@ · created with Skylog";
+"Alle Zeiten in Ortszeit des jeweiligen Flughafens. Stand: %@ · erstellt mit Awaymate" = "All times in the local time of each airport. As of: %@ · created with Awaymate";
 "Alle anzeigen" = "Show all";
 "Alle löschen" = "Delete all";
 "Alle zurücksetzen" = "Reset all";
@@ -171,7 +171,7 @@
 "Ankunft in %@ um %@." = "Arrival in %@ at %@.";
 "Ankunft jetzt %@." = "Arrival now %@.";
 "Ankunft · %@" = "Arrival · %@";
-"Ankunft über 3 Stunden zu spät – in Skylog den Antrag erstellen." = "Arrival more than 3 hours late – create the claim in Skylog.";
+"Ankunft über 3 Stunden zu spät – in Awaymate den Antrag erstellen." = "Arrival more than 3 hours late – create the claim in Awaymate.";
 "Ankunft: %@ (%@)" = "Arrival: %@ (%@)";
 "Ankunftszeit unbekannt" = "Arrival time unknown";
 "Anmeldung abgebrochen." = "Sign-in cancelled.";
@@ -201,6 +201,8 @@
 "Automatisch" = "Automatic";
 "Automatisch (%@)" = "Automatic (%@)";
 "Automatisch aktualisieren" = "Update automatically";
+"Awaymate" = "Awaymate";
+"Awaymate – eigener Flug-Tracker. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live." = "Awaymate – your own flight tracker. Data: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.";
 "Bearbeiten" = "Edit";
 "Beide kombiniert (empfohlen)" = "Both combined (recommended)";
 "Beim Mail-Import werden nur Buchungen übernommen, auf denen dieser Name steht." = "Email import only takes bookings that carry this name.";
@@ -228,8 +230,8 @@
 "Claude-API-Key (sk-ant-…)" = "Claude API key (sk-ant-…)";
 "Claude-Key (KI-Erkennung)" = "Claude key (AI recognition)";
 "Code %@" = "Code %@";
-"Damit Skylog Flüge in deinen Mails zuverlässig erkennt. Du zahlst nur, was du nutzt – mit dem günstigen Modell (Haiku) kostet ein kompletter Postfach-Import meist nur Rappen. Du kannst denselben Key wie in Vital verwenden." = "So that Skylog reliably recognises flights in your emails. You only pay for what you use – with the low-cost model (Haiku), a complete mailbox import usually costs just a few cents. You can use the same key as in Vital.";
-"Damit Skylog dein ganzes Outlook/Hotmail/MSN-Postfach nach Flügen durchsuchen darf (auch alte Flüge). Private Microsoft-Konten brauchen dafür einmalig ein kostenloses Azure-Konto. Ca. 10 Minuten." = "So that Skylog may search your whole Outlook/Hotmail/MSN mailbox for flights (including old ones). Personal Microsoft accounts need a free Azure account for this, set up once. About 10 minutes.";
+"Damit Awaymate Flüge in deinen Mails zuverlässig erkennt. Du zahlst nur, was du nutzt – mit dem günstigen Modell (Haiku) kostet ein kompletter Postfach-Import meist nur Rappen. Du kannst denselben Key wie in Vital verwenden." = "So that Awaymate reliably recognises flights in your emails. You only pay for what you use – with the low-cost model (Haiku), a complete mailbox import usually costs just a few cents. You can use the same key as in Vital.";
+"Damit Awaymate dein ganzes Outlook/Hotmail/MSN-Postfach nach Flügen durchsuchen darf (auch alte Flüge). Private Microsoft-Konten brauchen dafür einmalig ein kostenloses Azure-Konto. Ca. 10 Minuten." = "So that Awaymate may search your whole Outlook/Hotmail/MSN mailbox for flights (including old ones). Personal Microsoft accounts need a free Azure account for this, set up once. About 10 minutes.";
 "Dann: Flugliste → + → „Aus E-Mails importieren“ → Postfach durchsuchen → „KI-Analyse starten“." = "Then: flight list → + → “Import from emails” → search mailbox → “Start AI analysis”.";
 "Das wird sehr knapp – früh bei der Crew melden." = "This will be very tight – tell the crew early.";
 "Datei (PDF, Wallet-Pass, …)" = "File (PDF, Wallet pass, …)";
@@ -314,7 +316,7 @@
 "Flugdaten über RapidAPI. Der Basic-Plan ist gratis, hat aber nur wenige Abfragen pro Monat." = "Flight data via RapidAPI. The Basic plan is free but only has a few requests per month.";
 "Flugdetails" = "Flight details";
 "Flughäfen" = "Airports";
-"Flugliste → + → „Aus E-Mails importieren“ → „Mit Outlook anmelden & durchsuchen“. Skylog geht das ganze Postfach durch." = "Flight list → + → “Import from emails” → “Sign in with Outlook & search”. Skylog goes through the whole mailbox.";
+"Flugliste → + → „Aus E-Mails importieren“ → „Mit Outlook anmelden & durchsuchen“. Awaymate geht das ganze Postfach durch." = "Flight list → + → “Import from emails” → “Sign in with Outlook & search”. Awaymate goes through the whole mailbox.";
 "Flugnummer, z.B. LX1612" = "Flight number, e.g. LX1612";
 "Flugzeit" = "Flight time";
 "Flugzeug" = "Aircraft";
@@ -334,9 +336,9 @@
 "Frist: in der Schweiz und Deutschland meist bis 3 Jahre, je nach Land unterschiedlich." = "Deadline: in Switzerland and Germany usually up to 3 years, varies by country.";
 "Funktioniert auch für vergangene Flüge – so baust du deine Flughistorie auf." = "Also works for past flights – a good way to build up your flight history.";
 "Fähre" = "Ferry";
-"Für Bastler. Mit einem eigenen kleinen Server kommen Gate-Wechsel, Verspätungen, Start und Landung sofort – auch wenn das iPhone gesperrt ist – und die Live-Aktivität aktualisiert sich von selbst. Der Server läuft gratis bei Cloudflare und nutzt deine eigenen Flugdaten-Keys. Einmalig ca. 20 Minuten, am besten am Computer. Ohne Server funktioniert Skylog ganz normal weiter." = "For tinkerers. With a small server of your own, gate changes, delays, takeoff and landing arrive instantly – even when the iPhone is locked – and the Live Activity updates by itself. The server runs for free on Cloudflare and uses your own flight data keys. A one-time setup of about 20 minutes, best done on a computer. Without a server, Skylog keeps working as usual.";
+"Für Bastler. Mit einem eigenen kleinen Server kommen Gate-Wechsel, Verspätungen, Start und Landung sofort – auch wenn das iPhone gesperrt ist – und die Live-Aktivität aktualisiert sich von selbst. Der Server läuft gratis bei Cloudflare und nutzt deine eigenen Flugdaten-Keys. Einmalig ca. 20 Minuten, am besten am Computer. Ohne Server funktioniert Awaymate ganz normal weiter." = "For tinkerers. With a small server of your own, gate changes, delays, takeoff and landing arrive instantly – even when the iPhone is locked – and the Live Activity updates by itself. The server runs for free on Cloudflare and uses your own flight data keys. A one-time setup of about 20 minutes, best done on a computer. Without a server, Awaymate keeps working as usual.";
 "Für Grossbritannien gelten ähnliche Regeln (UK261) – prüfe diese separat." = "Similar rules apply in the United Kingdom (UK261) – check these separately.";
-"Für Zugverbindungen zum/vom Flughafen und als Vorschlag beim manuellen Eintragen. Unterwegs erkennt Skylog gebuchte Hotels und zeigt den Weg Flughafen ↔ Hotel." = "For train connections to/from the airport and as a suggestion when entering flights manually. While travelling, Skylog recognises booked hotels and shows the route airport ↔ hotel.";
+"Für Zugverbindungen zum/vom Flughafen und als Vorschlag beim manuellen Eintragen. Unterwegs erkennt Awaymate gebuchte Hotels und zeigt den Weg Flughafen ↔ Hotel." = "For train connections to/from the airport and as a suggestion when entering flights manually. While travelling, Awaymate recognises booked hotels and shows the route airport ↔ hotel.";
 "Für alte Flüge oder wenn das API-Kontingent leer ist – braucht keine Abfrage." = "For old flights or when the API quota is used up – needs no request.";
 "Für die Analyse werden die Texte der Reise-Mails an Anthropic geschickt; sie werden nicht zum Training verwendet." = "For the analysis, the text of your travel emails is sent to Anthropic; it is not used for training.";
 "Für die Reiseplanung brauchst du einen KI-Key (Einstellungen → KI-Erkennung)." = "Trip planning needs an AI key (Settings → AI recognition).";
@@ -414,7 +416,7 @@
 "Kein Guthaben mehr auf dem KI-Konto. (%@)" = "No credit left on the AI account. (%@)";
 "Kein KI-Key hinterlegt (Einstellungen → KI-Erkennung)." = "No AI key stored (Settings → AI recognition).";
 "Kein Obsidian-Vault verbunden (Einstellungen → Persönliches Profil)." = "No Obsidian vault connected (Settings → Personal profile).";
-"Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Skylog → Kalender (Vollzugriff)." = "No access to the calendar. Allow it in iPhone Settings → Skylog → Calendars (Full Access).";
+"Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Awaymate → Kalender (Vollzugriff)." = "No access to the calendar. Allow it in iPhone Settings → Awaymate → Calendars (Full Access).";
 "Keine" = "None";
 "Keine Einträge in Apple Maps gefunden." = "No entries found in Apple Maps.";
 "Keine Flüge erkannt." = "No flights detected.";
@@ -509,14 +511,14 @@
 "Oben auf „Pricing“ (oder „Change plan“) tippen." = "Tap “Pricing” (or “Change plan”) at the top.";
 "Obsidian" = "Obsidian";
 "Obsidian-Vault verbinden" = "Connect Obsidian vault";
-"Ohne Azure: Mail in Outlook öffnen → „…“ → Drucken → Teilen → Skylog. Oder Text kopieren → + → Aus E-Mails importieren → Aus Zwischenablage. Die Mails werden nur auf deinem iPhone ausgewertet." = "Without Azure: open the email in Outlook → “…” → Print → Share → Skylog. Or copy the text → + → Import from emails → From clipboard. The emails are only analysed on your iPhone.";
+"Ohne Azure: Mail in Outlook öffnen → „…“ → Drucken → Teilen → Awaymate. Oder Text kopieren → + → Aus E-Mails importieren → Aus Zwischenablage. Die Mails werden nur auf deinem iPhone ausgewertet." = "Without Azure: open the email in Outlook → “…” → Print → Share → Awaymate. Or copy the text → + → Import from emails → From clipboard. The emails are only analysed on your iPhone.";
 "Ohne Suche manuell eintragen" = "Enter manually without search";
 "Online eingecheckt" = "Checked in online";
 "OpenAI (eigenes API-Guthaben)" = "OpenAI (own API credit)";
 "OpenAI-API-Key (sk-…)" = "OpenAI API key (sk-…)";
 "OpenAI-Key" = "OpenAI key";
 "OpenAI-Plattform öffnen und mit deinem ChatGPT-/OpenAI-Konto anmelden." = "Open the OpenAI Platform and sign in with your ChatGPT/OpenAI account.";
-"Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen." = "Optional. With your own Skylog server, gate changes, delays, boarding (approx.), leaving the gate, takeoff, landing and baggage belt arrive instantly – and the Live Activity updates in real time. Runs for free on Cloudflare, with your own keys. With “Sync devices”, the same server keeps flights, trips and bookings identical on all your devices (enter the same address and token on each device). Documents and keys are not transferred.";
+"Optional. Mit deinem Awaymate-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen." = "Optional. With your own Awaymate server, gate changes, delays, boarding (approx.), leaving the gate, takeoff, landing and baggage belt arrive instantly – and the Live Activity updates in real time. Runs for free on Cloudflare, with your own keys. With “Sync devices”, the same server keeps flights, trips and bookings identical on all your devices (enter the same address and token on each device). Documents and keys are not transferred.";
 "Orte" = "Places";
 "Ortszeit" = "Local time";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
@@ -573,8 +575,8 @@
 "Schritte" = "Steps";
 "Secret 1 – Name: CLOUDFLARE_API_TOKEN · Inhalt: der Token aus Teil 2." = "Secret 1 – Name: CLOUDFLARE_API_TOKEN · Value: the token from Part 2.";
 "Secret 2 – Name: CLOUDFLARE_ACCOUNT_ID · Inhalt: die Account ID aus Teil 2." = "Secret 2 – Name: CLOUDFLARE_ACCOUNT_ID · Value: the Account ID from Part 2.";
-"Secret 3 – Name: SERVER_TOKEN · Inhalt: ein langes, selbst erfundenes Passwort (mind. 24 Zeichen, nur Buchstaben und Zahlen). Du brauchst es gleich nochmal in Skylog." = "Secret 3 – Name: SERVER_TOKEN · Value: a long password you make up yourself (at least 24 characters, letters and numbers only). You'll need it again in Skylog in a moment.";
-"Secret 4 – Name: RELAY_URL · Inhalt: die Adresse des Skylog-Relays. Sie steht in der Projektbeschreibung (README) unter „Relay“." = "Secret 4 – Name: RELAY_URL · Value: the address of the Skylog relay. You'll find it in the project description (README) under “Relay”.";
+"Secret 3 – Name: SERVER_TOKEN · Inhalt: ein langes, selbst erfundenes Passwort (mind. 24 Zeichen, nur Buchstaben und Zahlen). Du brauchst es gleich nochmal in Awaymate." = "Secret 3 – Name: SERVER_TOKEN · Value: a long password you make up yourself (at least 24 characters, letters and numbers only). You'll need it again in Awaymate in a moment.";
+"Secret 4 – Name: RELAY_URL · Inhalt: die Adresse des Awaymate-Relays. Sie steht in der Projektbeschreibung (README) unter „Relay“." = "Secret 4 – Name: RELAY_URL · Value: the address of the Awaymate relay. You'll find it in the project description (README) under “Relay”.";
 "Sehr zuverlässige Daten (Gates, Gepäckband, echte Zeiten). Monatliches Gratis-Guthaben, danach Abrechnung pro Abfrage." = "Very reliable data (gates, baggage belt, actual times). Monthly free credit, then billed per request.";
 "Seite %@" = "%@ side";
 "Server erreicht, aber Apple lehnt den Push ab (APNs-Schlüssel prüfen)." = "Server reached, but Apple rejects the push (check the APNs key).";
@@ -591,8 +593,6 @@
 "Sitzplan dieses Flugzeugtyps suchen" = "Find seat map for this aircraft type";
 "Sitzplatz" = "Seat";
 "Sitzplatz (optional)" = "Seat (optional)";
-"Skylog" = "Skylog";
-"Skylog – eigener Flug-Tracker. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live." = "Skylog – your own flight tracker. Data: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.";
 "So bekommst du den AeroDataBox-Key" = "How to get the AeroDataBox key";
 "So bekommst du den FlightAware-Key" = "How to get the FlightAware key";
 "So bekommst du den Key" = "How to get the key";
@@ -616,11 +616,11 @@
 "Suche „%@“ … (%lld Mails geprüft)" = "Searching “%@” … (%lld emails checked)";
 "Suche „%@“ … (%lld Mails)" = "Searching “%@” … (%lld emails)";
 "T%@" = "T%@";
-"TEIL 1 – Projekt kopieren. Bei GitHub anmelden (oder Konto erstellen), das Skylog-Projekt öffnen und oben rechts auf „Fork“ tippen. Damit hast du deine eigene Kopie." = "PART 1 – Copy the project. Sign in to GitHub (or create an account), open the Skylog project and tap “Fork” at the top right. This gives you your own copy.";
+"TEIL 1 – Projekt kopieren. Bei GitHub anmelden (oder Konto erstellen), das Awaymate-Projekt öffnen und oben rechts auf „Fork“ tippen. Damit hast du deine eigene Kopie." = "PART 1 – Copy the project. Sign in to GitHub (or create an account), open the Awaymate project and tap “Fork” at the top right. This gives you your own copy.";
 "TEIL 2 – Cloudflare. Gratis-Konto erstellen (keine Kreditkarte nötig)." = "PART 2 – Cloudflare. Create a free account (no credit card needed).";
 "TEIL 3 – Secrets. In DEINER Kopie bei GitHub: Settings → Secrets and variables → Actions → „New repository secret“. (Geht nur im Browser, nicht in der GitHub-App.)" = "PART 3 – Secrets. In YOUR copy on GitHub: Settings → Secrets and variables → Actions → “New repository secret”. (Only works in the browser, not in the GitHub app.)";
 "TEIL 4 – Server starten. In deiner Kopie auf „Actions“ (beim ersten Mal Workflows aktivieren) → links „Deploy push server“ → „Run workflow“. Nach 1–2 Minuten erscheint ein grüner Haken; in der Zusammenfassung steht die Adresse deines Servers (…workers.dev)." = "PART 4 – Start the server. In your copy, go to “Actions” (enable workflows the first time) → “Deploy push server” on the left → “Run workflow”. After 1–2 minutes a green check mark appears; the summary shows your server's address (…workers.dev).";
-"TEIL 5 – Skylog verbinden. Einstellungen → „Echtzeit-Pushs (eigener Server)“: die Adresse aus Teil 4 und das Passwort aus Secret 3 eintragen. „Verbindung testen“ – es sollte eine Test-Mitteilung kommen." = "PART 5 – Connect Skylog. Settings → “Real-time push (own server)”: enter the address from Part 4 and the password from Secret 3. “Test connection” – a test notification should arrive.";
+"TEIL 5 – Awaymate verbinden. Einstellungen → „Echtzeit-Pushs (eigener Server)“: die Adresse aus Teil 4 und das Passwort aus Secret 3 eintragen. „Verbindung testen“ – es sollte eine Test-Mitteilung kommen." = "PART 5 – Connect Awaymate. Settings → “Real-time push (own server)”: enter the address from Part 4 and the password from Secret 3. “Test connection” – a test notification should arrive.";
 "Tag-für-Tag-Plan ansehen" = "View day-by-day plan";
 "Tatsächlich" = "Actual";
 "Taxi %@" = "Taxi %@";
@@ -634,10 +634,10 @@
 "Test-Push gesendet – sollte gleich erscheinen." = "Test push sent – it should appear shortly.";
 "Testen: In der Flugliste auf + tippen, Flugnummer eingeben (z.B. LX1612) und suchen." = "Test it: tap + in the flight list, enter a flight number (e.g. LX1612) and search.";
 "Text kopieren" = "Copy text";
-"Tipp: In Outlook ein PDF-Ticket oder eine Bordkarte teilen → „Skylog“ wählen." = "Tip: in Outlook, share a PDF ticket or boarding pass → choose “Skylog”.";
+"Tipp: In Outlook ein PDF-Ticket oder eine Bordkarte teilen → „Awaymate“ wählen." = "Tip: in Outlook, share a PDF ticket or boarding pass → choose “Awaymate”.";
 "Tipp: Mit einem KI-Key (Einstellungen → KI-Erkennung) werden Flüge viel genauer erkannt." = "Tip: with an AI key (Settings → AI recognition), flights are recognised much more accurately.";
 "Tippe auf + und gib deine Flugnummer ein." = "Tap + and enter your flight number.";
-"Tippe in Skylog auf %@ für den Weg vom Flughafen zum Hotel." = "Tap %@ in Skylog for the route from the airport to the hotel.";
+"Tippe in Awaymate auf %@ für den Weg vom Flughafen zum Hotel." = "Tap %@ in Awaymate for the route from the airport to the hotel.";
 "Tipps" = "Tips";
 "Token falsch." = "Wrong token.";
 "Transponder" = "Transponder";
@@ -653,9 +653,9 @@
 "Unerwartete Antwort vom Server." = "Unexpected response from the server.";
 "Ungültige Adresse." = "Invalid address.";
 "Unlesbare Antwort vom KI-Dienst (HTTP %lld): " = "Unreadable response from the AI service (HTTP %lld): ";
-"Unter „API Keys“ auf „Create API Key“ tippen, Beschreibung „Skylog“, und den Key kopieren." = "Under “API Keys”, tap “Create API Key”, description “Skylog”, and copy the key.";
-"Unter „API Keys“ → „Create Key“ → Name „Skylog“ → Key kopieren (beginnt mit sk-ant-, wird nur einmal angezeigt)." = "Under “API Keys” → “Create Key” → name “Skylog” → copy the key (starts with sk-ant-, shown only once).";
-"Unter „API keys“ → „Create new secret key“ → Name „Skylog“ → Key kopieren (beginnt mit sk-, wird nur einmal angezeigt)." = "Under “API keys” → “Create new secret key” → name “Skylog” → copy the key (starts with sk-, shown only once).";
+"Unter „API Keys“ auf „Create API Key“ tippen, Beschreibung „Awaymate“, und den Key kopieren." = "Under “API Keys”, tap “Create API Key”, description “Awaymate”, and copy the key.";
+"Unter „API Keys“ → „Create Key“ → Name „Awaymate“ → Key kopieren (beginnt mit sk-ant-, wird nur einmal angezeigt)." = "Under “API Keys” → “Create Key” → name “Awaymate” → copy the key (starts with sk-ant-, shown only once).";
+"Unter „API keys“ → „Create new secret key“ → Name „Awaymate“ → Key kopieren (beginnt mit sk-, wird nur einmal angezeigt)." = "Under “API keys” → “Create new secret key” → name “Awaymate” → copy the key (starts with sk-, shown only once).";
 "Unter „Billing“ Guthaben aufladen, z.B. 5 $. Optional ein Ausgabenlimit setzen." = "Under “Billing”, top up credit, e.g. $5. Optionally set a spending limit.";
 "Unter „Billing“ ein monatliches Limit von 5 $ setzen, dann kann nie etwas anfallen." = "Under “Billing”, set a monthly limit of $5 – then no charges can ever arise.";
 "Unter „Billing“ prüfen, ob API-Guthaben vorhanden ist – sonst z.B. 5 $ aufladen." = "Under “Billing”, check whether you have API credit – otherwise top up, e.g. $5.";
@@ -675,7 +675,7 @@
 "Vom Flughafen %@ zum Hotel" = "From %@ Airport to the hotel";
 "Vom Hotel zum Flughafen %@" = "From the hotel to %@ Airport";
 "Von" = "From";
-"Von %@ zum Flughafen %@ – in Skylog siehst du, wann du los musst." = "From %@ to %@ Airport – Skylog shows you when to leave.";
+"Von %@ zum Flughafen %@ – in Awaymate siehst du, wann du los musst." = "From %@ to %@ Airport – Awaymate shows you when to leave.";
 "Von (Code, z.B. ZRH)" = "From (code, e.g. ZRH)";
 "Von jedem doppelten Flug bleibt der Eintrag mit den besten Daten." = "For each duplicate flight, the entry with the best data is kept.";
 "Vorschläge aus deinen Flügen" = "Suggestions from your flights";
@@ -691,7 +691,7 @@
 "Wirklich alle Flüge löschen?" = "Really delete all flights?";
 "Wo du warst" = "Where you've been";
 "Wo ist mein Flugzeug?" = "Where is my aircraft?";
-"Wähle den Ordner deines Vaults (in der Dateien-App unter iCloud Drive → Obsidian oder Auf meinem iPhone → Obsidian). Nur die ausgewählten Notizen werden genutzt. Packlisten und Reisepläne kannst du zurück in den Vault speichern (Ordner „Skylog“)." = "Choose your vault's folder (in the Files app under iCloud Drive → Obsidian or On My iPhone → Obsidian). Only the selected notes are used. You can save packing lists and trip plans back to the vault (folder “Skylog”).";
+"Wähle den Ordner deines Vaults (in der Dateien-App unter iCloud Drive → Obsidian oder Auf meinem iPhone → Obsidian). Nur die ausgewählten Notizen werden genutzt. Packlisten und Reisepläne kannst du zurück in den Vault speichern (Ordner „Awaymate“)." = "Choose your vault's folder (in the Files app under iCloud Drive → Obsidian or On My iPhone → Obsidian). Only the selected notes are used. You can save packing lists and trip plans back to the vault (folder “Awaymate”).";
 "Wünsche (z.B. „ein Tag Weinregion“, „kein Museum“)" = "Wishes (e.g. “a day in wine country”, “no museums”)";
 "Zahnbürste & Kulturbeutel" = "Toothbrush & toiletry bag";
 "Zeiten im Detail" = "Times in detail";
@@ -712,16 +712,16 @@
 "Zuhause" = "Home";
 "Zuletzt: %@ am %@" = "Last: %@ on %@";
 "Zur Packliste hinzufügen" = "Add to packing list";
-"Zurück in Skylog: Einstellungen → E-Mail-Import → Client-ID einfügen." = "Back in Skylog: Settings → Email import → paste the client ID.";
-"Zurück in Skylog: Einstellungen → Flugdaten → „AeroDataBox“ wählen → Key einfügen." = "Back in Skylog: Settings → Flight data → choose “AeroDataBox” → paste the key.";
-"Zurück in Skylog: Einstellungen → Flugdaten → „FlightAware AeroAPI“ wählen → Key einfügen." = "Back in Skylog: Settings → Flight data → choose “FlightAware AeroAPI” → paste the key.";
-"Zurück in Skylog: Einstellungen → KI-Erkennung → Key einfügen." = "Back in Skylog: Settings → AI recognition → paste the key.";
-"Zurück in Skylog: Einstellungen → KI-Erkennung → „OpenAI“ wählen → Key einfügen." = "Back in Skylog: Settings → AI recognition → choose “OpenAI” → paste the key.";
+"Zurück in Awaymate: Einstellungen → E-Mail-Import → Client-ID einfügen." = "Back in Awaymate: Settings → Email import → paste the client ID.";
+"Zurück in Awaymate: Einstellungen → Flugdaten → „AeroDataBox“ wählen → Key einfügen." = "Back in Awaymate: Settings → Flight data → choose “AeroDataBox” → paste the key.";
+"Zurück in Awaymate: Einstellungen → Flugdaten → „FlightAware AeroAPI“ wählen → Key einfügen." = "Back in Awaymate: Settings → Flight data → choose “FlightAware AeroAPI” → paste the key.";
+"Zurück in Awaymate: Einstellungen → KI-Erkennung → Key einfügen." = "Back in Awaymate: Settings → AI recognition → paste the key.";
+"Zurück in Awaymate: Einstellungen → KI-Erkennung → „OpenAI“ wählen → Key einfügen." = "Back in Awaymate: Settings → AI recognition → choose “OpenAI” → paste the key.";
 "Zurück: %@ → %@, ab %@" = "Return: %@ → %@, from %@";
 "Zusätzlich: Recht auf Erstattung des Tickets oder Ersatzflug sowie Verpflegung/Hotel." = "In addition: right to a ticket refund or replacement flight, plus meals/hotel.";
 "Zügig umsteigen." = "Connect quickly.";
 "eSIM / Roaming geprüft" = "eSIM / roaming checked";
-"erstellt mit Skylog" = "created with Skylog";
+"erstellt mit Awaymate" = "created with Awaymate";
 "erwartet" = "expected";
 "geflogen" = "flown";
 "in der Luft" = "in the air";
@@ -745,7 +745,7 @@
 "Öffnen" = "Open";
 "Über mich / KI-Erinnerungen" = "About me / AI memories";
 "„%@“ ablegen bei" = "File “%@” under";
-"„Neue Registrierung“ → Name: Skylog." = "“New registration” → Name: Skylog.";
+"„Neue Registrierung“ → Name: Awaymate." = "“New registration” → Name: Awaymate.";
 "„default-application“ → „Authorization“ → den „Application Key“ kopieren." = "“default-application” → “Authorization” → copy the “Application Key”.";
 "✈️ %@ storniert" = "✈️ %@ cancelled";
 "✈️ Flug umgebucht" = "✈️ Flight rebooked";

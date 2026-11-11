@@ -1,4 +1,4 @@
-// Skylog push engine – watches the flights the app reports and decides which pushes to send.
+// Awaymate push engine – watches the flights the app reports and decides which pushes to send.
 // Platform independent: storage, push sending and logging are injected (Node server or Cloudflare Worker).
 
 const MIN = 60_000;
@@ -17,7 +17,7 @@ const TEXTS = {
     beltTitle: "{0}: Gepäckband {1}", beltBody: "Dein Gepäck kommt auf Band {0}.",
     cancelledTitle: "{0} annulliert", cancelledBody: "Dein Flug wurde annulliert.",
     boardingTitle: "{0}: Boarding beginnt", boardingBody: "Voraussichtlich jetzt. Abflug {0}.", boardingBodyGate: "Voraussichtlich jetzt an Gate {0}. Abflug {1}.",
-    testTitle: "Skylog-Server verbunden ✅", testBody: "Pushs funktionieren.",
+    testTitle: "Awaymate-Server verbunden ✅", testBody: "Pushs funktionieren.",
   },
   en: {
     delayed: "Delayed", scheduled: "On time", cancelled: "Cancelled", diverted: "Diverted", leftGate: "Left the gate", inAir: "In the air",
@@ -31,7 +31,7 @@ const TEXTS = {
     beltTitle: "{0}: baggage belt {1}", beltBody: "Your bags arrive on belt {0}.",
     cancelledTitle: "{0} cancelled", cancelledBody: "Your flight has been cancelled.",
     boardingTitle: "{0}: boarding starts", boardingBody: "Probably now. Departure {0}.", boardingBodyGate: "Probably now at gate {0}. Departure {1}.",
-    testTitle: "Skylog server connected ✅", testBody: "Push notifications work.",
+    testTitle: "Awaymate server connected ✅", testBody: "Push notifications work.",
   },
   fr: {
     delayed: "Retardé", scheduled: "À l'heure", cancelled: "Annulé", diverted: "Dérouté", leftGate: "A quitté la porte", inAir: "En vol",
@@ -45,7 +45,7 @@ const TEXTS = {
     beltTitle: "{0} : tapis {1}", beltBody: "Vos bagages arrivent sur le tapis {0}.",
     cancelledTitle: "{0} annulé", cancelledBody: "Votre vol a été annulé.",
     boardingTitle: "{0} : l'embarquement commence", boardingBody: "Probablement maintenant. Départ {0}.", boardingBodyGate: "Probablement maintenant à la porte {0}. Départ {1}.",
-    testTitle: "Serveur Skylog connecté ✅", testBody: "Les notifications fonctionnent.",
+    testTitle: "Serveur Awaymate connecté ✅", testBody: "Les notifications fonctionnent.",
   },
   it: {
     delayed: "In ritardo", scheduled: "In orario", cancelled: "Cancellato", diverted: "Dirottato", leftGate: "Ha lasciato il gate", inAir: "In volo",
@@ -59,7 +59,7 @@ const TEXTS = {
     beltTitle: "{0}: nastro bagagli {1}", beltBody: "I tuoi bagagli arrivano sul nastro {0}.",
     cancelledTitle: "{0} cancellato", cancelledBody: "Il tuo volo è stato cancellato.",
     boardingTitle: "{0}: inizia l'imbarco", boardingBody: "Probabilmente ora. Partenza {0}.", boardingBodyGate: "Probabilmente ora al gate {0}. Partenza {1}.",
-    testTitle: "Server Skylog collegato ✅", testBody: "Le notifiche funzionano.",
+    testTitle: "Server Awaymate collegato ✅", testBody: "Le notifiche funzionano.",
   },
   es: {
     delayed: "Retrasado", scheduled: "A tiempo", cancelled: "Cancelado", diverted: "Desviado", leftGate: "Salió de la puerta", inAir: "En vuelo",
@@ -73,21 +73,21 @@ const TEXTS = {
     beltTitle: "{0}: cinta de equipaje {1}", beltBody: "Tu equipaje llega por la cinta {0}.",
     cancelledTitle: "{0} cancelado", cancelledBody: "Tu vuelo ha sido cancelado.",
     boardingTitle: "{0}: comienza el embarque", boardingBody: "Probablemente ahora. Salida {0}.", boardingBodyGate: "Probablemente ahora en la puerta {0}. Salida {1}.",
-    testTitle: "Servidor Skylog conectado ✅", testBody: "Las notificaciones funcionan.",
+    testTitle: "Servidor Awaymate conectado ✅", testBody: "Las notificaciones funcionan.",
   },
 };
 // Texts of the public status page (link shared with family & friends)
 const PAGE = {
   de: { alt: "Höhe", spd: "Geschwindigkeit", left: "Noch", climb: "steigt", desc: "sinkt", live: "Live-Position, Stand {0}", est: "Geschätzte Position (keine Live-Daten)", title: "Flugstatus", dep: "Abflug", arr: "Ankunft", gate: "Gate", terminal: "Terminal", belt: "Gepäckband", delay: "{0} Min. später",
-        onTime: "pünktlich", updated: "Stand {0}", local: "Ortszeit", ended: "Dieser Link ist abgelaufen oder ungültig.", by: "Geteilt mit Skylog", reload: "Die Seite aktualisiert sich jede Minute." },
+        onTime: "pünktlich", updated: "Stand {0}", local: "Ortszeit", ended: "Dieser Link ist abgelaufen oder ungültig.", by: "Geteilt mit Awaymate", reload: "Die Seite aktualisiert sich jede Minute." },
   en: { alt: "Altitude", spd: "Speed", left: "Remaining", climb: "climbing", desc: "descending", live: "Live position as of {0}", est: "Estimated position (no live data)", title: "Flight status", dep: "Departure", arr: "Arrival", gate: "Gate", terminal: "Terminal", belt: "Baggage belt", delay: "{0} min late",
-        onTime: "on time", updated: "As of {0}", local: "local time", ended: "This link has expired or is invalid.", by: "Shared with Skylog", reload: "This page refreshes every minute." },
+        onTime: "on time", updated: "As of {0}", local: "local time", ended: "This link has expired or is invalid.", by: "Shared with Awaymate", reload: "This page refreshes every minute." },
   fr: { alt: "Altitude", spd: "Vitesse", left: "Restant", climb: "en montée", desc: "en descente", live: "Position en direct à {0}", est: "Position estimée (pas de données en direct)", title: "Statut du vol", dep: "Départ", arr: "Arrivée", gate: "Porte", terminal: "Terminal", belt: "Tapis à bagages", delay: "{0} min de retard",
-        onTime: "à l'heure", updated: "Mis à jour à {0}", local: "heure locale", ended: "Ce lien a expiré ou n'est pas valide.", by: "Partagé avec Skylog", reload: "La page s'actualise chaque minute." },
+        onTime: "à l'heure", updated: "Mis à jour à {0}", local: "heure locale", ended: "Ce lien a expiré ou n'est pas valide.", by: "Partagé avec Awaymate", reload: "La page s'actualise chaque minute." },
   it: { alt: "Quota", spd: "Velocità", left: "Mancano", climb: "in salita", desc: "in discesa", live: "Posizione in tempo reale alle {0}", est: "Posizione stimata (nessun dato in tempo reale)", title: "Stato del volo", dep: "Partenza", arr: "Arrivo", gate: "Gate", terminal: "Terminal", belt: "Nastro bagagli", delay: "{0} min di ritardo",
-        onTime: "in orario", updated: "Aggiornato alle {0}", local: "ora locale", ended: "Questo link è scaduto o non è valido.", by: "Condiviso con Skylog", reload: "La pagina si aggiorna ogni minuto." },
+        onTime: "in orario", updated: "Aggiornato alle {0}", local: "ora locale", ended: "Questo link è scaduto o non è valido.", by: "Condiviso con Awaymate", reload: "La pagina si aggiorna ogni minuto." },
   es: { alt: "Altitud", spd: "Velocidad", left: "Faltan", climb: "ascendiendo", desc: "descendiendo", live: "Posición en directo a las {0}", est: "Posición estimada (sin datos en directo)", title: "Estado del vuelo", dep: "Salida", arr: "Llegada", gate: "Puerta", terminal: "Terminal", belt: "Cinta de equipaje", delay: "{0} min de retraso",
-        onTime: "a tiempo", updated: "Actualizado a las {0}", local: "hora local", ended: "Este enlace ha caducado o no es válido.", by: "Compartido con Skylog", reload: "La página se actualiza cada minuto." },
+        onTime: "a tiempo", updated: "Actualizado a las {0}", local: "hora local", ended: "Este enlace ha caducado o no es válido.", by: "Compartido con Awaymate", reload: "La página se actualiza cada minuto." },
 };
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const LOCALES = { de: "de-CH", en: "en-GB", fr: "fr-FR", it: "it-IT", es: "es-ES" };
@@ -183,7 +183,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
   async function adsb(callsign) {
     for (const base of ["https://api.adsb.lol/v2/callsign/", "https://api.airplanes.live/v2/callsign/"]) {
       try {
-        const r = await fetch(base + callsign, { headers: { "User-Agent": "Skylog push server (personal)" }, signal: AbortSignal.timeout(8000) });
+        const r = await fetch(base + callsign, { headers: { "User-Agent": "Awaymate push server (personal)" }, signal: AbortSignal.timeout(8000) });
         if (!r.ok) continue;
         const j = await r.json();
         const ac = (j.ac || []).filter((a) => (a.flight || "").trim().toUpperCase() === callsign).sort((a, b) => (a.seen ?? 99) - (b.seen ?? 99))[0];
@@ -199,7 +199,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     if (!/^[0-9a-f]{6}$/i.test(hex)) return null;
     for (const base of ["https://api.adsb.lol/v2/hex/", "https://api.airplanes.live/v2/hex/"]) {
       try {
-        const r = await fetch(base + hex.toLowerCase(), { headers: { "User-Agent": "Skylog push server (personal)" }, signal: AbortSignal.timeout(8000) });
+        const r = await fetch(base + hex.toLowerCase(), { headers: { "User-Agent": "Awaymate push server (personal)" }, signal: AbortSignal.timeout(8000) });
         if (!r.ok) continue;
         const ac = ((await r.json()).ac || [])[0];
         if (ac && ac.lat != null) return { lat: ac.lat, lon: ac.lon, onGround: ac.alt_baro === "ground", gs: ac.gs, alt: ac.alt_baro, track: ac.track ?? ac.true_heading ?? null, rate: ac.baro_rate ?? ac.geom_rate ?? null };

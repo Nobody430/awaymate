@@ -1,4 +1,4 @@
-# Cloudflare Workers deployment of the Skylog push server (free plan is enough for personal use).
+# Cloudflare Workers deployment of the Awaymate push server (free plan is enough for personal use).
 name = "skylog-push"
 main = "worker.mjs"
 compatibility_date = "2026-06-01"

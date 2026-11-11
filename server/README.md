@@ -1,4 +1,4 @@
-# Skylog Push-Server
+# Awaymate Push-Server
 
 Kleiner Server ohne Abhängigkeiten. Er beobachtet die anstehenden Flüge, die die App ihm meldet, und schickt
 Echtzeit-Mitteilungen (Gate, Verspätung, Boarding ca., Gate verlassen, gestartet, gelandet, Gepäckband) sowie
@@ -29,7 +29,7 @@ Updates für die Live-Aktivität.
 | `CLOUDFLARE_API_TOKEN` | Cloudflare → Profil → API Tokens → Vorlage „Edit Cloudflare Workers“ |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare → Workers & Pages → Account ID |
 | `SERVER_TOKEN` | frei gewähltes langes Passwort (auch in der App eintragen) |
-| `RELAY_URL` | Adresse des Relays, siehe Haupt-README |
+| `RELAY_URL` | Adresse des Relays, siehe [README](../README.md#relay) |
 | `FLIGHTAWARE_KEY` | optional; sonst nimmt der Server den Key aus der App |
 
 **Relay (nur der Herausgeber der App):** zusätzlich `APNS_KEY_ID`, `APNS_KEY_P8`, `APPLE_TEAM_ID`.
@@ -59,4 +59,4 @@ Höhe und Geschwindigkeit ohne Ort werden trotzdem angezeigt (das Flugzeug steht
 
 Mitteilungen und Status-Seite gibt es auf Deutsch, Englisch, Französisch, Italienisch und Spanisch (`core.mjs`, `TEXTS` und `PAGE`).
 
-Relay: `GET /health` · `POST /push` mit `{deviceToken, payload, type}`; sendet ausschliesslich an die Skylog-App.
+Relay: `GET /health` · `POST /push` mit `{deviceToken, payload, type}`; sendet ausschliesslich an die Awaymate-App.

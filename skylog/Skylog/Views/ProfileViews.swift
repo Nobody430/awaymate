@@ -35,7 +35,7 @@ struct ProfileSettingsView: View {
             } header: {
                 Text("Obsidian")
             } footer: {
-                Text("Wähle den Ordner deines Vaults (in der Dateien-App unter iCloud Drive → Obsidian oder Auf meinem iPhone → Obsidian). Nur die ausgewählten Notizen werden genutzt. Packlisten und Reisepläne kannst du zurück in den Vault speichern (Ordner „Skylog“).")
+                Text("Wähle den Ordner deines Vaults (in der Dateien-App unter iCloud Drive → Obsidian oder Auf meinem iPhone → Obsidian). Nur die ausgewählten Notizen werden genutzt. Packlisten und Reisepläne kannst du zurück in den Vault speichern (Ordner „Awaymate“).")
             }
         }
         .navigationTitle("Persönliches Profil")

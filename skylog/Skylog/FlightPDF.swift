@@ -105,7 +105,7 @@ private struct ItineraryPDFView: View {
             ForEach(flights) { f in
                 FlightPDFCard(flight: f, map: maps[f.id])
             }
-            Text("Alle Zeiten in Ortszeit des jeweiligen Flughafens. Stand: \(Date().formatted(date: .abbreviated, time: .shortened)) · erstellt mit Skylog")
+            Text("Alle Zeiten in Ortszeit des jeweiligen Flughafens. Stand: \(Date().formatted(date: .abbreviated, time: .shortened)) · erstellt mit Awaymate")
                 .font(.system(size: 9))
                 .foregroundStyle(.gray)
         }

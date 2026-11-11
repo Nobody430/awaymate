@@ -32,14 +32,14 @@ targets:
       properties:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
-        CFBundleDisplayName: Skylog
+        CFBundleDisplayName: Awaymate
         CFBundleDevelopmentRegion: de
         CFBundleLocalizations: [de, en, fr, it, es]
         UILaunchScreen: {}
         UIBackgroundModes: [fetch, remote-notification, location]
-        NSLocationWhenInUseUsageDescription: Skylog nutzt deinen ungefähren Standort am Reisetag, um Flugdaten im Hintergrund aktuell zu halten.
-        NSLocationAlwaysAndWhenInUseUsageDescription: Am Reisetag hält Skylog die App über deinen ungefähren Standort wach und aktualisiert Gate, Verspätungen und Landung – auch wenn die App geschlossen ist. Am Flughafen wird automatisch aktualisiert.
-        NSCalendarsFullAccessUsageDescription: Skylog trägt deine Flüge und Hotels in den Kalender ein, hält Zeiten und Gates dort aktuell und kann Flüge aus deinem Kalender importieren.
+        NSLocationWhenInUseUsageDescription: Awaymate nutzt deinen ungefähren Standort am Reisetag, um Flugdaten im Hintergrund aktuell zu halten.
+        NSLocationAlwaysAndWhenInUseUsageDescription: Am Reisetag hält Awaymate die App über deinen ungefähren Standort wach und aktualisiert Gate, Verspätungen und Landung – auch wenn die App geschlossen ist. Am Flughafen wird automatisch aktualisiert.
+        NSCalendarsFullAccessUsageDescription: Awaymate trägt deine Flüge und Hotels in den Kalender ein, hält Zeiten und Gates dort aktuell und kann Flüge aus deinem Kalender importieren.
         BGTaskSchedulerPermittedIdentifiers: [com.nobody430.skylog.refresh]
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         ITSAppUsesNonExemptEncryption: false
@@ -73,7 +73,7 @@ targets:
       properties:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
-        CFBundleDisplayName: Skylog
+        CFBundleDisplayName: Awaymate
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
 schemes:

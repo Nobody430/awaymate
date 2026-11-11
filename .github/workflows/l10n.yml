@@ -1,6 +1,6 @@
-name: Export Skylog strings
+name: Export Awaymate strings
 
-# Lets the compiler collect every localizable string of Skylog (exact keys incl. format specifiers)
+# Lets the compiler collect every localizable string of Awaymate (exact keys incl. format specifiers)
 # and prints them to the log, so translations can be written without a Mac.
 on:
   workflow_dispatch:

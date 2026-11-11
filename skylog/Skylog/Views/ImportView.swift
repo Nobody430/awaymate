@@ -102,7 +102,7 @@ struct ImportView: View {
                         Label("PDF / E-Mail-Datei wählen", systemImage: "doc.text.magnifyingglass")
                     }
                 } footer: {
-                    Text("Tipp: In Outlook ein PDF-Ticket oder eine Bordkarte teilen → „Skylog“ wählen.")
+                    Text("Tipp: In Outlook ein PDF-Ticket oder eine Bordkarte teilen → „Awaymate“ wählen.")
                 }
 
                 if let status {

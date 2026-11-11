@@ -81,7 +81,7 @@ enum Notifier {
                 result.append(Change(title: String(localized: "\(n) ist gelandet"), body: String(localized: "Willkommen in \(new.arrival.displayCity)!") + (new.arrival.baggageBelt.map { String(localized: " Gepäckband \($0).") } ?? "")))
                 let comp = Compensation.check(new)
                 if comp.status == .eligible {
-                    result.append(Change(title: String(localized: "\(n): \(comp.amountEUR) € Entschädigung möglich"), body: String(localized: "Ankunft über 3 Stunden zu spät – in Skylog den Antrag erstellen.")))
+                    result.append(Change(title: String(localized: "\(n): \(comp.amountEUR) € Entschädigung möglich"), body: String(localized: "Ankunft über 3 Stunden zu spät – in Awaymate den Antrag erstellen.")))
                 }
             case .canceled:
                 result.append(Change(title: String(localized: "\(n) annulliert"), body: String(localized: "Dein Flug nach \(new.arrival.displayCity) wurde annulliert.")))

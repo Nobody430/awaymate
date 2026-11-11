@@ -1,4 +1,4 @@
-// Skylog push server for Cloudflare Workers (free plan): one Durable Object keeps the state,
+// Awaymate push server for Cloudflare Workers (free plan): one Durable Object keeps the state,
 // a cron trigger runs the flight check every minute.
 import { DurableObject } from "cloudflare:workers";
 import { createEngine } from "./core.mjs";

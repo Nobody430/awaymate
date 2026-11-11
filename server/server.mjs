@@ -1,5 +1,5 @@
-// Skylog push server for Node 20+ / Docker (Fly.io, a VPS, a Raspberry Pi …). No dependencies.
-// Pushes go through the Skylog relay (RELAY_URL) or – if you built the app yourself – directly to Apple
+// Awaymate push server for Node 20+ / Docker (Fly.io, a VPS, a Raspberry Pi …). No dependencies.
+// Pushes go through the Awaymate relay (RELAY_URL) or – if you built the app yourself – directly to Apple
 // with your own APNs key (APNS_KEY_ID, APNS_KEY_P8, APPLE_TEAM_ID, APNS_TOPIC).
 import http from "node:http";
 import http2 from "node:http2";
@@ -77,4 +77,4 @@ http.createServer(async (req, res) => {
     res.end(JSON.stringify(r.json));
   }
   if (r.after) r.after().catch((e) => log("loop", e.message));
-}).listen(cfg.port, () => log(`Skylog push server on :${cfg.port} (push ${cfg.pushMode}, flightaware ${cfg.faKey ? "on" : "per device"})`));
+}).listen(cfg.port, () => log(`Awaymate push server on :${cfg.port} (push ${cfg.pushMode}, flightaware ${cfg.faKey ? "on" : "per device"})`));

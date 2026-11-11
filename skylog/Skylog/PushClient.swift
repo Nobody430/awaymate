@@ -1,7 +1,7 @@
 import Foundation
 import UIKit
 
-/// Connection to the Skylog push server: registers the device and syncs upcoming flights.
+/// Connection to the Awaymate push server: registers the device and syncs upcoming flights.
 @MainActor
 enum PushClient {
     static var serverURL: String { (UserDefaults.standard.string(forKey: "pushServerURL") ?? "").trimmingCharacters(in: .whitespacesAndNewlines) }

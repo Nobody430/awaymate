@@ -1,7 +1,7 @@
 import Foundation
 import CoreLocation
 
-/// Keeps Skylog awake in the background on travel days (coarse location) and wakes it at airports (geofences),
+/// Keeps Awaymate awake in the background on travel days (coarse location) and wakes it at airports (geofences),
 /// so flight data is refreshed regularly without a server.
 @MainActor
 final class TravelMode: NSObject, CLLocationManagerDelegate {

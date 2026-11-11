@@ -543,7 +543,7 @@ final class FlightStore {
     }
 
     func exportURL() -> URL? {
-        let url = FileManager.default.temporaryDirectory.appending(path: "Skylog-Fluege.json")
+        let url = FileManager.default.temporaryDirectory.appending(path: "Awaymate-Fluege.json")
         guard let data = try? Self.encoder.encode(flights), (try? data.write(to: url)) != nil else { return nil }
         return url
     }

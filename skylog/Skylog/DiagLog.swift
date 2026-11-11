@@ -33,7 +33,7 @@ enum DiagLog {
     static func exportURL(flights: [Flight]) -> URL? {
         let d = UserDefaults.standard
         let info = Bundle.main.infoDictionary
-        var head = "Skylog Diagnose\n"
+        var head = "Awaymate Diagnose\n"
         head += "Version \(info?["CFBundleShortVersionString"] as? String ?? "?") (\(info?["CFBundleVersion"] as? String ?? "?")), iOS \(ProcessInfo.processInfo.operatingSystemVersionString)\n"
         head += "Sprache \(Bundle.main.preferredLocalizations.first ?? "?"), Zeitzone \(TimeZone.current.identifier)\n"
         head += "Datenquelle \(d.string(forKey: "provider") ?? "aerodatabox"), FlightAware-Key \(FlightAware.hasKey ? "ja" : "nein"), AeroDataBox-Key \(Settings.hasKey ? "ja" : "nein")\n"
@@ -46,7 +46,7 @@ enum DiagLog {
         }
         head += "\nProtokoll (UTC, neueste unten):\n"
         let body = queue.sync { (try? String(contentsOf: url, encoding: .utf8)) ?? "(leer)\n" }
-        let out = FileManager.default.temporaryDirectory.appending(path: "Skylog-Diagnose.txt")
+        let out = FileManager.default.temporaryDirectory.appending(path: "Awaymate-Diagnose.txt")
         guard (try? Data((head + body).utf8).write(to: out, options: .atomic)) != nil else { return nil }
         return out
     }

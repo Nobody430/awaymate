@@ -17,7 +17,7 @@ struct YearReviewCard: View {
                 let renderer = ImageRenderer(content: ReviewPoster(stats: stats, title: title).frame(width: 360))
                 renderer.scale = 3
                 guard let img = renderer.uiImage, let data = img.pngData() else { return }
-                let url = FileManager.default.temporaryDirectory.appending(path: "Skylog-Rueckblick.png")
+                let url = FileManager.default.temporaryDirectory.appending(path: "Awaymate-Rueckblick.png")
                 if (try? data.write(to: url)) != nil { shared = SharedFile(url: url) }
             } label: {
                 Label("Als Bild teilen", systemImage: "square.and.arrow.up")
@@ -60,7 +60,7 @@ struct ReviewPoster: View {
             if let top = stats.top({ [$0.airlineName] }, limit: 1).first {
                 Text("Meistens mit \(top.0) (\(top.1)×)").font(.footnote)
             }
-            Text("Skylog").font(.caption2).opacity(0.7)
+            Text("Awaymate").font(.caption2).opacity(0.7)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)

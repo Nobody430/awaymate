@@ -1,4 +1,4 @@
-// Skylog push relay (Cloudflare Worker). Run by whoever publishes the app: it holds the Apple push key and
+// Awaymate push relay (Cloudflare Worker). Run by whoever publishes the app: it holds the Apple push key and
 // forwards pushes from users' own servers to Apple. It knows no flights and no API keys – only a device token
 // and the finished notification. It only ever sends to this one app.
 import { pushViaFetch } from "../server/apns.mjs";

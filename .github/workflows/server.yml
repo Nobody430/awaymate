@@ -83,7 +83,7 @@ jobs:
           rm -f secrets.json
           url=$(grep -o 'https://[a-zA-Z0-9.-]*workers\.dev' deploy.log | head -1)
           echo "### Push-Server: $url" >> "$GITHUB_STEP_SUMMARY"
-          echo "Diese Adresse (ohne https://) und dein SERVER_TOKEN gehören in Skylog → Einstellungen → Echtzeit-Pushs." >> "$GITHUB_STEP_SUMMARY"
+          echo "Diese Adresse (ohne https://) und dein SERVER_TOKEN gehören in Awaymate → Einstellungen → Echtzeit-Pushs." >> "$GITHUB_STEP_SUMMARY"
           echo "::notice::Push-Server läuft: $url"
           # a fresh workers.dev address can take a minute or two to answer
           for i in $(seq 1 18); do

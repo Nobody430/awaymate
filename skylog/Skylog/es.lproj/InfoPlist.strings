@@ -1,4 +1,4 @@
 /* Permission texts – es */
-"NSCalendarsFullAccessUsageDescription" = "Skylog añade tus vuelos y hoteles al calendario, mantiene allí los horarios y las puertas al día y puede importar vuelos desde tu calendario.";
-"NSLocationAlwaysAndWhenInUseUsageDescription" = "El día del viaje, Skylog mantiene la app activa mediante tu ubicación aproximada y actualiza la puerta, los retrasos y el aterrizaje, incluso con la app cerrada. En el aeropuerto se actualiza automáticamente.";
-"NSLocationWhenInUseUsageDescription" = "Skylog usa tu ubicación aproximada el día del viaje para mantener actualizados los datos de vuelo en segundo plano.";
+"NSCalendarsFullAccessUsageDescription" = "Awaymate añade tus vuelos y hoteles al calendario, mantiene allí los horarios y las puertas al día y puede importar vuelos desde tu calendario.";
+"NSLocationAlwaysAndWhenInUseUsageDescription" = "El día del viaje, Awaymate mantiene la app activa mediante tu ubicación aproximada y actualiza la puerta, los retrasos y el aterrizaje, incluso con la app cerrada. En el aeropuerto se actualiza automáticamente.";
+"NSLocationWhenInUseUsageDescription" = "Awaymate usa tu ubicación aproximada el día del viaje para mantener actualizados los datos de vuelo en segundo plano.";

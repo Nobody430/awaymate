@@ -13,11 +13,11 @@ def write(path, pairs, header):
 src = json.load(open(os.path.join(here, "source.json")))
 for lang in sys.argv[2:]:
     tr = json.load(open(os.path.join(here, f"tr_{lang}.json")))
-    write(f"{repo}/Skylog/{lang}.lproj/Localizable.strings", tr["Skylog"], f"Skylog – {lang}. Keys are the German source texts.")
-    write(f"{repo}/SkylogWidgets/{lang}.lproj/Localizable.strings", tr["SkylogWidgets"], f"Skylog widgets – {lang}")
+    write(f"{repo}/Skylog/{lang}.lproj/Localizable.strings", tr["Skylog"], f"Awaymate – {lang}. Keys are the German source texts.")
+    write(f"{repo}/SkylogWidgets/{lang}.lproj/Localizable.strings", tr["SkylogWidgets"], f"Awaymate widgets – {lang}")
     write(f"{repo}/Skylog/{lang}.lproj/InfoPlist.strings", tr["InfoPlist"], f"Permission texts – {lang}")
     print(lang, len(tr["Skylog"]), len(tr["SkylogWidgets"]))
 # German: keys are the texts themselves; the folder makes German a supported language
 for target in ("Skylog", "SkylogWidgets"):
-    write(f"{repo}/{target}/de.lproj/Localizable.strings", {"Skylog": "Skylog"}, "German is the source language – the keys are the texts.")
+    write(f"{repo}/{target}/de.lproj/Localizable.strings", {"Awaymate": "Awaymate"}, "German is the source language – the keys are the texts.")
 write(f"{repo}/Skylog/de.lproj/InfoPlist.strings", src["InfoPlist"], "Permission texts – de")

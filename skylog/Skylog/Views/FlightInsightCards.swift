@@ -376,7 +376,7 @@ struct BoardingPassButton: View {
     }
 }
 
-/// Sheet for a file shared to Skylog: attach it to one of the upcoming flights.
+/// Sheet for a file shared to Awaymate: attach it to one of the upcoming flights.
 struct AttachDocumentView: View {
     let url: URL
     @Environment(FlightStore.self) private var store

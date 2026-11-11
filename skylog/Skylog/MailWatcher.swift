@@ -84,7 +84,7 @@ enum MailWatcher {
                     if autoAdd {
                         store.delete([old.id])
                         store.add(flight)
-                        Notifier.post(id: "mail-rebook-\(c.id)", title: String(localized: "✈️ Flug umgebucht"), body: what + String(localized: ". In Skylog ersetzt."))
+                        Notifier.post(id: "mail-rebook-\(c.id)", title: String(localized: "✈️ Flug umgebucht"), body: what + String(localized: ". In Awaymate ersetzt."))
                     } else {
                         flight.replacesID = old.id
                         if store.suggest(flight) {

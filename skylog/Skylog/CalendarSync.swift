@@ -70,7 +70,7 @@ enum CalendarSync {
         map = ids
     }
 
-    /// Removes everything Skylog put into the calendar (when the option is switched off).
+    /// Removes everything Awaymate put into the calendar (when the option is switched off).
     static func removeAll() {
         guard EKEventStore.authorizationStatus(for: .event) == .fullAccess else { return }
         for id in map.values { if let e = store.event(withIdentifier: id) { try? store.remove(e, span: .thisEvent) } }
@@ -85,7 +85,7 @@ enum CalendarImport {
     static func scan() async throws -> [FlightCandidate] {
         let store = EKEventStore()
         guard (try? await store.requestFullAccessToEvents()) == true else {
-            throw AIClient.Failure(message: String(localized: "Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Skylog → Kalender (Vollzugriff)."))
+            throw AIClient.Failure(message: String(localized: "Kein Zugriff auf den Kalender. Erlaube ihn in den iPhone-Einstellungen → Awaymate → Kalender (Vollzugriff)."))
         }
         let now = Date()
         let ownEvents = Set((UserDefaults.standard.dictionary(forKey: "calendarEvents") as? [String: String] ?? [:]).values)
@@ -99,7 +99,7 @@ enum CalendarImport {
                   let to = Calendar.current.date(byAdding: .year, value: 1, to: from) else { continue }
             let predicate = store.predicateForEvents(withStart: from, end: to, calendars: nil)
             for event in store.events(matching: predicate) {
-                // skip all-day entries and the ones Skylog wrote itself
+                // skip all-day entries and the ones Awaymate wrote itself
                 guard !event.isAllDay, let id = event.eventIdentifier, !ownEvents.contains(id),
                       let title = event.title, let start = event.startDate else { continue }
                 let text = [title, event.location ?? "", event.notes ?? ""].joined(separator: "\n")

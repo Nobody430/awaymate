@@ -20,3 +20,6 @@ saldo/Saldo/Info.plist
 skylog/Skylog/Skylog.entitlements
 skylog/SkylogWidgets/Info.plist
 skylog/SkylogWidgets/SkylogWidgets.entitlements
+node_modules/
+.wrangler/
+__pycache__/

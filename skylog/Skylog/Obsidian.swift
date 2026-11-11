@@ -7,7 +7,7 @@ enum ObsidianVault {
 
     static var isConnected: Bool { UserDefaults.standard.data(forKey: bookmarkKey) != nil }
 
-    /// Relative paths of the notes the user allowed Skylog to use.
+    /// Relative paths of the notes the user allowed Awaymate to use.
     static var selectedNotes: [String] {
         get { UserDefaults.standard.stringArray(forKey: notesKey) ?? [] }
         set { UserDefaults.standard.set(newValue, forKey: notesKey) }
@@ -76,15 +76,15 @@ enum ObsidianVault {
         }) ?? ""
     }
 
-    /// Writes a note into "<vault>/Skylog/<name>.md".
+    /// Writes a note into "<vault>/Awaymate/<name>.md".
     static func write(name: String, markdown: String) throws -> String {
         try withVault { root in
-            let folder = root.appending(path: "Skylog")
+            let folder = root.appending(path: "Awaymate")
             try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
             let safe = name.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-")
             let url = folder.appending(path: "\(safe).md")
             try markdown.write(to: url, atomically: true, encoding: .utf8)
-            return "Skylog/\(safe).md"
+            return "Awaymate/\(safe).md"
         }
     }
 }
@@ -153,7 +153,7 @@ enum PackingAI {
 
     static func markdown(trip: Trip) -> String {
         var md = "# " + String(localized: "Packliste – \(trip.name)") + "\n\n"
-        md += "_\(trip.start.formatted(date: .long, time: .omitted)) – \(trip.end.formatted(date: .long, time: .omitted)) · " + String(localized: "erstellt mit Skylog") + "_\n\n"
+        md += "_\(trip.start.formatted(date: .long, time: .omitted)) – \(trip.end.formatted(date: .long, time: .omitted)) · " + String(localized: "erstellt mit Awaymate") + "_\n\n"
         for item in trip.packing { md += "- [\(item.done ? "x" : " ")] \(item.name)\n" }
         return md
     }
