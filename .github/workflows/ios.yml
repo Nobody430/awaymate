@@ -1,4 +1,4 @@
-name: Build iOS apps
+name: Build Awaymate (unsigned)
 
 # Unsigned test build (for sideloading). Manual only – the TestFlight workflow already builds every change.
 on:
@@ -17,10 +17,6 @@ jobs:
         include:
           - app: Skylog
             dir: skylog
-          - app: Vital
-            dir: vital
-          - app: Saldo
-            dir: saldo
     steps:
       - uses: actions/checkout@v4
 

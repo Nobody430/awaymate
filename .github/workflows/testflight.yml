@@ -1,11 +1,9 @@
-name: Apps to TestFlight
+name: Awaymate to TestFlight
 
 on:
   push:
     paths:
       - 'skylog/**'
-      - 'vital/**'
-      - 'saldo/**'
       - '.github/workflows/testflight.yml'
       - '.github/scripts/**'
   workflow_dispatch:
@@ -106,7 +104,7 @@ jobs:
         run: |
           set -o pipefail
           FAILED=""
-          for pair in Skylog:skylog Vital:vital Saldo:saldo; do
+          for pair in Skylog:skylog; do
             APP="${pair%%:*}"; DIR="${pair##*:}"
             echo "::group::$APP"
             (

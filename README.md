@@ -251,8 +251,3 @@ Secrets des Herausgebers für Relay und eigenen Server: `CLOUDFLARE_API_TOKEN`, 
 
 - Keine Keys, Tokens oder Passwörter im Repository; alles liegt in GitHub-Secrets oder auf dem Gerät.
 - Wer einen Fehler mit Sicherheitsbezug findet, meldet ihn bitte über ein privates GitHub-Advisory statt öffentlich.
-
-## Vital und Saldo
-
-In diesem Projekt liegen vorübergehend noch zwei weitere, unabhängige Apps (`vital/`, `saldo/`). Sie ziehen in ein eigenes
-Projekt um und haben mit Awaymate nichts zu tun.

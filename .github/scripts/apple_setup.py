@@ -17,8 +17,6 @@ API = "https://api.appstoreconnect.apple.com/v1"
 APPS = [
     ("Skylog", "com.nobody430.skylog", ["APP_GROUPS", "PUSH_NOTIFICATIONS"]),
     ("Skylog Widgets", "com.nobody430.skylog.widgets", ["APP_GROUPS"]),
-    ("Vital", "com.nobody430.vital", ["HEALTHKIT"]),
-    ("Saldo", "com.nobody430.saldo", []),
 ]
 
 

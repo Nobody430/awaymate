@@ -21,7 +21,7 @@ from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.x509.oid import NameOID
 
 API = "https://api.appstoreconnect.apple.com/v1"
-BUNDLE_IDS = ["com.nobody430.skylog", "com.nobody430.skylog.widgets", "com.nobody430.vital", "com.nobody430.saldo"]
+BUNDLE_IDS = ["com.nobody430.skylog", "com.nobody430.skylog.widgets"]
 
 
 def token():
