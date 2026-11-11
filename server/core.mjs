@@ -179,6 +179,9 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     return push(liveToken, { aps }, { type: "liveactivity" });
   }
 
+  /** "LX338" → "LX 338" (the way the app shows flight numbers) */
+  const shown = (n) => String(n || "").replace(/^([A-Z0-9]{2})(\d{1,4}[A-Z]?)$/, "$1 $2");
+
   // ---------- data sources ----------
   async function adsb(callsign) {
     for (const base of ["https://api.adsb.lol/v2/callsign/", "https://api.airplanes.live/v2/callsign/"]) {
@@ -203,6 +206,21 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         if (!r.ok) continue;
         const ac = ((await r.json()).ac || [])[0];
         if (ac && ac.lat != null) return { lat: ac.lat, lon: ac.lon, onGround: ac.alt_baro === "ground", gs: ac.gs, alt: ac.alt_baro, track: ac.track ?? ac.true_heading ?? null, rate: ac.baro_rate ?? ac.geom_rate ?? null };
+      } catch {}
+    }
+    return null;
+  }
+
+  /** Same networks by aircraft registration (when neither callsign nor transponder code finds the plane). */
+  async function adsbReg(reg) {
+    const want = String(reg || "").replace(/\s/g, "").toUpperCase();
+    if (want.length < 4) return null;
+    for (const base of ["https://api.adsb.lol/v2/reg/", "https://api.airplanes.live/v2/reg/"]) {
+      try {
+        const r = await fetch(base + encodeURIComponent(want), { headers: { "User-Agent": "Awaymate push server (personal)" }, signal: AbortSignal.timeout(8000) });
+        if (!r.ok) continue;
+        const ac = ((await r.json()).ac || []).find((a) => String(a.r || "").replace(/\s/g, "").toUpperCase() === want);
+        if (ac && ac.lat != null) return { lat: ac.lat, lon: ac.lon, onGround: ac.alt_baro === "ground", gs: ac.gs, alt: ac.alt_baro, track: ac.track ?? ac.true_heading ?? null, rate: ac.baro_rate ?? null };
       } catch {}
     }
     return null;
@@ -271,17 +289,23 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         snap.delay = x.departure_delay ? Math.round(x.departure_delay / 60) : snap.delay || 0;
         if (x.cancelled) { snap.statusKey = "cancelled"; snap.final = true; }
         if (x.diverted) snap.statusKey = "diverted";
-        if (x.actual_out && !prev.leftGate) { snap.leftGate = true; snap.statusKey = "leftGate"; msgs.push([L("leftGateTitle"), L("leftGateBody", f.number)]); }
-        if (x.actual_off && !prev.inAir && !prev.landed) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", f.number), L("departedEta", fmtTime(snap.arr, f.arrTz, lang))]); }
-        if ((x.actual_on || x.actual_in) && !prev.landed) { snap.landed = true; snap.inAir = false; snap.statusKey = "landed"; msgs.push([L("landedTitle", f.number), L("landedBody", f.toCity || f.to)]); }
+        if (x.actual_out && !prev.leftGate) { snap.leftGate = true; snap.statusKey = "leftGate"; msgs.push([L("leftGateTitle"), L("leftGateBody", shown(f.number))]); }
+        if (x.actual_off && !prev.inAir && !prev.landed) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", shown(f.number)), L("departedEta", fmtTime(snap.arr, f.arrTz, lang))]); }
+        if ((x.actual_on || x.actual_in) && !prev.landed) { snap.landed = true; snap.inAir = false; snap.statusKey = "landed"; msgs.push([L("landedTitle", shown(f.number)), L("landedBody", f.toCity || f.to)]); }
         if (x.actual_in && !prev.atGate) { snap.atGate = true; snap.statusKey = "atGate"; }
       }
     }
 
     // Free ADS-B: from 15 min before departure while not landed (every loop = 1 min)
-    if ((f.callsign || f.icao24) && now > dep - 15 * MIN && !snap.landed) {
+    if ((f.callsign || f.icao24 || f.reg) && now > dep - 15 * MIN && !snap.landed) {
       let p = f.callsign ? await adsb(f.callsign) : null;
       if (!p && f.icao24) p = await adsbHex(f.icao24);
+      if (!p && f.reg) {
+        // the aircraft may still be flying its previous leg: in the air it only counts once our flight has left the gate
+        // or is clearly past its departure time
+        const r = await adsbReg(f.reg);
+        if (r && (r.onGround || snap.leftGate || snap.inAir || now > Date.parse(snap.dep || f.dep) + 10 * MIN)) p = r;
+      }
       // ignore the 0°/0° placeholder and fixes far off the route (another aircraft with the same callsign)
       const sane = p && (Math.abs(p.lat) > 0.05 || Math.abs(p.lon) > 0.05) &&
         (f.fromLat == null || f.toLat == null ||
@@ -289,7 +313,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       if (p && !sane) p = null;
       if (p) snap.pos = { lat: p.lat, lon: p.lon, track: p.track, ground: !!p.onGround, t: now,
                           altFt: typeof p.alt === "number" ? p.alt : null, kt: typeof p.gs === "number" ? p.gs : null, fpm: typeof p.rate === "number" ? p.rate : null };
-      if (p && !p.onGround && !snap.inAir) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", f.number), L("departedTo", f.toCity || f.to)]); }
+      if (p && !p.onGround && !snap.inAir) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", shown(f.number)), L("departedTo", f.toCity || f.to)]); }
       if (p && !p.onGround && f.toLat != null && p.gs > 100) {
         const km = distKm(p, { lat: f.toLat, lon: f.toLon });
         const eta = now + (km / (p.gs * 1.852)) * 3600_000 + 10 * MIN;
@@ -298,7 +322,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       }
       if (p && p.onGround && snap.inAir && f.toLat != null && distKm(p, { lat: f.toLat, lon: f.toLon }) < 15) {
         snap.inAir = false; snap.landed = true; snap.statusKey = "landed";
-        msgs.push([L("landedTitle", f.number), L("landedBody", f.toCity || f.to)]);
+        msgs.push([L("landedTitle", shown(f.number)), L("landedBody", f.toCity || f.to)]);
       }
     }
 
@@ -321,21 +345,21 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     // Change notifications
     if (snap.gate && snap.gate !== prev.gate) {
       msgs.push(prev.gate
-        ? [L("gateChangeTitle", f.number), L("gateChangeBody", snap.gate, prev.gate)]
-        : [L("gateTitle", f.number, snap.gate), snap.terminal ? L("gateBodyTerminal", snap.gate, snap.terminal) : L("gateBody", snap.gate)]);
+        ? [L("gateChangeTitle", shown(f.number)), L("gateChangeBody", snap.gate, prev.gate)]
+        : [L("gateTitle", shown(f.number), snap.gate), snap.terminal ? L("gateBodyTerminal", snap.gate, snap.terminal) : L("gateBody", snap.gate)]);
     }
     // compare with the time the user was last told about, so creeping delays are noticed
     const told = Date.parse(prev.toldDep || prev.dep || snap.dep);
     if (!snap.inAir && !snap.landed && Math.abs(Date.parse(snap.dep) - told) >= 5 * MIN) {
       snap.toldDep = snap.dep;
       const when = fmtTime(snap.dep, f.depTz, lang);
-      msgs.push([L("newDepTitle", f.number), snap.delay > 0 ? L("newDepBodyDelay", when, snap.delay) : L("newDepBody", when)]);
+      msgs.push([L("newDepTitle", shown(f.number)), snap.delay > 0 ? L("newDepBodyDelay", when, snap.delay) : L("newDepBody", when)]);
     }
     // the belt only matters once the plane is on its way down
     if (snap.belt && snap.belt !== prev.belt && (snap.landed || (snap.inAir && Date.parse(snap.arr) - now < 45 * MIN))) {
-      msgs.push([L("beltTitle", f.number, snap.belt), L("beltBody", snap.belt)]);
+      msgs.push([L("beltTitle", shown(f.number), snap.belt), L("beltBody", snap.belt)]);
     }
-    if (snap.statusKey === "cancelled" && prev.statusKey !== "cancelled") msgs.push([L("cancelledTitle", f.number), L("cancelledBody")]);
+    if (snap.statusKey === "cancelled" && prev.statusKey !== "cancelled") msgs.push([L("cancelledTitle", shown(f.number)), L("cancelledBody")]);
 
     // Estimated boarding (airlines don't publish boarding status in open data)
     const boardingAt = Date.parse(snap.dep) - (f.longHaul ? 50 : 35) * MIN;
@@ -343,7 +367,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       snap.boardingNotified = true;
       if (!snap.leftGate) snap.statusKey = "boarding";
       const when = fmtTime(snap.dep, f.depTz, lang);
-      msgs.push([L("boardingTitle", f.number), snap.gate ? L("boardingBodyGate", snap.gate, when) : L("boardingBody", when)]);
+      msgs.push([L("boardingTitle", shown(f.number)), snap.gate ? L("boardingBodyGate", snap.gate, when) : L("boardingBody", when)]);
     }
 
     dev.last[f.id] = snap;
@@ -368,7 +392,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         if (dev.updated && Date.parse(dev.updated) < cutoff) { delete state.devices[token]; dirty = true; continue; }
         dev.last ||= {};
         for (const f of dev.flights || []) {
-          try { if (await checkFlight(token, dev, f)) dirty = true; } catch (e) { log("check", f.number, e.message); }
+          try { if (await checkFlight(token, dev, f)) dirty = true; } catch (e) { log("check", shown(f.number), e.message); }
         }
       }
     } finally { running = false; }
@@ -532,7 +556,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     const updated = fmtTime(new Date(snap.faAt || Date.parse(dev_updated(f)) || Date.now()).toISOString(), f.depTz, lang);
     const body =
       // a delayed flight shows the delay instead of a contradicting "on time"
-      `<div class="card"><div class="top"><span>${esc(f.number)}</span><span class="${late ? cls(delay) : "status"}">` +
+      `<div class="card"><div class="top"><span>${esc(shown(f.number))}</span><span class="${late ? cls(delay) : "status"}">` +
       `${late ? esc(P("delay", delay)) : esc(status)}</span></div>` +
       `<div class="route"><div><div class="code">${esc(f.from)}</div><div class="muted">${esc(f.fromCity || "")}</div>` +
       `<div class="muted lbl">${esc(P("dep"))}</div><div class="time ${cls(delay)}">${planned(f.depPlanned, f.depTz, delay)}${esc(fmtTime(dep, f.depTz, lang))}</div></div>` +

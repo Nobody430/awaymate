@@ -81,6 +81,7 @@ enum PushClient {
         if let fa = f.faFlightID { p["faFlightID"] = fa }
         if let share = f.shareToken { p["share"] = share }
         if let hex = f.icao24, !hex.isEmpty { p["icao24"] = hex.lowercased() }
+        if let reg = f.aircraftReg, !reg.isEmpty { p["reg"] = reg }
         // what the app itself sees right now – the status page shows the newer of this and the server's own data
         if let pos = f.liveTelemetry, f.isInAir {
             var q: [String: Any] = ["t": Int(pos.timestamp.timeIntervalSince1970 * 1000), "ground": pos.onGround]
