@@ -17,7 +17,24 @@ export class SkylogState extends DurableObject {
                   pushMode: direct ? "direct" : relay ? "relay" : "off" };
     const sendPush = (t, p, o) => direct ? pushViaFetch(creds, t, p, o) : relay ? pushViaRelay(relay, t, p, o)
       : Promise.resolve({ ok: false, status: 0, reason: "no push configured" });
-    this._engine = createEngine({ cfg, state, sendPush, log: (...a) => console.log(...a),
+    // Device sync document, stored in chunks (Durable Object values are size-limited)
+    const storage = this.ctx.storage;
+    const store = {
+      get: async () => {
+        const meta = await storage.get("sync:meta");
+        if (!meta) return null;
+        const parts = await storage.get(Array.from({ length: meta.chunks }, (_, i) => `sync:${i}`));
+        return { rev: meta.rev, data: Array.from({ length: meta.chunks }, (_, i) => parts.get(`sync:${i}`) || "").join("") };
+      },
+      put: async ({ rev, data }) => {
+        const size = 100_000, old = (await storage.get("sync:meta"))?.chunks || 0;
+        const chunks = Math.max(1, Math.ceil(data.length / size));
+        for (let i = 0; i < chunks; i++) await storage.put(`sync:${i}`, data.slice(i * size, (i + 1) * size));
+        for (let i = chunks; i < old; i++) await storage.delete(`sync:${i}`);
+        await storage.put("sync:meta", { rev, chunks });
+      },
+    };
+    this._engine = createEngine({ cfg, state, sendPush, store, log: (...a) => console.log(...a),
                                   save: () => this.ctx.storage.put("state", state) });
     return this._engine;
   }
@@ -27,8 +44,12 @@ export class SkylogState extends DurableObject {
     const url = new URL(request.url);
     if (url.pathname === "/__tick") { await engine.loop(); return new Response("ok"); }
     const r = await engine.handle({ method: request.method, path: url.pathname,
-                                    authorization: request.headers.get("authorization") || "", body: await request.text() });
+                                    authorization: request.headers.get("authorization") || "",
+                                    language: request.headers.get("accept-language") || "", body: await request.text() });
     if (r.after) this.ctx.waitUntil(r.after());
+    if (r.html) {
+      return new Response(r.html, { status: r.status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "referrer-policy": "no-referrer" } });
+    }
     return Response.json(r.json, { status: r.status });
   }
 }

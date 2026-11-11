@@ -54,15 +54,27 @@ async function sendDirect(deviceToken, payload, opts = {}) {
 }
 const sendPush = (t, p, o) => direct ? sendDirect(t, p, o) : relay ? pushViaRelay(relay, t, p, o) : Promise.resolve({ ok: false, status: 0, reason: "no push configured" });
 
-const engine = createEngine({ cfg, state, save, sendPush, log });
+// Device sync document (one file)
+const dataFile = path.join(dataDir, "sync.json");
+const store = {
+  get: async () => { try { return JSON.parse(fs.readFileSync(dataFile, "utf8")); } catch { return null; } },
+  put: async (doc) => { fs.mkdirSync(dataDir, { recursive: true }); fs.writeFileSync(dataFile, JSON.stringify(doc)); },
+};
+const engine = createEngine({ cfg, state, save, sendPush, store, log });
 setInterval(() => engine.loop().catch((e) => log("loop", e.message)), 60_000);
 
 http.createServer(async (req, res) => {
   let body = "";
-  for await (const chunk of req) { body += chunk; if (body.length > 200_000) break; }
-  const r = await engine.handle({ method: req.method, path: (req.url || "/").split("?")[0], authorization: req.headers.authorization, body })
+  for await (const chunk of req) { body += chunk; if (body.length > 4_500_000) break; }
+  const r = await engine.handle({ method: req.method, path: (req.url || "/").split("?")[0], authorization: req.headers.authorization,
+                                  language: req.headers["accept-language"] || "", body })
     .catch((e) => ({ status: 500, json: { error: e.message } }));
-  res.writeHead(r.status, { "content-type": "application/json" });
-  res.end(JSON.stringify(r.json));
+  if (r.html) {
+    res.writeHead(r.status, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "referrer-policy": "no-referrer" });
+    res.end(r.html);
+  } else {
+    res.writeHead(r.status, { "content-type": "application/json" });
+    res.end(JSON.stringify(r.json));
+  }
   if (r.after) r.after().catch((e) => log("loop", e.message));
 }).listen(cfg.port, () => log(`Skylog push server on :${cfg.port} (push ${cfg.pushMode}, flightaware ${cfg.faKey ? "on" : "per device"})`));

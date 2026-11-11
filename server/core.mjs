@@ -76,12 +76,28 @@ const TEXTS = {
     testTitle: "Servidor Skylog conectado ✅", testBody: "Las notificaciones funcionan.",
   },
 };
+// Texts of the public status page (link shared with family & friends)
+const PAGE = {
+  de: { title: "Flugstatus", dep: "Abflug", arr: "Ankunft", gate: "Gate", terminal: "Terminal", belt: "Gepäckband", delay: "{0} Min. später",
+        onTime: "pünktlich", updated: "Stand {0}", local: "Ortszeit", ended: "Dieser Link ist abgelaufen oder ungültig.", by: "Geteilt mit Skylog", reload: "Die Seite aktualisiert sich jede Minute." },
+  en: { title: "Flight status", dep: "Departure", arr: "Arrival", gate: "Gate", terminal: "Terminal", belt: "Baggage belt", delay: "{0} min late",
+        onTime: "on time", updated: "As of {0}", local: "local time", ended: "This link has expired or is invalid.", by: "Shared with Skylog", reload: "This page refreshes every minute." },
+  fr: { title: "Statut du vol", dep: "Départ", arr: "Arrivée", gate: "Porte", terminal: "Terminal", belt: "Tapis à bagages", delay: "{0} min de retard",
+        onTime: "à l'heure", updated: "Mis à jour à {0}", local: "heure locale", ended: "Ce lien a expiré ou n'est pas valide.", by: "Partagé avec Skylog", reload: "La page s'actualise chaque minute." },
+  it: { title: "Stato del volo", dep: "Partenza", arr: "Arrivo", gate: "Gate", terminal: "Terminal", belt: "Nastro bagagli", delay: "{0} min di ritardo",
+        onTime: "in orario", updated: "Aggiornato alle {0}", local: "ora locale", ended: "Questo link è scaduto o non è valido.", by: "Condiviso con Skylog", reload: "La pagina si aggiorna ogni minuto." },
+  es: { title: "Estado del vuelo", dep: "Salida", arr: "Llegada", gate: "Puerta", terminal: "Terminal", belt: "Cinta de equipaje", delay: "{0} min de retraso",
+        onTime: "a tiempo", updated: "Actualizado a las {0}", local: "hora local", ended: "Este enlace ha caducado o no es válido.", by: "Compartido con Skylog", reload: "La página se actualiza cada minuto." },
+};
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const LOCALES = { de: "de-CH", en: "en-GB", fr: "fr-FR", it: "it-IT", es: "es-ES" };
+
 function t(lang, key, ...args) {
   const text = (TEXTS[lang] || TEXTS.de)[key] ?? TEXTS.de[key] ?? key;
   return text.replace(/\{(\d)\}/g, (_, i) => String(args[Number(i)] ?? ""));
 }
 
-export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
+export function createEngine({ cfg, state, save, sendPush, store = null, log = () => {} }) {
   state.devices ||= {};
 
   function forgetToken(t) {
@@ -155,7 +171,7 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
 
   function fmtTime(iso, tz, lang) {
     if (!iso) return "–";
-    try { return new Date(iso).toLocaleTimeString({ en: "en-GB", fr: "fr-FR", it: "it-IT", es: "es-ES" }[lang] || "de-CH", { hour: "2-digit", minute: "2-digit", timeZone: tz || "Europe/Zurich" }); }
+    try { return new Date(iso).toLocaleTimeString(LOCALES[lang] || "de-CH", { hour: "2-digit", minute: "2-digit", timeZone: tz || "Europe/Zurich" }); }
     catch { return new Date(iso).toISOString().slice(11, 16); }
   }
 
@@ -278,7 +294,28 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
     if (req.path === "/health") {
       return { status: 200, json: { ok: true, devices: Object.keys(state.devices).length, push: cfg.pushMode, flightaware: !!cfg.faKey } };
     }
+    // Public status page: the unguessable id in the link is the key
+    if (req.method === "GET" && req.path.startsWith("/s/")) return statusPage(req.path.slice(3), req.language);
     if (!cfg.token || !safeEqual(req.authorization || "", `Bearer ${cfg.token}`)) return { status: 401, json: { error: "unauthorized" } };
+
+    // Device sync: one opaque document per server, merged by the apps (the server only stores it)
+    if (req.path === "/data" && store) {
+      if (req.method === "GET") {
+        const doc = await store.get();
+        return { status: 200, json: { rev: doc?.rev || 0, data: doc?.data ?? null } };
+      }
+      if (req.method === "PUT") {
+        let put;
+        try { put = JSON.parse(req.body || ""); } catch { return { status: 400, json: { error: "json" } }; }
+        if (typeof put.data !== "string" || put.data.length > 4_000_000) return { status: 413, json: { error: "too large" } };
+        const cur = await store.get();
+        // someone else wrote in between: the app must merge again
+        if ((cur?.rev || 0) !== (put.rev || 0)) return { status: 409, json: { rev: cur?.rev || 0, data: cur?.data ?? null } };
+        const rev = (cur?.rev || 0) + 1;
+        await store.put({ rev, data: put.data });
+        return { status: 200, json: { rev } };
+      }
+    }
     let body = {};
     try { body = req.body ? JSON.parse(req.body) : {}; } catch { return { status: 400, json: { error: "json" } }; }
 
@@ -288,7 +325,8 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
         return { status: 429, json: { error: "too many devices" } };
       }
       const dev = state.devices[body.deviceToken] || { flights: [], live: {}, last: {} };
-      dev.flights = (body.flights || []).slice(0, 50);
+      dev.flights = (body.flights || []).slice(0, 50).map((f) =>
+        typeof f.share === "string" && !/^[A-Za-z0-9_-]{20,64}$/.test(f.share) ? { ...f, share: undefined } : f);
       dev.live = { ...dev.live, ...(body.liveTokens || {}) };
       if (typeof body.flightawareKey === "string") dev.faKey = body.flightawareKey || undefined;
       if (typeof body.lang === "string") dev.lang = body.lang.slice(0, 2).toLowerCase();
@@ -307,6 +345,54 @@ export function createEngine({ cfg, state, save, sendPush, log = () => {} }) {
       return { status: r.ok ? 200 : 502, json: { ok: r.ok, status: r.status, reason: r.reason || undefined } };
     }
     return { status: 404, json: { error: "not found" } };
+  }
+
+  function statusPage(id, language) {
+    const lang = PAGE[(language || "").slice(0, 2).toLowerCase()] ? language.slice(0, 2).toLowerCase() : "en";
+    const P = (k, ...a) => (PAGE[lang][k] || k).replace(/\{(\d)\}/g, (_, i) => String(a[Number(i)] ?? ""));
+    let found = null;
+    if (/^[A-Za-z0-9_-]{20,64}$/.test(id)) {
+      for (const dev of Object.values(state.devices)) {
+        const f = (dev.flights || []).find((x) => x.share === id);
+        if (f) { found = { f, snap: (dev.last || {})[f.id] || {} }; break; }
+      }
+    }
+    const page = (body, refresh) => ({
+      status: found ? 200 : 404,
+      html: `<!doctype html><html lang="${lang}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
+        `<meta name="robots" content="noindex,nofollow">${refresh ? '<meta http-equiv="refresh" content="60">' : ""}<title>${esc(P("title"))}</title>` +
+        `<style>:root{color-scheme:light dark}body{margin:0;font:16px/1.4 -apple-system,system-ui,sans-serif;background:#0b1220;color:#f2f4f8}` +
+        `main{max-width:460px;margin:0 auto;padding:24px 16px}.card{background:#172033;border-radius:18px;padding:20px;margin-bottom:14px}` +
+        `.top{display:flex;justify-content:space-between;align-items:center;font-weight:600}.status{color:#7fb0ff}.late{color:#ffb454}` +
+        `.route{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}.code{font-size:34px;font-weight:800;line-height:1}` +
+        `.time{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}.muted{color:#93a0b8;font-size:13px}.right{text-align:right}` +
+        `.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tile{background:#172033;border-radius:14px;padding:12px}` +
+        `.tile b{display:block;font-size:20px}</style></head><body><main>${body}<p class="muted">${esc(P("by"))}</p></main></body></html>`,
+    });
+    if (!found) return page(`<div class="card">${esc(P("ended"))}</div>`, false);
+    const { f, snap } = found;
+    const dep = snap.dep || f.dep, arr = snap.arr || f.arr;
+    // statusKey = set by this server (translated here); otherwise the label the app sent
+    const status = snap.statusKey ? t(lang, snap.statusKey) : (snap.statusLabel || f.statusLabel || t(lang, "scheduled"));
+    const delay = Math.max(0, snap.delay || 0);
+    const gate = snap.landed || snap.inAir ? snap.arrGate : (snap.gate || f.gate);
+    const terminal = snap.landed || snap.inAir ? null : (snap.terminal || f.terminal);
+    const tile = (label, value) => (value ? `<div class="tile"><span class="muted">${esc(label)}</span><b>${esc(value)}</b></div>` : "");
+    const tiles = tile(P("terminal"), terminal) + tile(P("gate"), gate) + tile(P("belt"), snap.landed || snap.inAir ? snap.belt : null);
+    const updated = fmtTime(new Date(snap.faAt || Date.parse(dev_updated(f)) || Date.now()).toISOString(), f.depTz, lang);
+    const body =
+      `<div class="card"><div class="top"><span>${esc(f.number)}</span><span class="${delay >= 5 && !snap.inAir && !snap.landed ? "late" : "status"}">` +
+      `${esc(status)}${delay >= 5 && !snap.inAir && !snap.landed ? " · " + esc(P("delay", delay)) : ""}</span></div>` +
+      `<div class="route"><div><div class="code">${esc(f.from)}</div><div class="muted">${esc(P("dep"))}</div><div class="time">${esc(fmtTime(dep, f.depTz, lang))}</div></div>` +
+      `<div class="right"><div class="code">${esc(f.to)}</div><div class="muted">${esc(f.toCity || P("arr"))}</div><div class="time">${esc(fmtTime(arr, f.arrTz, lang))}</div></div></div>` +
+      `<p class="muted">${esc(P("local"))} · ${esc(P("updated", updated))}</p></div>` +
+      (tiles ? `<div class="grid">${tiles}</div><p></p>` : "") + `<p class="muted">${esc(P("reload"))}</p>`;
+    return page(body, true);
+  }
+  // time of the device's last sync (shown when the server has not queried anything itself yet)
+  function dev_updated(f) {
+    for (const dev of Object.values(state.devices)) if ((dev.flights || []).includes(f)) return dev.updated;
+    return null;
   }
 
   return { loop, handle };
