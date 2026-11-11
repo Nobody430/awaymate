@@ -120,6 +120,10 @@
 "Abflug: %@ (%@)" = "Departure: %@ (%@)";
 "Abflugdatum" = "Departure date";
 "Abfragen diesen Monat" = "Requests this month";
+"Abgeglichen %@: %lld Flüge, %lld Reisen, %lld Buchungen" = "Synced %@: %lld flights, %lld trips, %lld bookings";
+"Abgleich abgebrochen: das Ergebnis hätte zu viele Flüge entfernt." = "Sync stopped: the result would have removed too many flights.";
+"Abgleich fehlgeschlagen: %@" = "Sync failed: %@";
+"Abgleich im Moment nicht möglich – bitte später nochmal." = "Sync isn't possible right now – please try again later.";
 "Achtung: %lld V – Ladegeräte sind meist ok, Föhn/Glätteisen aus der Schweiz oft nicht." = "Note: %lld V – chargers are usually fine, hairdryers/straighteners from Switzerland often aren't.";
 "Achtung: Ein ChatGPT-Abo (Plus/Pro) gilt NICHT für die API. Die API wird separat über Guthaben abgerechnet." = "Note: a ChatGPT subscription (Plus/Pro) does NOT cover the API. The API is billed separately via credit.";
 "Adresse" = "Address";
@@ -245,6 +249,7 @@
 "Dein Name wie auf dem Ticket (z.B. Max Muster)" = "Your name as on the ticket (e.g. Max Muster)";
 "Dein Platz ist auf der Schattenseite 👍" = "Your seat is on the shady side 👍";
 "Dein Platz ist auf der Sonnenseite – Sonnenbrille einpacken 😎" = "Your seat is on the sunny side – pack sunglasses 😎";
+"Dein Status-Link zeigt Zeiten, Gate und Verspätung immer aktuell – ohne App, in der Sprache des Empfängers." = "Your status link always shows current times, gate and delay – no app needed, in the recipient's language.";
 "Deine Angaben" = "Your details";
 "Deine Apps auf RapidAPI öffnen." = "Open your apps on RapidAPI.";
 "Deine Heimat-Haltestelle (z.B. Frauenfeld)" = "Your home stop (e.g. Frauenfeld)";
@@ -282,6 +287,7 @@
 "Entspannt" = "Relaxed";
 "Erinnerungen (Check-in, Boarding, Landung)" = "Reminders (check-in, boarding, landing)";
 "Ersetzen" = "Replace";
+"Erstellt eine Seite auf deinem Server, die den Flugstatus live zeigt. Wer den Link hat, kann sie sehen." = "Creates a page on your server that shows the flight status live. Anyone with the link can see it.";
 "Erstflug/Auslieferung: %@ · Seriennr. %@" = "First flight/delivery: %@ · Serial no. %@";
 "Erwartet" = "Expected";
 "Export teilen …" = "Share export …";
@@ -319,7 +325,6 @@
 "Flüge exportieren (JSON)" = "Export flights (JSON)";
 "Flüge importieren" = "Import flights";
 "Flüge pro Monat" = "Flights per month";
-"Flüge starten im Schnitt ca. %lld Min. später" = "Flights depart approx. %lld min later on average";
 "Formular der Airline suchen" = "Find the airline's form";
 "Foto / Screenshot" = "Photo / screenshot";
 "Frist: in der Schweiz und Deutschland meist bis 3 Jahre, je nach Land unterschiedlich." = "Deadline: in Switzerland and Germany usually up to 3 years, varies by country.";
@@ -352,6 +357,7 @@
 "Gepäck" = "Baggage";
 "Gepäckaufgabe schliesst (ca.)" = "Bag drop closes (approx.)";
 "Gepäckband" = "Baggage belt";
+"Geräte abgleichen (iPhone, iPad)" = "Sync devices (iPhone, iPad)";
 "Gesamt" = "Total";
 "Geschwindigkeit" = "Speed";
 "Gespeicherte Flüge" = "Saved flights";
@@ -359,6 +365,7 @@
 "Gestartet (Live-Position)" = "Took off (live position)";
 "Gl. %@" = "Plat. %@";
 "Google Maps" = "Google Maps";
+"Grössere Verspätungen gemeldet" = "Major delays reported";
 "Günstig" = "Low-cost";
 "Haiku kostet für einen kompletten Postfach-Import meist nur Rappen. Opus ist genauer, aber etwa 40× teurer." = "Haiku usually costs just a few cents for a complete mailbox import. Opus is more accurate but about 40× more expensive.";
 "Haltestelle ändern" = "Change stop";
@@ -384,6 +391,7 @@
 "Innenplan (Karten)" = "Indoor map (Maps)";
 "Interessen" = "Interests";
 "Jahr" = "Year";
+"Jetzt abgleichen" = "Sync now";
 "KI" = "AI";
 "KI liest Mails … %lld/%lld · %lld Flugabschnitte" = "AI is reading emails … %lld/%lld · %lld flight segments";
 "KI-Analyse starten (ca. CHF %@)" = "Start AI analysis (approx. CHF %@)";
@@ -428,6 +436,7 @@
 "Laufende Live-Aktivitäten einmal beenden und neu starten, damit sie die Updates vom Server bekommen." = "End running Live Activities once and start them again so they receive updates from the server.";
 "Laut einer neuen Mail wurde dein Flug am %@ storniert." = "According to a new email, your flight on %@ has been cancelled.";
 "Leere Antwort erhalten." = "Empty response received.";
+"Leichte Verspätungen gemeldet" = "Minor delays reported";
 "Letzte Mail-Prüfung fehlgeschlagen – %@" = "Last email check failed – %@";
 "Links „API-Berechtigungen“ → „Berechtigung hinzufügen“ → Microsoft Graph → Delegiert → „Mail.Read“ → Hinzufügen." = "On the left, “API permissions” → “Add a permission” → Microsoft Graph → Delegated permissions → “Mail.Read” → Add permissions.";
 "Links „Authentifizierung“ → „Plattform hinzufügen“ → „iOS/macOS“ → Bundle-ID: com.nobody430.skylog → Konfigurieren." = "On the left, “Authentication” → “Add a platform” → “iOS/macOS” → Bundle ID: com.nobody430.skylog → Configure.";
@@ -499,7 +508,7 @@
 "OpenAI-API-Key (sk-…)" = "OpenAI API key (sk-…)";
 "OpenAI-Key" = "OpenAI key";
 "OpenAI-Plattform öffnen und mit deinem ChatGPT-/OpenAI-Konto anmelden." = "Open the OpenAI Platform and sign in with your ChatGPT/OpenAI account.";
-"Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys." = "Optional. With your own Skylog server, gate changes, delays, boarding (approx.), leaving the gate, takeoff, landing and baggage belt arrive instantly – and the Live Activity updates in real time. Runs for free on Cloudflare, with your own keys.";
+"Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen." = "Optional. With your own Skylog server, gate changes, delays, boarding (approx.), leaving the gate, takeoff, landing and baggage belt arrive instantly – and the Live Activity updates in real time. Runs for free on Cloudflare, with your own keys. With “Sync devices”, the same server keeps flights, trips and bookings identical on all your devices (enter the same address and token on each device). Documents and keys are not transferred.";
 "Orte" = "Places";
 "Ortszeit" = "Local time";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
@@ -589,6 +598,8 @@
 "Start" = "Takeoff";
 "Statistik" = "Statistics";
 "Status per WhatsApp" = "Status via WhatsApp";
+"Status-Link erstellen" = "Create status link";
+"Status-Link teilen" = "Share status link";
 "Steckdose" = "Power socket";
 "Steigrate" = "Climb rate";
 "Strecken" = "Routes";

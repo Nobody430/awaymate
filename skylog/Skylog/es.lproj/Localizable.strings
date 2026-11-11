@@ -120,6 +120,10 @@
 "Abflug: %@ (%@)" = "Salida: %@ (%@)";
 "Abflugdatum" = "Fecha de salida";
 "Abfragen diesen Monat" = "Consultas este mes";
+"Abgeglichen %@: %lld Flüge, %lld Reisen, %lld Buchungen" = "Sincronizado %@: %lld vuelos, %lld viajes, %lld reservas";
+"Abgleich abgebrochen: das Ergebnis hätte zu viele Flüge entfernt." = "Sincronización cancelada: el resultado habría eliminado demasiados vuelos.";
+"Abgleich fehlgeschlagen: %@" = "Error de sincronización: %@";
+"Abgleich im Moment nicht möglich – bitte später nochmal." = "La sincronización no es posible ahora – inténtalo más tarde.";
 "Achtung: %lld V – Ladegeräte sind meist ok, Föhn/Glätteisen aus der Schweiz oft nicht." = "Atención: %lld V – los cargadores suelen funcionar; los secadores y planchas de pelo de Suiza, a menudo no.";
 "Achtung: Ein ChatGPT-Abo (Plus/Pro) gilt NICHT für die API. Die API wird separat über Guthaben abgerechnet." = "Atención: una suscripción a ChatGPT (Plus/Pro) NO sirve para la API. La API se factura aparte mediante saldo.";
 "Adresse" = "Dirección";
@@ -245,6 +249,7 @@
 "Dein Name wie auf dem Ticket (z.B. Max Muster)" = "Tu nombre como en el billete (p. ej. Max Muster)";
 "Dein Platz ist auf der Schattenseite 👍" = "Tu asiento está en el lado de la sombra 👍";
 "Dein Platz ist auf der Sonnenseite – Sonnenbrille einpacken 😎" = "Tu asiento está en el lado del sol: lleva gafas de sol 😎";
+"Dein Status-Link zeigt Zeiten, Gate und Verspätung immer aktuell – ohne App, in der Sprache des Empfängers." = "Tu enlace de estado muestra siempre horarios, puerta y retraso actualizados – sin app, en el idioma del destinatario.";
 "Deine Angaben" = "Tus datos";
 "Deine Apps auf RapidAPI öffnen." = "Abre tus apps en RapidAPI.";
 "Deine Heimat-Haltestelle (z.B. Frauenfeld)" = "Tu parada de casa (p. ej. Frauenfeld)";
@@ -282,6 +287,7 @@
 "Entspannt" = "Relajado";
 "Erinnerungen (Check-in, Boarding, Landung)" = "Recordatorios (check-in, embarque, aterrizaje)";
 "Ersetzen" = "Reemplazar";
+"Erstellt eine Seite auf deinem Server, die den Flugstatus live zeigt. Wer den Link hat, kann sie sehen." = "Crea una página en tu servidor que muestra el estado del vuelo en directo. Cualquiera que tenga el enlace puede verla.";
 "Erstflug/Auslieferung: %@ · Seriennr. %@" = "Primer vuelo/entrega: %@ · N.º de serie %@";
 "Erwartet" = "Previsto";
 "Export teilen …" = "Compartir exportación…";
@@ -319,7 +325,6 @@
 "Flüge exportieren (JSON)" = "Exportar vuelos (JSON)";
 "Flüge importieren" = "Importar vuelos";
 "Flüge pro Monat" = "Vuelos por mes";
-"Flüge starten im Schnitt ca. %lld Min. später" = "Los vuelos salen de media unos %lld min más tarde";
 "Formular der Airline suchen" = "Buscar el formulario de la aerolínea";
 "Foto / Screenshot" = "Foto / captura de pantalla";
 "Frist: in der Schweiz und Deutschland meist bis 3 Jahre, je nach Land unterschiedlich." = "Plazo: en Suiza y Alemania suele ser de hasta 3 años; varía según el país.";
@@ -352,6 +357,7 @@
 "Gepäck" = "Equipaje";
 "Gepäckaufgabe schliesst (ca.)" = "Cierre de facturación de equipaje (aprox.)";
 "Gepäckband" = "Cinta de equipaje";
+"Geräte abgleichen (iPhone, iPad)" = "Sincronizar dispositivos (iPhone, iPad)";
 "Gesamt" = "Total";
 "Geschwindigkeit" = "Velocidad";
 "Gespeicherte Flüge" = "Vuelos guardados";
@@ -359,6 +365,7 @@
 "Gestartet (Live-Position)" = "Despegado (posición en directo)";
 "Gl. %@" = "Vía %@";
 "Google Maps" = "Google Maps";
+"Grössere Verspätungen gemeldet" = "Retrasos importantes notificados";
 "Günstig" = "Económico";
 "Haiku kostet für einen kompletten Postfach-Import meist nur Rappen. Opus ist genauer, aber etwa 40× teurer." = "Con Haiku, importar un buzón completo suele costar solo unos céntimos. Opus es más preciso, pero unas 40× más caro.";
 "Haltestelle ändern" = "Cambiar parada";
@@ -384,6 +391,7 @@
 "Innenplan (Karten)" = "Plano interior (Mapas)";
 "Interessen" = "Intereses";
 "Jahr" = "Año";
+"Jetzt abgleichen" = "Sincronizar ahora";
 "KI" = "IA";
 "KI liest Mails … %lld/%lld · %lld Flugabschnitte" = "La IA lee los correos… %lld/%lld · %lld tramos de vuelo";
 "KI-Analyse starten (ca. CHF %@)" = "Iniciar análisis con IA (aprox. CHF %@)";
@@ -428,6 +436,7 @@
 "Laufende Live-Aktivitäten einmal beenden und neu starten, damit sie die Updates vom Server bekommen." = "Finaliza una vez las Actividades en directo en curso y vuelve a iniciarlas para que reciban las actualizaciones del servidor.";
 "Laut einer neuen Mail wurde dein Flug am %@ storniert." = "Según un correo nuevo, tu vuelo del %@ ha sido cancelado.";
 "Leere Antwort erhalten." = "Se recibió una respuesta vacía.";
+"Leichte Verspätungen gemeldet" = "Retrasos leves notificados";
 "Letzte Mail-Prüfung fehlgeschlagen – %@" = "Falló la última comprobación del correo: %@";
 "Links „API-Berechtigungen“ → „Berechtigung hinzufügen“ → Microsoft Graph → Delegiert → „Mail.Read“ → Hinzufügen." = "A la izquierda, «Permisos de API» → «Agregar un permiso» → Microsoft Graph → Permisos delegados → «Mail.Read» → Agregar.";
 "Links „Authentifizierung“ → „Plattform hinzufügen“ → „iOS/macOS“ → Bundle-ID: com.nobody430.skylog → Konfigurieren." = "A la izquierda, «Autenticación» → «Agregar una plataforma» → «iOS/macOS» → ID de paquete: com.nobody430.skylog → Configurar.";
@@ -499,7 +508,7 @@
 "OpenAI-API-Key (sk-…)" = "Clave de API de OpenAI (sk-…)";
 "OpenAI-Key" = "Clave de OpenAI";
 "OpenAI-Plattform öffnen und mit deinem ChatGPT-/OpenAI-Konto anmelden." = "Abre la plataforma de OpenAI e inicia sesión con tu cuenta de ChatGPT/OpenAI.";
-"Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys." = "Opcional. Con tu servidor de Skylog, los cambios de puerta, los retrasos, el embarque (aprox.), la salida de la puerta, el despegue, el aterrizaje y la cinta de equipaje llegan al instante, y la Actividad en directo se actualiza en tiempo real. Funciona gratis en Cloudflare, con tus propias claves.";
+"Optional. Mit deinem Skylog-Server kommen Gate-Wechsel, Verspätungen, Boarding (ca.), Gate verlassen, Start, Landung und Gepäckband sofort – und die Live-Aktivität aktualisiert sich in Echtzeit. Läuft gratis bei Cloudflare, mit deinen eigenen Keys. Mit „Geräte abgleichen“ hält derselbe Server Flüge, Reisen und Buchungen auf allen deinen Geräten gleich (auf jedem Gerät dieselbe Adresse und dasselbe Token eintragen). Dokumente und Keys werden nicht übertragen." = "Opcional. Con tu servidor de Skylog, los cambios de puerta, los retrasos, el embarque (aprox.), la salida de la puerta, el despegue, el aterrizaje y la cinta de equipaje llegan al instante, y la Actividad en directo se actualiza en tiempo real. Funciona gratis en Cloudflare, con tus propias claves. Con «Sincronizar dispositivos», el mismo servidor mantiene vuelos, viajes y reservas iguales en todos tus dispositivos (introduce la misma dirección y el mismo token en cada uno). Los documentos y las claves no se transfieren.";
 "Orte" = "Lugares";
 "Ortszeit" = "Hora local";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
@@ -589,6 +598,8 @@
 "Start" = "Despegue";
 "Statistik" = "Estadísticas";
 "Status per WhatsApp" = "Estado por WhatsApp";
+"Status-Link erstellen" = "Crear enlace de estado";
+"Status-Link teilen" = "Compartir enlace de estado";
 "Steckdose" = "Enchufe";
 "Steigrate" = "Velocidad de ascenso";
 "Strecken" = "Rutas";
