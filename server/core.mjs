@@ -78,15 +78,15 @@ const TEXTS = {
 };
 // Texts of the public status page (link shared with family & friends)
 const PAGE = {
-  de: { alt: "Höhe", spd: "Geschwindigkeit", left: "Noch", climb: "steigt", desc: "sinkt", live: "Live-Position, Stand {0}", est: "Geschätzte Position (keine Live-Daten)", title: "Flugstatus", dep: "Abflug", arr: "Ankunft", gate: "Gate", terminal: "Terminal", belt: "Gepäckband", delay: "{0} Min. später",
+  de: { tripNow: "Jetzt", tripFlying: "Im Flug {0} nach {1}", tripAt: "In {0}", tripNext: "Nächster Flug: {0} am {1}", tripOver: "Die Reise ist zu Ende.", tripLive: "Live", tripTitle: "Reise", alt: "Höhe", spd: "Geschwindigkeit", left: "Noch", climb: "steigt", desc: "sinkt", live: "Live-Position, Stand {0}", est: "Geschätzte Position (keine Live-Daten)", title: "Flugstatus", dep: "Abflug", arr: "Ankunft", gate: "Gate", terminal: "Terminal", belt: "Gepäckband", delay: "{0} Min. später",
         onTime: "pünktlich", updated: "Stand {0}", local: "Ortszeit", ended: "Dieser Link ist abgelaufen oder ungültig.", by: "Geteilt mit Awaymate", reload: "Die Seite aktualisiert sich jede Minute." },
-  en: { alt: "Altitude", spd: "Speed", left: "Remaining", climb: "climbing", desc: "descending", live: "Live position as of {0}", est: "Estimated position (no live data)", title: "Flight status", dep: "Departure", arr: "Arrival", gate: "Gate", terminal: "Terminal", belt: "Baggage belt", delay: "{0} min late",
+  en: { tripNow: "Now", tripFlying: "On flight {0} to {1}", tripAt: "In {0}", tripNext: "Next flight: {0} on {1}", tripOver: "The trip is over.", tripLive: "Live", tripTitle: "Trip", alt: "Altitude", spd: "Speed", left: "Remaining", climb: "climbing", desc: "descending", live: "Live position as of {0}", est: "Estimated position (no live data)", title: "Flight status", dep: "Departure", arr: "Arrival", gate: "Gate", terminal: "Terminal", belt: "Baggage belt", delay: "{0} min late",
         onTime: "on time", updated: "As of {0}", local: "local time", ended: "This link has expired or is invalid.", by: "Shared with Awaymate", reload: "This page refreshes every minute." },
-  fr: { alt: "Altitude", spd: "Vitesse", left: "Restant", climb: "en montée", desc: "en descente", live: "Position en direct à {0}", est: "Position estimée (pas de données en direct)", title: "Statut du vol", dep: "Départ", arr: "Arrivée", gate: "Porte", terminal: "Terminal", belt: "Tapis à bagages", delay: "{0} min de retard",
+  fr: { tripNow: "Maintenant", tripFlying: "En vol {0} vers {1}", tripAt: "À {0}", tripNext: "Prochain vol : {0} le {1}", tripOver: "Le voyage est terminé.", tripLive: "En direct", tripTitle: "Voyage", alt: "Altitude", spd: "Vitesse", left: "Restant", climb: "en montée", desc: "en descente", live: "Position en direct à {0}", est: "Position estimée (pas de données en direct)", title: "Statut du vol", dep: "Départ", arr: "Arrivée", gate: "Porte", terminal: "Terminal", belt: "Tapis à bagages", delay: "{0} min de retard",
         onTime: "à l'heure", updated: "Mis à jour à {0}", local: "heure locale", ended: "Ce lien a expiré ou n'est pas valide.", by: "Partagé avec Awaymate", reload: "La page s'actualise chaque minute." },
-  it: { alt: "Quota", spd: "Velocità", left: "Mancano", climb: "in salita", desc: "in discesa", live: "Posizione in tempo reale alle {0}", est: "Posizione stimata (nessun dato in tempo reale)", title: "Stato del volo", dep: "Partenza", arr: "Arrivo", gate: "Gate", terminal: "Terminal", belt: "Nastro bagagli", delay: "{0} min di ritardo",
+  it: { tripNow: "Adesso", tripFlying: "In volo {0} per {1}", tripAt: "A {0}", tripNext: "Prossimo volo: {0} il {1}", tripOver: "Il viaggio è finito.", tripLive: "Live", tripTitle: "Viaggio", alt: "Quota", spd: "Velocità", left: "Mancano", climb: "in salita", desc: "in discesa", live: "Posizione in tempo reale alle {0}", est: "Posizione stimata (nessun dato in tempo reale)", title: "Stato del volo", dep: "Partenza", arr: "Arrivo", gate: "Gate", terminal: "Terminal", belt: "Nastro bagagli", delay: "{0} min di ritardo",
         onTime: "in orario", updated: "Aggiornato alle {0}", local: "ora locale", ended: "Questo link è scaduto o non è valido.", by: "Condiviso con Awaymate", reload: "La pagina si aggiorna ogni minuto." },
-  es: { alt: "Altitud", spd: "Velocidad", left: "Faltan", climb: "ascendiendo", desc: "descendiendo", live: "Posición en directo a las {0}", est: "Posición estimada (sin datos en directo)", title: "Estado del vuelo", dep: "Salida", arr: "Llegada", gate: "Puerta", terminal: "Terminal", belt: "Cinta de equipaje", delay: "{0} min de retraso",
+  es: { tripNow: "Ahora", tripFlying: "En el vuelo {0} a {1}", tripAt: "En {0}", tripNext: "Próximo vuelo: {0} el {1}", tripOver: "El viaje ha terminado.", tripLive: "En directo", tripTitle: "Viaje", alt: "Altitud", spd: "Velocidad", left: "Faltan", climb: "ascendiendo", desc: "descendiendo", live: "Posición en directo a las {0}", est: "Posición estimada (sin datos en directo)", title: "Estado del vuelo", dep: "Salida", arr: "Llegada", gate: "Puerta", terminal: "Terminal", belt: "Cinta de equipaje", delay: "{0} min de retraso",
         onTime: "a tiempo", updated: "Actualizado a las {0}", local: "hora local", ended: "Este enlace ha caducado o no es válido.", by: "Compartido con Awaymate", reload: "La página se actualiza cada minuto." },
 };
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -406,6 +406,11 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     }
     // Public status page: the unguessable id in the link is the key
     if (req.method === "GET" && req.path.startsWith("/s/")) return statusPage(req.path.slice(3), req.language);
+    // Public trip page: all flights and stays of a trip, with a live page per flight
+    if (req.method === "GET" && req.path.startsWith("/t/")) {
+      const [token, flightId] = req.path.slice(3).split("/");
+      return tripPage(token, flightId, req.language);
+    }
     if (!cfg.token || !safeEqual(req.authorization || "", `Bearer ${cfg.token}`)) return { status: 401, json: { error: "unauthorized" } };
 
     // Device sync: one opaque document per server, merged by the apps (the server only stores it)
@@ -437,6 +442,11 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       const dev = state.devices[body.deviceToken] || { flights: [], live: {}, last: {} };
       dev.flights = (body.flights || []).slice(0, 50).map((f) =>
         typeof f.share === "string" && !/^[A-Za-z0-9_-]{20,64}$/.test(f.share) ? { ...f, share: undefined } : f);
+      if (Array.isArray(body.trips)) {
+        dev.trips = body.trips.slice(0, 5)
+          .filter((x) => x && typeof x.token === "string" && /^[A-Za-z0-9_-]{20,64}$/.test(x.token))
+          .map((x) => ({ token: x.token, name: String(x.name || "").slice(0, 80), items: (Array.isArray(x.items) ? x.items : []).slice(0, 60) }));
+      }
       dev.live = { ...dev.live, ...(body.liveTokens || {}) };
       if (typeof body.flightawareKey === "string") dev.faKey = body.flightawareKey || undefined;
       if (typeof body.lang === "string") dev.lang = body.lang.slice(0, 2).toLowerCase();
@@ -457,11 +467,15 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     return { status: 404, json: { error: "not found" } };
   }
 
-  function statusPage(id, language) {
-    const lang = PAGE[(language || "").slice(0, 2).toLowerCase()] ? language.slice(0, 2).toLowerCase() : "en";
-    const P = (k, ...a) => (PAGE[lang][k] || k).replace(/\{(\d)\}/g, (_, i) => String(a[Number(i)] ?? ""));
-    let found = null;
-    if (/^[A-Za-z0-9_-]{20,64}$/.test(id)) {
+  const pageLang = (language) => (PAGE[(language || "").slice(0, 2).toLowerCase()] ? language.slice(0, 2).toLowerCase() : "en");
+  const pageText = (lang) => (k, ...a) => (PAGE[lang][k] || k).replace(/\{(\d)\}/g, (_, i) => String(a[Number(i)] ?? ""));
+
+  /** `preset` = a flight reached through a trip link ({ f, snap, dev, back }) instead of its own share id. */
+  function statusPage(id, language, preset) {
+    const lang = pageLang(language);
+    const P = pageText(lang);
+    let found = preset || null;
+    if (!found && /^[A-Za-z0-9_-]{20,64}$/.test(id || "")) {
       for (const dev of Object.values(state.devices)) {
         const f = (dev.flights || []).find((x) => x.share === id);
         if (f) { found = { f, snap: (dev.last || {})[f.id] || {}, dev }; break; }
@@ -479,7 +493,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         `.time{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}.muted{color:#93a0b8;font-size:13px}.right{text-align:right}` +
         `.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tile{background:#172033;border-radius:14px;padding:12px}` +
         `.tile b{display:block;font-size:19px;white-space:nowrap}.tile .muted{font-size:12px}#map{height:260px;border-radius:18px;margin-bottom:8px;background:#172033}` +
-        `.plane{font-size:26px;line-height:26px;text-align:center;color:#ffb454;text-shadow:0 0 3px #000}.apt{font:700 12px system-ui;color:#fff;text-shadow:0 0 3px #000}</style></head><body><main>${body}<p class="muted">${esc(P("by"))}</p></main></body></html>`,
+        `.plane{font-size:26px;line-height:26px;text-align:center;color:#ffb454;text-shadow:0 0 3px #000}.apt{font:700 12px system-ui;color:#fff;text-shadow:0 0 3px #000}a{color:#7fb0ff;text-decoration:none}.it{display:flex;gap:12px;align-items:center;background:#172033;border-radius:14px;padding:12px 14px;margin-bottom:8px}.it b{display:block}.it .grow{flex:1;min-width:0}.it.past{opacity:.55}.now{font-size:20px;font-weight:700;margin:4px 0 0}h1{font-size:24px;margin:0 0 14px}</style></head><body><main>${body}<p class="muted">${esc(P("by"))}</p></main></body></html>`,
     });
     if (!found) return page(`<div class="card">${esc(P("ended"))}</div>`, false);
     const { f, snap, dev } = found;
@@ -564,7 +578,68 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       `<div class="muted lbl">${esc(P("arr"))}</div><div class="time ${cls(arrDelay)}">${planned(f.arrPlanned, f.arrTz, arrDelay)}${esc(fmtTime(arr, f.arrTz, lang))}</div></div></div>` +
       `<p class="muted">${esc(P("local"))} · ${esc(P("updated", updated))}</p></div>` +
       map + (flightTiles ? `<div class="grid">${flightTiles}</div><p></p>` : "") + (tiles ? `<div class="grid">${tiles}</div><p></p>` : "") + `<p class="muted">${esc(P("reload"))}</p>`;
-    return page(body, true);
+    return page((found.back || "") + body, true);
+  }
+
+  function fmtDate(iso, tz, lang) {
+    try { return new Date(iso).toLocaleDateString(LOCALES[lang] || "de-CH", { weekday: "short", day: "numeric", month: "short", timeZone: tz || "Europe/Zurich" }); }
+    catch { return String(iso).slice(0, 10); }
+  }
+
+  /** Everything of one trip in the order it happens; flights the server is watching link to their live page. */
+  function tripPage(token, flightId, language) {
+    const lang = pageLang(language);
+    const P = pageText(lang);
+    let dev = null, trip = null;
+    if (/^[A-Za-z0-9_-]{20,64}$/.test(token || "")) {
+      for (const d of Object.values(state.devices)) {
+        const x = (d.trips || []).find((y) => y.token === token);
+        if (x) { dev = d; trip = x; break; }
+      }
+    }
+    if (!trip) return statusPage("", language);
+    const watched = (id) => (dev.flights || []).find((f) => f.id === id);
+    const snapOf = (id) => (dev.last || {})[id] || {};
+    const flights = trip.items.filter((i) => i && i.kind === "flight");
+    if (flightId) {
+      const f = flights.some((i) => i.id === flightId) ? watched(flightId) : null;
+      if (!f) return statusPage("", language);
+      return statusPage(null, language, { f, snap: snapOf(f.id), dev, back: `<p><a href="/t/${esc(token)}">‹ ${esc(trip.name)}</a></p>` });
+    }
+    const now = Date.now();
+    const today = new Date(now).toISOString().slice(0, 10);
+    // times: the server's own view of a watched flight is newer than what the app sent with the trip
+    const timesOf = (i) => {
+      const f = watched(i.id), s = snapOf(i.id);
+      return { dep: s.dep || f?.dep || i.dep, arr: s.arr || f?.arr || i.arr, landed: !!s.landed || i.state === "arrived", inAir: !!s.inAir && !s.landed, key: s.statusKey };
+    };
+    const flying = flights.find((i) => { const x = timesOf(i); return !x.landed && (x.inAir || (now >= Date.parse(x.dep) && now < Date.parse(x.arr))); });
+    const stay = trip.items.find((i) => i && i.kind === "stay" && i.start <= today && today <= i.end);
+    const next = flights.find((i) => Date.parse(timesOf(i).dep) > now);
+    const nowLine = flying ? P("tripFlying", shown(flying.number), flying.toCity || flying.to)
+      : stay ? P("tripAt", stay.city || stay.name)
+      : next ? P("tripNext", shown(next.number), fmtDate(timesOf(next).dep, next.depTz, lang))
+      : P("tripOver");
+    const day = (d) => fmtDate(d + "T12:00:00Z", "UTC", lang);
+    const rows = trip.items.map((i) => {
+      if (!i) return "";
+      if (i.kind === "stay") {
+        return `<div class="it${i.end < today ? " past" : ""}"><div>🛏</div><div class="grow"><b>${esc(i.name)}</b>` +
+          `<span class="muted">${esc([i.city, `${day(i.start)} – ${day(i.end)}`].filter(Boolean).join(" · "))}</span></div></div>`;
+      }
+      if (i.kind !== "flight") return "";
+      const x = timesOf(i);
+      const status = x.landed ? t(lang, "landed") : i === flying ? t(lang, "inAir") : x.key ? t(lang, x.key) : "";
+      const link = watched(i.id) && !x.landed ? `<a href="/t/${esc(token)}/${esc(i.id)}">${esc(P("tripLive"))} ›</a>` : "";
+      return `<div class="it${x.landed ? " past" : ""}"><div>✈</div><div class="grow"><b>${esc(shown(i.number))} · ${esc(i.from)} → ${esc(i.to)}</b>` +
+        `<span class="muted">${esc([fmtDate(x.dep, i.depTz, lang), `${fmtTime(x.dep, i.depTz, lang)} – ${fmtTime(x.arr, i.arrTz, lang)}`, status].filter(Boolean).join(" · "))}</span></div>${link}</div>`;
+    }).join("");
+    const body = `<h1>${esc(trip.name)}</h1><div class="card"><span class="muted">${esc(P("tripNow"))}</span><div class="now">${esc(nowLine)}</div></div>` +
+      rows + `<p class="muted">${esc(P("local"))} · ${esc(P("reload"))}</p>`;
+    const shell = statusPage("", language).html;        // same frame and styles as the flight page
+    const html = shell.replace(/<main>[\s\S]*<\/main>/, () => `<main>${body}<p class="muted">${esc(P("by"))}</p></main>`)
+      .replace(/<title>[^<]*<\/title>/, () => `<meta http-equiv="refresh" content="60"><title>${esc(trip.name)}</title>`);
+    return { status: 200, html };
   }
   // time of the device's last sync (shown when the server has not queried anything itself yet)
   function dev_updated(f) {

@@ -95,13 +95,37 @@ enum PushClient {
         return p
     }
 
+    /// Trips with a public link: every flight and stay in the order they happen (for the trip page on the server).
+    private static func sharedTrips() -> [[String: Any]] {
+        let iso = ISO8601DateFormatter()
+        return TripStore.shared.trips.filter { $0.shareToken != nil }.prefix(5).map { trip -> [String: Any] in
+            let steps = TripStep.timeline(flights: TripStore.shared.flights(for: trip, in: FlightStore.shared),
+                                          bookings: BookingStore.shared.bookings(for: trip).filter { !$0.cancelled })
+            let items: [[String: Any]] = steps.prefix(60).compactMap { step -> [String: Any]? in
+                switch step {
+                case .flight(let f):
+                    guard let dep = f.departure.best ?? f.departure.scheduled else { return nil }
+                    return ["kind": "flight", "id": f.id.uuidString, "number": FlightStore.normalizedNumber(f.number),
+                            "from": f.departure.code, "to": f.arrival.code, "toCity": f.arrival.displayCity,
+                            "dep": iso.string(from: dep), "arr": iso.string(from: f.arrival.best ?? f.arrival.scheduled ?? dep),
+                            "depTz": f.departure.tz.identifier, "arrTz": f.arrival.tz.identifier, "state": f.normalizedStatus.rawValue]
+                case .booking(let b):
+                    return ["kind": "stay", "name": b.name, "city": b.city,
+                            "start": Fmt.apiDate.string(from: b.start), "end": Fmt.apiDate.string(from: b.end)]
+                }
+            }
+            return ["token": trip.shareToken ?? "", "name": trip.name, "items": items]
+        }
+    }
+
     static func sync() async {
         guard isConfigured, let token = deviceToken, let url = endpoint("/sync") else { return }
         let horizon = Date().addingTimeInterval(7 * 86400)
         let flights = FlightStore.shared.upcoming
             .filter { !$0.normalizedStatus.isFinal && ($0.departure.best ?? .distantFuture) < horizon }
             .compactMap(payload(for:))
-        var body: [String: Any] = ["deviceToken": token, "flights": flights, "liveTokens": liveTokens, "lang": appLanguage]
+        var body: [String: Any] = ["deviceToken": token, "flights": flights, "liveTokens": liveTokens, "lang": appLanguage,
+                                   "trips": sharedTrips()]
         // Your own server uses your own FlightAware key (sent only to the server you entered, over HTTPS)
         if FlightAware.hasKey, FlightProvider.current != .aerodatabox { body["flightawareKey"] = FlightAware.apiKey }
         var request = URLRequest(url: url)

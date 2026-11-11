@@ -294,3 +294,42 @@ struct RideApp: Identifiable {
         }
     }
 }
+
+/// Public page for a whole trip on the user's own server: all flights and stays, and where the traveller is right now.
+struct TripShareSection: View {
+    let trip: Trip
+    @State private var store = TripStore.shared
+
+    private var link: URL? { trip.shareToken.flatMap { PushClient.endpoint("/t/" + $0) } }
+
+    private func setToken(_ token: String?) {
+        var t = trip
+        t.shareToken = token
+        store.upsert(t)
+        PushClient.scheduleSync()
+    }
+
+    var body: some View {
+        Section {
+            if !PushClient.isConfigured {
+                Text("Mit einem eigenen Push-Server (Einstellungen) kannst du einen Live-Link für die ganze Reise teilen.")
+                    .font(.footnote).foregroundStyle(.secondary)
+            } else if let link {
+                ShareLink(item: link) { Label("Live-Link zur Reise teilen", systemImage: "square.and.arrow.up") }
+                Button("Link entfernen", role: .destructive) { setToken(nil) }
+            } else {
+                Button {
+                    // 32 random characters – the link can't be guessed
+                    let alphabet = Array("ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789")
+                    setToken(String((0..<32).map { _ in alphabet[Int.random(in: 0..<alphabet.count)] }))
+                } label: { Label("Live-Link für die Reise erstellen", systemImage: "link") }
+            }
+        } header: {
+            Text("Familie & Freunde")
+        } footer: {
+            if PushClient.isConfigured {
+                Text("Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen.")
+            }
+        }
+    }
+}

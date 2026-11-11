@@ -773,7 +773,13 @@
   "Buchung hinzufügen": "Añadir reserva",
   "Unterkunft oder Buchung hinzufügen": "Añadir alojamiento o reserva",
   "Flug oder Buchung daraus erkennen": "Detectar un vuelo o una reserva",
-  "Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen.": "Para confirmaciones de reserva de hoteles, coches de alquiler o vuelos."
+  "Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen.": "Para confirmaciones de reserva de hoteles, coches de alquiler o vuelos.",
+  "Mit einem eigenen Push-Server (Einstellungen) kannst du einen Live-Link für die ganze Reise teilen.": "Con tu propio servidor push (Ajustes) puedes compartir un enlace en directo de todo el viaje.",
+  "Live-Link zur Reise teilen": "Compartir enlace en directo del viaje",
+  "Link entfernen": "Eliminar enlace",
+  "Live-Link für die Reise erstellen": "Crear enlace en directo del viaje",
+  "Familie & Freunde": "Familia y amigos",
+  "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen.": "La página muestra todos los vuelos y alojamientos de este viaje, dónde estás ahora y cada vuelo en directo. Cualquiera que tenga el enlace puede verla."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Sin vuelos programados",

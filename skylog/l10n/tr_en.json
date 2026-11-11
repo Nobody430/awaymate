@@ -773,7 +773,13 @@
   "Buchung hinzufügen": "Add booking",
   "Unterkunft oder Buchung hinzufügen": "Add a stay or booking",
   "Flug oder Buchung daraus erkennen": "Detect a flight or booking in it",
-  "Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen.": "For booking confirmations of hotels, rental cars or flights."
+  "Für Buchungsbestätigungen von Hotels, Mietwagen oder Flügen.": "For booking confirmations of hotels, rental cars or flights.",
+  "Mit einem eigenen Push-Server (Einstellungen) kannst du einen Live-Link für die ganze Reise teilen.": "With your own push server (Settings) you can share a live link for the whole trip.",
+  "Live-Link zur Reise teilen": "Share live link to the trip",
+  "Link entfernen": "Remove link",
+  "Live-Link für die Reise erstellen": "Create live link for the trip",
+  "Familie & Freunde": "Family & friends",
+  "Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen.": "The page shows all flights and stays of this trip, where you are right now, and every flight live. Anyone with the link can see it."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

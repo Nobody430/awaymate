@@ -278,6 +278,7 @@
 "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " = "L'IA n'a pas fourni de plan exploitable. Réessaie ou choisis un autre modèle d'IA dans les Réglages.\n\nRéponse : ";
 "Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten." = "L'IA planifie ton voyage… cela prend en général 30 à 60 secondes, quelques minutes pour les longs voyages.";
 "Die Reise hat keine Tage – bitte Start und Ende prüfen." = "Le voyage ne compte aucun jour – vérifie le début et la fin.";
+"Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen." = "La page montre tous les vols et hébergements de ce voyage, où tu te trouves en ce moment, et chaque vol en direct. Toute personne ayant le lien peut la voir.";
 "Die Stufe „Personal“ wählen und die Bedingungen akzeptieren." = "Choisis le niveau « Personal » et accepte les conditions.";
 "Diese Links funktionieren im Browser – niemand braucht dafür eine App:" = "Ces liens fonctionnent dans le navigateur – personne n'a besoin d'une app pour cela :";
 "Distanz" = "Distance";
@@ -307,6 +308,7 @@
 "Erstflug/Auslieferung: %@ · Seriennr. %@" = "Premier vol/livraison : %@ · N° de série %@";
 "Erwartet" = "Estimé";
 "Export teilen …" = "Partager l'export…";
+"Familie & Freunde" = "Famille et amis";
 "Familie & Freunde informieren" = "Informer famille et amis";
 "Fast nur im Dunkeln – Seite egal 🌙" = "Presque uniquement de nuit – peu importe le côté 🌙";
 "Fehler %lld: %@" = "Erreur %lld : %@";
@@ -463,6 +465,7 @@
 "Leere Antwort erhalten." = "Réponse vide reçue.";
 "Leichte Verspätungen gemeldet" = "Légers retards signalés";
 "Letzte Mail-Prüfung fehlgeschlagen – %@" = "Échec de la dernière vérification des e-mails – %@";
+"Link entfernen" = "Supprimer le lien";
 "Link zur Buchung" = "Lien vers la réservation";
 "Links „API-Berechtigungen“ → „Berechtigung hinzufügen“ → Microsoft Graph → Delegiert → „Mail.Read“ → Hinzufügen." = "À gauche, « API autorisées » → « Ajouter une autorisation » → Microsoft Graph → Autorisations déléguées → « Mail.Read » → Ajouter.";
 "Links „Authentifizierung“ → „Plattform hinzufügen“ → „iOS/macOS“ → Bundle-ID: com.nobody430.skylog → Konfigurieren." = "À gauche, « Authentification » → « Ajouter une plateforme » → « iOS/macOS » → ID de bundle : com.nobody430.skylog → Configurer.";
@@ -473,6 +476,8 @@
 "Live-Aktivität automatisch (4 h vor Abflug)" = "Activité en direct automatique (4 h avant le départ)";
 "Live-Aktivität beenden" = "Arrêter l'Activité en direct";
 "Live-Daten werden nur für Flüge der nächsten 3 Tage abgefragt, alle anderen kommen aus den Mail-Angaben." = "Les données en direct ne sont demandées que pour les vols des 3 prochains jours ; tous les autres proviennent des données des e-mails.";
+"Live-Link für die Reise erstellen" = "Créer un lien en direct pour le voyage";
+"Live-Link zur Reise teilen" = "Partager le lien en direct du voyage";
 "Losgehen spätestens %@ (%@ vor Abflug am Flughafen)" = "Partir au plus tard à %@ (à l'aéroport %@ avant le départ)";
 "Länder" = "Pays";
 "Länder der Flughäfen unbekannt – Flug aktualisieren." = "Pays des aéroports inconnus – actualise le vol.";
@@ -495,6 +500,7 @@
 "Mietwagen" = "Voiture de location";
 "Mit KI-Erkennung: Die KI liest die gefundenen Mails und übernimmt nur echte Buchungen (inkl. Umbuchungen und Stornos)." = "Avec la détection IA : l'IA lit les e-mails trouvés et ne reprend que les vraies réservations (y compris modifications et annulations).";
 "Mit Outlook anmelden & durchsuchen" = "Se connecter à Outlook et rechercher";
+"Mit einem eigenen Push-Server (Einstellungen) kannst du einen Live-Link für die ganze Reise teilen." = "Avec ton propre serveur push (Réglages), tu peux partager un lien en direct pour tout le voyage.";
 "Mitte" = "Milieu";
 "Mitteilung bei Gate-/Zeitänderung" = "Notification en cas de changement de porte/d'horaire";
 "Mittel" = "Moyen";

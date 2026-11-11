@@ -278,6 +278,7 @@
 "Die KI hat keinen brauchbaren Plan geliefert. Bitte nochmal versuchen oder in den Einstellungen ein anderes KI-Modell wählen.\n\nAntwort: " = "The AI did not return a usable plan. Please try again or choose a different AI model in Settings.\n\nResponse: ";
 "Die KI plant deine Reise … das dauert meist 30–60 Sekunden, bei langen Reisen ein paar Minuten." = "The AI is planning your trip … this usually takes 30–60 seconds, a few minutes for long trips.";
 "Die Reise hat keine Tage – bitte Start und Ende prüfen." = "The trip has no days – please check start and end.";
+"Die Seite zeigt alle Flüge und Unterkünfte dieser Reise, wo du gerade bist, und jeden Flug live. Wer den Link hat, kann sie sehen." = "The page shows all flights and stays of this trip, where you are right now, and every flight live. Anyone with the link can see it.";
 "Die Stufe „Personal“ wählen und die Bedingungen akzeptieren." = "Choose the “Personal” tier and accept the terms.";
 "Diese Links funktionieren im Browser – niemand braucht dafür eine App:" = "These links work in the browser – nobody needs an app for them:";
 "Distanz" = "Distance";
@@ -307,6 +308,7 @@
 "Erstflug/Auslieferung: %@ · Seriennr. %@" = "First flight/delivery: %@ · Serial no. %@";
 "Erwartet" = "Expected";
 "Export teilen …" = "Share export …";
+"Familie & Freunde" = "Family & friends";
 "Familie & Freunde informieren" = "Inform family & friends";
 "Fast nur im Dunkeln – Seite egal 🌙" = "Almost entirely in the dark – side doesn't matter 🌙";
 "Fehler %lld: %@" = "Error %lld: %@";
@@ -463,6 +465,7 @@
 "Leere Antwort erhalten." = "Empty response received.";
 "Leichte Verspätungen gemeldet" = "Minor delays reported";
 "Letzte Mail-Prüfung fehlgeschlagen – %@" = "Last email check failed – %@";
+"Link entfernen" = "Remove link";
 "Link zur Buchung" = "Link to the booking";
 "Links „API-Berechtigungen“ → „Berechtigung hinzufügen“ → Microsoft Graph → Delegiert → „Mail.Read“ → Hinzufügen." = "On the left, “API permissions” → “Add a permission” → Microsoft Graph → Delegated permissions → “Mail.Read” → Add permissions.";
 "Links „Authentifizierung“ → „Plattform hinzufügen“ → „iOS/macOS“ → Bundle-ID: com.nobody430.skylog → Konfigurieren." = "On the left, “Authentication” → “Add a platform” → “iOS/macOS” → Bundle ID: com.nobody430.skylog → Configure.";
@@ -473,6 +476,8 @@
 "Live-Aktivität automatisch (4 h vor Abflug)" = "Automatic Live Activity (4 h before departure)";
 "Live-Aktivität beenden" = "End Live Activity";
 "Live-Daten werden nur für Flüge der nächsten 3 Tage abgefragt, alle anderen kommen aus den Mail-Angaben." = "Live data is only requested for flights in the next 3 days; all others come from the email details.";
+"Live-Link für die Reise erstellen" = "Create live link for the trip";
+"Live-Link zur Reise teilen" = "Share live link to the trip";
 "Losgehen spätestens %@ (%@ vor Abflug am Flughafen)" = "Leave by %@ at the latest (at the airport %@ before departure)";
 "Länder" = "Countries";
 "Länder der Flughäfen unbekannt – Flug aktualisieren." = "Airport countries unknown – refresh the flight.";
@@ -495,6 +500,7 @@
 "Mietwagen" = "Rental car";
 "Mit KI-Erkennung: Die KI liest die gefundenen Mails und übernimmt nur echte Buchungen (inkl. Umbuchungen und Stornos)." = "With AI recognition: the AI reads the emails found and only takes real bookings (incl. rebookings and cancellations).";
 "Mit Outlook anmelden & durchsuchen" = "Sign in with Outlook & search";
+"Mit einem eigenen Push-Server (Einstellungen) kannst du einen Live-Link für die ganze Reise teilen." = "With your own push server (Settings) you can share a live link for the whole trip.";
 "Mitte" = "Middle";
 "Mitteilung bei Gate-/Zeitänderung" = "Notification on gate/time change";
 "Mittel" = "Mid-range";

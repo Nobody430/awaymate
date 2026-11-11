@@ -374,7 +374,9 @@ struct TripDetailView: View {
                             case .leg(let leg):
                                 TripLegRow(leg: leg)
                             case .step(.flight(let f)):
-                                NavigationLink { FlightDetailView(flightID: f.id) } label: { FlightCard(flight: f) }
+                                // invisible link: the card keeps its full width, without the list's arrow next to it
+                                FlightCard(flight: f)
+                                    .background(NavigationLink("", value: f.id).opacity(0))
                             case .step(.booking(let b)):
                                 Button { editingBooking = b } label: { StayCard(booking: b) }
                                     .buttonStyle(.plain)
@@ -391,8 +393,19 @@ struct TripDetailView: View {
                     }
                     Button { addingBooking = true } label: {
                         Label("Unterkunft oder Buchung hinzufügen", systemImage: "plus")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Theme.accent)
+                            .frame(maxWidth: .infinity)
+                            .padding(14)
+                            .background(RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .strokeBorder(Theme.accent.opacity(0.45), style: StrokeStyle(lineWidth: 1, dash: [5, 4])))
                     }
+                    .buttonStyle(.plain)
+                    .listRowInsets(EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 8))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                 }
+                TripShareSection(trip: trip)
                 Section("Packliste \(trip.packing.filter(\.done).count)/\(trip.packing.count)") {
                     ForEach(trip.packing) { item in
                         Button {

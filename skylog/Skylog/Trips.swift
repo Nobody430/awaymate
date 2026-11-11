@@ -40,6 +40,8 @@ struct Trip: Identifiable, Codable, Hashable {
     var plan: TripPlan? = nil
     /// Last change on any device (for the sync between devices)
     var modified: Date? = nil
+    /// Random id of the public trip page on the user's own server (nil = not shared)
+    var shareToken: String? = nil
 
     static func defaultPacking() -> [PackItem] {
         [String(localized: "Pass / ID"), String(localized: "Handy-Ladekabel"), String(localized: "Powerbank"), String(localized: "Kopfhörer"),
