@@ -258,6 +258,7 @@
 "Der Flug %@, der dein Flugzeug bringen sollte, ist annulliert. Mögliche Verspätung oder Flugzeugwechsel." = "Flight %@, which was due to bring your aircraft, has been cancelled. Possible delay or aircraft change.";
 "Der Flug wurde umgeleitet." = "The flight was diverted.";
 "Deutsch" = "Deutsch";
+"Diagnose-Protokoll teilen" = "Share diagnostic log";
 "Die Anfrage wurde abgelehnt." = "The request was rejected.";
 "Die EU-Fluggastrechte gelten für Abflüge aus EU/EWR/Schweiz und für Flüge dorthin mit einer europäischen Airline." = "EU air passenger rights apply to departures from the EU/EEA/Switzerland and to flights there with a European airline.";
 "Die KI hat beim letzten Mal keinen Inhalt geliefert." = "The AI returned no content last time.";

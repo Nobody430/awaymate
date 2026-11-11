@@ -108,6 +108,7 @@ enum MailWatcher {
         } catch {
             // Silent in the background; the next check tries again (lastCheck was not moved).
             seenFailure(error)
+            DiagLog.add("mail", "FEHLER \(error.localizedDescription)")
         }
     }
 }

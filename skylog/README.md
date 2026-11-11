@@ -66,6 +66,8 @@ The app is available in German, English, French, Italian and Spanish.*
 - **Abgleich zwischen eigenen Geräten** (mit eigenem Push-Server): Flüge, Reisen und Buchungen bleiben auf iPhone
   und iPad gleich. Dokumente und Keys werden nicht übertragen.
 - Export und Import aller Flüge als JSON.
+- **Diagnose-Protokoll** (Einstellungen → Daten): was die App zuletzt abgefragt und was die Quellen geantwortet
+  haben, zum Teilen bei Problemen. Enthält keine Keys, Passwörter oder Mail-Inhalte.
 
 **Sprachen:** Deutsch, Englisch, Französisch, Italienisch, Spanisch (folgt der Sprache des iPhones).
 

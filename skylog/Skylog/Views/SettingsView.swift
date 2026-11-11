@@ -32,6 +32,7 @@ struct SettingsView: View {
     @AppStorage("calendarSync") private var calendarSync = false
     @AppStorage("deviceSync") private var deviceSync = false
     @State private var syncStatus: String?
+    @State private var diagFile: SharedFile?
     @State private var exportFile: URL?
     @State private var confirmDupes = false
     @State private var confirmJunk = false
@@ -249,6 +250,11 @@ struct SettingsView: View {
                             Label("Aufräumen: \(junk) unvollständige Flüge löschen", systemImage: "wand.and.stars")
                         }
                     }
+                    Button {
+                        if let url = DiagLog.exportURL(flights: store.flights) { diagFile = SharedFile(url: url) }
+                    } label: {
+                        Label("Diagnose-Protokoll teilen", systemImage: "stethoscope")
+                    }
                     Button(role: .destructive) { confirmWipe = true } label: {
                         Label("Alle Flüge löschen", systemImage: "trash")
                     }
@@ -295,6 +301,9 @@ struct SettingsView: View {
                 Text(store.incomplete.prefix(8).map { "\($0.number) \($0.departure.code)→\($0.arrival.code) \($0.date)" }.joined(separator: "\n"))
             }
             .onAppear { recount() }
+            .sheet(item: $diagFile) { file in
+                ShareSheet(items: [file.url]).presentationDetents([.medium, .large])
+            }
             .alert(message ?? "", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
                 Button("OK", role: .cancel) {}
             }

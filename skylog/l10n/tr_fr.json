@@ -751,7 +751,8 @@
   "Findet Einträge mit Flugnummer (z.B. von der Airline oder vom Reisebüro) der letzten zwei Jahre und des nächsten Jahres. Mit zwei Flughafen-Codes im Eintrag werden Zeiten und Strecke direkt übernommen.": "Trouve les entrées contenant un numéro de vol (p. ex. de la compagnie ou de l'agence) des deux dernières années et de l'année à venir. Si l'entrée contient deux codes d'aéroport, les horaires et le trajet sont repris directement.",
   "Keine Flüge im Kalender gefunden.": "Aucun vol trouvé dans le calendrier.",
   "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld vol(s) trouvé(s) dans le calendrier – vérifie et importe.",
-  "Kalender: %@": "Calendrier : %@"
+  "Kalender: %@": "Calendrier : %@",
+  "Diagnose-Protokoll teilen": "Partager le journal de diagnostic"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Aucun vol prévu",

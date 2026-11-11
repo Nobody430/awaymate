@@ -751,7 +751,8 @@
   "Findet Einträge mit Flugnummer (z.B. von der Airline oder vom Reisebüro) der letzten zwei Jahre und des nächsten Jahres. Mit zwei Flughafen-Codes im Eintrag werden Zeiten und Strecke direkt übernommen.": "Finds entries with a flight number (e.g. from the airline or travel agency) from the last two years and the next year. If the entry contains two airport codes, times and route are taken over directly.",
   "Keine Flüge im Kalender gefunden.": "No flights found in the calendar.",
   "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld flight(s) found in the calendar – review and import.",
-  "Kalender: %@": "Calendar: %@"
+  "Kalender: %@": "Calendar: %@",
+  "Diagnose-Protokoll teilen": "Share diagnostic log"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

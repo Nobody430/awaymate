@@ -132,12 +132,14 @@ enum DeviceSync {
                 TripStore.shared.replaceAll(merged.trips)
                 BookingStore.shared.replaceAll(merged.bookings)
                 deleted = merged.deleted
+                DiagLog.add("sync", "ok: \(merged.flights.count) Flüge (lokal vorher \(local.flights.count), Server \(remoteDoc.flights.count)), \(merged.trips.count) Reisen, \(merged.bookings.count) Buchungen, rev \(remote.rev)")
                 lastStatus = String(localized: "Abgeglichen \(Date().formatted(date: .abbreviated, time: .shortened)): \(merged.flights.count) Flüge, \(merged.trips.count) Reisen, \(merged.bookings.count) Buchungen")
                 return true
             }
             throw AIClient.Failure(message: String(localized: "Abgleich im Moment nicht möglich – bitte später nochmal."))
         } catch {
             lastStatus = String(localized: "Abgleich fehlgeschlagen: \(error.localizedDescription)")
+            DiagLog.add("sync", "FEHLER \(error.localizedDescription)")
             return false
         }
     }

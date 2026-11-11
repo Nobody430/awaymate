@@ -751,7 +751,8 @@
   "Findet Einträge mit Flugnummer (z.B. von der Airline oder vom Reisebüro) der letzten zwei Jahre und des nächsten Jahres. Mit zwei Flughafen-Codes im Eintrag werden Zeiten und Strecke direkt übernommen.": "Trova le voci con un numero di volo (ad es. della compagnia o dell'agenzia) degli ultimi due anni e dell'anno prossimo. Se la voce contiene due codici aeroportuali, orari e tratta vengono ripresi direttamente.",
   "Keine Flüge im Kalender gefunden.": "Nessun volo trovato nel calendario.",
   "%lld Flug/Flüge im Kalender gefunden – prüfen und importieren.": "%lld volo/i trovato/i nel calendario – controlla e importa.",
-  "Kalender: %@": "Calendario: %@"
+  "Kalender: %@": "Calendario: %@",
+  "Diagnose-Protokoll teilen": "Condividi registro diagnostico"
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

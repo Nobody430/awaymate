@@ -264,6 +264,7 @@ final class FlightStore {
             results = try await FlightData.search(number: before.number, date: date, stored: before)
         } catch {
             attempts[id] = (Date(), (attempts[id]?.fails ?? 0) + 1)
+            DiagLog.add("refresh", "\(before.number) FEHLER \(error.localizedDescription) (Versuch \(attempts[id]?.fails ?? 1))")
             throw error
         }
         attempts[id] = nil
@@ -303,7 +304,10 @@ final class FlightStore {
             new.lastNotifiedDeparture = n
         }
 
+        let iso = ISO8601DateFormatter()
+        DiagLog.add("refresh", "\(new.number) \(cur.status ?? "nil")→\(new.status ?? "nil") dep=\(new.departure.best.map(iso.string(from:)) ?? "–") arr=\(new.arrival.best.map(iso.string(from:)) ?? "–") gate=\(new.departure.gate ?? "–")\(new.gateConflict.map { " (andere Quelle: \($0))" } ?? "") belt=\(new.arrival.baggageBelt ?? "–") treffer=\(results.count)")
         let changes = Notifier.changes(old: cur, new: new)
+        for c in changes { DiagLog.add("change", "\(c.title) | \(c.body)") }
         for change in changes {
             let title = change.title.replacingOccurrences(of: "\(new.number): ", with: "").replacingOccurrences(of: "\(new.number) ", with: "")
             new.log(title.prefix(1).uppercased() + String(title.dropFirst()) + " – " + change.body)
@@ -387,6 +391,7 @@ final class FlightStore {
             for f in flights.filter({ isDue($0, force: force, now: now) }) {
                 do { try await refresh(f.id, notify: notify) } catch {
                     lastError = error.localizedDescription
+                    DiagLog.add("refresh", "Abbruch der Runde: \(error.localizedDescription)")
                     if case APIError.rateLimited = error {
                         ratePausedUntil = Date().addingTimeInterval(120)   // per-minute limit: short pause
                         break
@@ -426,7 +431,12 @@ final class FlightStore {
     }
 
     func updateInbound(_ id: UUID, notify: Bool = true) async {
-        guard let f = flight(id), let new = try? await FlightData.inbound(for: f) else { return }
+        guard let f = flight(id) else { return }
+        guard let new = try? await FlightData.inbound(for: f) else {
+            DiagLog.add("inbound", "\(f.number) nichts gefunden (reg=\(f.aircraftReg ?? "–"), inboundID=\(f.inboundFAID == nil ? "nein" : "ja"))")
+            return
+        }
+        DiagLog.add("inbound", "\(f.number) ← \(new.number) aus \(new.fromCode) gestartet=\(new.departed) gelandet=\(new.landed)")
         guard var current = flight(id) else { return }
         let old = current.inbound
         current.inbound = new
@@ -460,6 +470,7 @@ final class FlightStore {
         if let cs = LiveADSB.callsign(for: f) {
             let fix = await LiveADSB.lookup(callsign: cs)
             guard var current = flight(id) else { return }
+            DiagLog.add("adsb", "\(f.number) cs=\(cs) " + (fix.map { String(format: "%.3f/%.3f %@ boden=%@", $0.position.lat, $0.position.lon, $0.position.source, $0.onGround ? "ja" : "nein") } ?? "kein Treffer"))
             let notes = LiveADSB.apply(fix, to: &current)
             if fix != nil || !notes.isEmpty {
                 for n in notes { current.log(n.takeoff ? String(localized: "Gestartet (Live-Position)") : String(localized: "Gelandet (Live-Position)")) }
@@ -482,6 +493,7 @@ final class FlightStore {
             positionQueries[id] = Date()
             pos = try? await FlightAware.position(faID)
         }
+        if let pos { DiagLog.add("position", "\(now.number) \(pos.source) " + String(format: "%.3f/%.3f", pos.lat, pos.lon) + " alt=\(pos.altitudeM.map { String(Int($0)) } ?? "–")m plausibel=\(now.isPlausible(pos))") }
         guard let pos, var current = flight(id), current.isPlausible(pos) || Flight.hasNoCoordinates(pos) else { return }
         if let old = current.lastPosition, old.timestamp >= pos.timestamp { return }
         current.lastPosition = pos

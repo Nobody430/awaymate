@@ -63,6 +63,7 @@ enum FlightData {
         var results: [Flight]
         if faFirst {
             do { results = try await FlightAware.search(number: number, date: date) } catch {
+                DiagLog.add("quelle", "\(number): FlightAware fehlgeschlagen (\(error.localizedDescription))\(adbAvailable ? " → AeroDataBox" : "")")
                 if case APIError.rateLimited = error { throw error }
                 guard adbAvailable else { throw error }
                 return try await adb(number: number, date: date)
@@ -79,6 +80,7 @@ enum FlightData {
         let key = FlightStore.normalizedNumber(number) + "|" + Fmt.apiDate.string(from: date)
         guard needsEnrichment(known), Date().timeIntervalSince(lastEnrich[key] ?? .distantPast) > 30 * 60 else { return results }
         lastEnrich[key] = Date()
+        DiagLog.add("quelle", "\(number): FlightAware + Ergänzung durch AeroDataBox (Gate/Terminal/Position)")
         if let extra = try? await adb(number: number, date: date) {
             results = results.map { f in
                 guard let other = extra.first(where: { $0.departure.code == f.departure.code }) ?? extra.first else { return f }
