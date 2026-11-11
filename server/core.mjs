@@ -78,15 +78,15 @@ const TEXTS = {
 };
 // Texts of the public status page (link shared with family & friends)
 const PAGE = {
-  de: { live: "Live-Position, Stand {0}", est: "Geschätzte Position (keine Live-Daten)", title: "Flugstatus", dep: "Abflug", arr: "Ankunft", gate: "Gate", terminal: "Terminal", belt: "Gepäckband", delay: "{0} Min. später",
+  de: { alt: "Höhe", spd: "Geschwindigkeit", left: "Noch", climb: "steigt", desc: "sinkt", live: "Live-Position, Stand {0}", est: "Geschätzte Position (keine Live-Daten)", title: "Flugstatus", dep: "Abflug", arr: "Ankunft", gate: "Gate", terminal: "Terminal", belt: "Gepäckband", delay: "{0} Min. später",
         onTime: "pünktlich", updated: "Stand {0}", local: "Ortszeit", ended: "Dieser Link ist abgelaufen oder ungültig.", by: "Geteilt mit Skylog", reload: "Die Seite aktualisiert sich jede Minute." },
-  en: { live: "Live position as of {0}", est: "Estimated position (no live data)", title: "Flight status", dep: "Departure", arr: "Arrival", gate: "Gate", terminal: "Terminal", belt: "Baggage belt", delay: "{0} min late",
+  en: { alt: "Altitude", spd: "Speed", left: "Remaining", climb: "climbing", desc: "descending", live: "Live position as of {0}", est: "Estimated position (no live data)", title: "Flight status", dep: "Departure", arr: "Arrival", gate: "Gate", terminal: "Terminal", belt: "Baggage belt", delay: "{0} min late",
         onTime: "on time", updated: "As of {0}", local: "local time", ended: "This link has expired or is invalid.", by: "Shared with Skylog", reload: "This page refreshes every minute." },
-  fr: { live: "Position en direct à {0}", est: "Position estimée (pas de données en direct)", title: "Statut du vol", dep: "Départ", arr: "Arrivée", gate: "Porte", terminal: "Terminal", belt: "Tapis à bagages", delay: "{0} min de retard",
+  fr: { alt: "Altitude", spd: "Vitesse", left: "Restant", climb: "en montée", desc: "en descente", live: "Position en direct à {0}", est: "Position estimée (pas de données en direct)", title: "Statut du vol", dep: "Départ", arr: "Arrivée", gate: "Porte", terminal: "Terminal", belt: "Tapis à bagages", delay: "{0} min de retard",
         onTime: "à l'heure", updated: "Mis à jour à {0}", local: "heure locale", ended: "Ce lien a expiré ou n'est pas valide.", by: "Partagé avec Skylog", reload: "La page s'actualise chaque minute." },
-  it: { live: "Posizione in tempo reale alle {0}", est: "Posizione stimata (nessun dato in tempo reale)", title: "Stato del volo", dep: "Partenza", arr: "Arrivo", gate: "Gate", terminal: "Terminal", belt: "Nastro bagagli", delay: "{0} min di ritardo",
+  it: { alt: "Quota", spd: "Velocità", left: "Mancano", climb: "in salita", desc: "in discesa", live: "Posizione in tempo reale alle {0}", est: "Posizione stimata (nessun dato in tempo reale)", title: "Stato del volo", dep: "Partenza", arr: "Arrivo", gate: "Gate", terminal: "Terminal", belt: "Nastro bagagli", delay: "{0} min di ritardo",
         onTime: "in orario", updated: "Aggiornato alle {0}", local: "ora locale", ended: "Questo link è scaduto o non è valido.", by: "Condiviso con Skylog", reload: "La pagina si aggiorna ogni minuto." },
-  es: { live: "Posición en directo a las {0}", est: "Posición estimada (sin datos en directo)", title: "Estado del vuelo", dep: "Salida", arr: "Llegada", gate: "Puerta", terminal: "Terminal", belt: "Cinta de equipaje", delay: "{0} min de retraso",
+  es: { alt: "Altitud", spd: "Velocidad", left: "Faltan", climb: "ascendiendo", desc: "descendiendo", live: "Posición en directo a las {0}", est: "Posición estimada (sin datos en directo)", title: "Estado del vuelo", dep: "Salida", arr: "Llegada", gate: "Puerta", terminal: "Terminal", belt: "Cinta de equipaje", delay: "{0} min de retraso",
         onTime: "a tiempo", updated: "Actualizado a las {0}", local: "hora local", ended: "Este enlace ha caducado o no es válido.", by: "Compartido con Skylog", reload: "La página se actualiza cada minuto." },
 };
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -182,7 +182,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         if (!r.ok) continue;
         const j = await r.json();
         const ac = (j.ac || []).filter((a) => (a.flight || "").trim().toUpperCase() === callsign).sort((a, b) => (a.seen ?? 99) - (b.seen ?? 99))[0];
-        if (ac && ac.lat != null) return { lat: ac.lat, lon: ac.lon, onGround: ac.alt_baro === "ground", gs: ac.gs, alt: ac.alt_baro, track: ac.track ?? ac.true_heading ?? null };
+        if (ac && ac.lat != null) return { lat: ac.lat, lon: ac.lon, onGround: ac.alt_baro === "ground", gs: ac.gs, alt: ac.alt_baro, track: ac.track ?? ac.true_heading ?? null, rate: ac.baro_rate ?? ac.geom_rate ?? null };
         return null;
       } catch {}
     }
@@ -262,7 +262,8 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     // Free ADS-B: from 15 min before departure while not landed (every loop = 1 min)
     if (f.callsign && now > dep - 15 * MIN && !snap.landed) {
       const p = await adsb(f.callsign);
-      if (p) snap.pos = { lat: p.lat, lon: p.lon, track: p.track, ground: !!p.onGround, t: now };
+      if (p) snap.pos = { lat: p.lat, lon: p.lon, track: p.track, ground: !!p.onGround, t: now,
+                          altFt: typeof p.alt === "number" ? p.alt : null, kt: typeof p.gs === "number" ? p.gs : null, fpm: typeof p.rate === "number" ? p.rate : null };
       if (p && !p.onGround && !snap.inAir) { snap.inAir = true; snap.statusKey = "inAir"; msgs.push([L("departedTitle", f.number), L("departedTo", f.toCity || f.to)]); }
       if (p && !p.onGround && f.toLat != null && p.gs > 100) {
         const km = distKm(p, { lat: f.toLat, lon: f.toLon });
@@ -412,7 +413,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         `.route{display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px}.code{font-size:34px;font-weight:800;line-height:1}` +
         `.time{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums}.muted{color:#93a0b8;font-size:13px}.right{text-align:right}` +
         `.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.tile{background:#172033;border-radius:14px;padding:12px}` +
-        `.tile b{display:block;font-size:20px}#map{height:260px;border-radius:18px;margin-bottom:8px;background:#172033}` +
+        `.tile b{display:block;font-size:19px;white-space:nowrap}.tile .muted{font-size:12px}#map{height:260px;border-radius:18px;margin-bottom:8px;background:#172033}` +
         `.plane{font-size:26px;line-height:26px;text-align:center;color:#ffb454;text-shadow:0 0 3px #000}.apt{font:700 12px system-ui;color:#fff;text-shadow:0 0 3px #000}</style></head><body><main>${body}<p class="muted">${esc(P("by"))}</p></main></body></html>`,
     });
     if (!found) return page(`<div class="card">${esc(P("ended"))}</div>`, false);
@@ -447,6 +448,23 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         `<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>` +
         `<script>var D=${JSON.stringify(data).replace(/</g, "\\u003c")};(${mapScript.toString()})(D);</script>`;
     }
+    // Flight data while airborne (from the live position)
+    let flightTiles = "";
+    const lp = snap.pos && !snap.pos.ground && Date.now() - snap.pos.t < 20 * MIN && !snap.landed ? snap.pos : null;
+    if (lp) {
+      const num = (n) => Math.round(n).toLocaleString(LOCALES[lang] || "de-CH");
+      const ft = (label, value, sub) => `<div class="tile"><span class="muted">${esc(label)}</span><b>${esc(value)}</b>${sub ? `<span class="muted">${esc(sub)}</span>` : ""}</div>`;
+      if (lp.altFt != null) {
+        const trend = lp.fpm > 300 ? P("climb") : lp.fpm < -300 ? P("desc") : "";
+        flightTiles += ft(P("alt"), `${num(lp.altFt * 0.3048)} m`, `${num(lp.altFt)} ft${trend ? " · " + trend : ""}`);
+      }
+      if (lp.kt != null) flightTiles += ft(P("spd"), `${num(lp.kt * 1.852)} km/h`, `${num(lp.kt)} kt`);
+      if (f.toLat != null) {
+        const km = distKm(lp, { lat: f.toLat, lon: f.toLon });
+        const mins = Math.max(0, Math.round((Date.parse(arr) - Date.now()) / MIN));
+        flightTiles += ft(P("left"), `${num(km)} km`, mins > 0 ? (mins >= 60 ? `${Math.floor(mins / 60)} h ${mins % 60} min` : `${mins} min`) : "");
+      }
+    }
     const tile = (label, value) => (value ? `<div class="tile"><span class="muted">${esc(label)}</span><b>${esc(value)}</b></div>` : "");
     const tiles = tile(P("terminal"), terminal) + tile(P("gate"), gate) + tile(P("belt"), snap.landed || snap.inAir ? snap.belt : null);
     const updated = fmtTime(new Date(snap.faAt || Date.parse(dev_updated(f)) || Date.now()).toISOString(), f.depTz, lang);
@@ -459,7 +477,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       `<div class="right"><div class="code">${esc(f.to)}</div><div class="muted">${esc(f.toCity || "")}</div>` +
       `<div class="muted lbl">${esc(P("arr"))}</div><div class="time ${cls(arrDelay)}">${planned(f.arrPlanned, f.arrTz, arrDelay)}${esc(fmtTime(arr, f.arrTz, lang))}</div></div></div>` +
       `<p class="muted">${esc(P("local"))} · ${esc(P("updated", updated))}</p></div>` +
-      map + (tiles ? `<div class="grid">${tiles}</div><p></p>` : "") + `<p class="muted">${esc(P("reload"))}</p>`;
+      map + (flightTiles ? `<div class="grid">${flightTiles}</div><p></p>` : "") + (tiles ? `<div class="grid">${tiles}</div><p></p>` : "") + `<p class="muted">${esc(P("reload"))}</p>`;
     return page(body, true);
   }
   // time of the device's last sync (shown when the server has not queried anything itself yet)
