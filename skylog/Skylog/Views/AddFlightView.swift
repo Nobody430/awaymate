@@ -87,7 +87,7 @@ struct AddFlightView: View {
         results = []
         defer { loading = false }
         do {
-            results = try await FlightData.search(number: number, date: date)
+            results = try await FlightData.search(number: number, date: date, allLegs: true)
         } catch {
             self.error = error.localizedDescription
         }

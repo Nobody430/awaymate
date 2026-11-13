@@ -27,11 +27,21 @@ enum FlightData {
         }
     }
 
-    static func search(number: String, date: Date, stored: Flight? = nil) async throws -> [Flight] {
+    /// `allLegs`: when adding a flight by hand, also ask the second source for legs the first one does not list
+    /// (one number can fly several legs a day, e.g. LX 92 ZRH→GRU and GRU→EZE).
+    static func search(number: String, date: Date, stored: Flight? = nil, allLegs: Bool = false) async throws -> [Flight] {
         switch FlightProvider.current {
         case .flightaware: return try await FlightAware.search(number: number, date: date)
         case .aerodatabox: return try await adb(number: number, date: date)
-        case .both: return try await combined(number: number, date: date, stored: stored)
+        case .both:
+            var results = try await combined(number: number, date: date, stored: stored)
+            if allLegs, adbAvailable, let more = try? await adb(number: number, date: date) {
+                for leg in more where !results.contains(where: { $0.departure.code == leg.departure.code && $0.arrival.code == leg.arrival.code }) {
+                    results.append(leg)
+                }
+                results.sort { ($0.departure.best ?? .distantFuture) < ($1.departure.best ?? .distantFuture) }
+            }
+            return results
         }
     }
 
@@ -309,8 +319,10 @@ enum FlightAware {
         var items = [URLQueryItem(name: "ident_type", value: "designator")]
         let now = Date()
         // AeroAPI only allows a limited window around today on this endpoint
-        if start > now.addingTimeInterval(-10 * 86400) && end < now.addingTimeInterval(2 * 86400) {
-            items += [URLQueryItem(name: "start", value: iso.string(from: start)), URLQueryItem(name: "end", value: iso.string(from: end))]
+        // (the end is cut to what is allowed, so tomorrow's flights are still asked for by date)
+        let latest = now.addingTimeInterval(2 * 86400 - 120)
+        if start > now.addingTimeInterval(-10 * 86400) && start < latest {
+            items += [URLQueryItem(name: "start", value: iso.string(from: start)), URLQueryItem(name: "end", value: iso.string(from: min(end, latest)))]
         }
         let data = try await get("/flights/\(ident)", query: items)
         let all = try JSONDecoder().decode(FlightsResponse.self, from: data).flights
