@@ -263,7 +263,12 @@ final class FlightStore {
     /// Picks the right record: same route, not cancelled if possible, closest to the known departure time.
     private static func pick(_ results: [Flight], for cur: Flight) -> Flight? {
         var c = results.filter { $0.departure.code == cur.departure.code }
-        if c.isEmpty { c = results }
+        // One flight number can have several legs a day (LX 92: ZRH→GRU and GRU→EZE). If none of the records
+        // starts where this flight starts, it is another leg: keep what we have instead of taking over its route.
+        if c.isEmpty {
+            guard cur.departure.code == "???" || cur.departure.code.isEmpty else { return nil }
+            c = results
+        }
         let sameArr = c.filter { $0.arrival.code == cur.arrival.code }
         if !sameArr.isEmpty { c = sameArr }
         let alive = c.filter { $0.normalizedStatus != .canceled }
@@ -287,7 +292,11 @@ final class FlightStore {
         }
         attempts[id] = nil
         // The flight may have changed (ADS-B, notes, seat) or been deleted while we were waiting
-        guard let cur = flight(id), let picked = Self.pick(results, for: cur) else { return }
+        guard let cur = flight(id) else { return }
+        guard let picked = Self.pick(results, for: cur) else {
+            DiagLog.add("refresh", "\(cur.number) \(cur.departure.code)→\(cur.arrival.code): kein passender Abschnitt unter \(results.count) Treffern (\(results.map { $0.departure.code + "→" + $0.arrival.code }.joined(separator: ", "))) – unverändert gelassen")
+            return
+        }
         var new = FlightData.merge(picked, with: cur)
         new.id = cur.id
         new.number = cur.number          // keep the booked (codeshare) number

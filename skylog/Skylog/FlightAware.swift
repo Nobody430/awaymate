@@ -75,7 +75,16 @@ enum FlightData {
                 return try await FlightAware.search(number: number, date: date)
             }
         }
-        guard adbAvailable, let first = results.first else { return results }
+        // Several legs under one number: if FlightAware has none that starts where the stored flight starts,
+        // ask AeroDataBox for that leg before giving up.
+        if let from = stored?.departure.code, from != "???", !from.isEmpty, !results.contains(where: { $0.departure.code == from }),
+           adbAvailable, let other = try? await adb(number: number, date: date), other.contains(where: { $0.departure.code == from }) {
+            DiagLog.add("quelle", "\(number): Abschnitt ab \(from) nur bei AeroDataBox gefunden")
+            return other
+        }
+        // enrich the record of the stored flight's own leg, not just the first one
+        let own = results.first { $0.departure.code == stored?.departure.code } ?? results.first
+        guard adbAvailable, let first = own else { return results }
         let known = stored.map { merge(first, with: $0) } ?? first
         let key = FlightStore.normalizedNumber(number) + "|" + Fmt.apiDate.string(from: date)
         guard needsEnrichment(known), Date().timeIntervalSince(lastEnrich[key] ?? .distantPast) > 30 * 60 else { return results }
@@ -83,7 +92,8 @@ enum FlightData {
         DiagLog.add("quelle", "\(number): FlightAware + Ergänzung durch AeroDataBox (Gate/Terminal/Position)")
         if let extra = try? await adb(number: number, date: date) {
             results = results.map { f in
-                guard let other = extra.first(where: { $0.departure.code == f.departure.code }) ?? extra.first else { return f }
+                // only the same leg – another leg's gate or terminal would be wrong here
+                guard let other = extra.first(where: { $0.departure.code == f.departure.code }) else { return f }
                 var m = merge(f, with: other)
                 // Gates, terminals, desks and belts are airport data: AeroDataBox gets them from the airports,
                 // FlightAware's are often outdated outside North America. Prefer AeroDataBox, remember the difference.
