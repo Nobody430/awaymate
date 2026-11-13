@@ -26,7 +26,7 @@ struct KeyGuide: Identifiable {
             (String(localized: "TEIL 5 – Awaymate verbinden. Einstellungen → „Echtzeit-Pushs (eigener Server)“: die Adresse aus Teil 4 und das Passwort aus Secret 3 eintragen. „Verbindung testen“ – es sollte eine Test-Mitteilung kommen."), nil),
             (String(localized: "Laufende Live-Aktivitäten einmal beenden und neu starten, damit sie die Updates vom Server bekommen."), nil),
         ],
-        note: String(localized: "Dein FlightAware-Key aus den Einstellungen wird verschlüsselt an DEINEN Server geschickt, damit er Gates und Verspätungen abfragen kann; ohne Key meldet er nur Start und Landung (gratis über ADS-B). Das Relay des Herausgebers reicht nur die fertige Mitteilung an Apple weiter – es sieht weder deine Keys noch deine Flugliste. Statt Cloudflare geht auch Docker (Fly.io, eigener Rechner): siehe README im Ordner „server“. Roter Haken? Meist ist ein Secret-Name falsch geschrieben."))
+        note: String(localized: "Dein FlightAware-Key aus den Einstellungen wird verschlüsselt an DEINEN Server geschickt, damit er Gates und Verspätungen abfragen kann; ohne Key meldet er nur Start und Landung (gratis über ADS-B). Das Relay des Herausgebers reicht nur die fertige Mitteilung an Apple weiter – es sieht weder deine Keys noch deine Flugliste. Statt Cloudflare geht auch Docker (Fly.io, eigener Rechner): siehe README im Ordner „server“. Roter Haken? Meist ist ein Secret-Name falsch geschrieben.") + " " + String(localized: "Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann."))
 
     static let aerodatabox = KeyGuide(
         id: "adb", title: String(localized: "AeroDataBox-Key (gratis)"), icon: "airplane.circle",

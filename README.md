@@ -165,7 +165,7 @@ queries. With your own push server, the server checks every minute.
   the app settings). There is no account and no central server.
 - Queries go directly from the device to the services whose keys you entered.
 - For AI recognition, the text of travel emails is sent to the AI provider you chose.
-- Your own push server receives the upcoming flights and, if entered, your FlightAware key.
+- Your own push server receives the upcoming flights and, if entered, your FlightAware and AeroDataBox keys.
 - With "sync devices", flights, trips and bookings are also stored on your own server.
 - A status link shows the flight to anyone who has the link; a trip link shows all flights and the names of the
   stays of that trip. The map loads map tiles from OpenStreetMap and the map library from unpkg.com.
@@ -214,7 +214,9 @@ Airport database: [mwgg/Airports](https://github.com/mwgg/Airports) (MIT, see `S
 
 ## Limits
 
-- **Boarding status** does not exist in open data; "Boarding (est.)" is an estimate from the departure time.
+- **Boarding status:** with an AeroDataBox key, "Boarding" and "Gate closed" come from the airport feed in the last
+  hour before departure (every 6 min), where the airport publishes them. Otherwise "Boarding (est.)" is an
+  estimate from the departure time.
 - **Gates** come from the data sources and can be wrong or outdated; the display at the airport is what counts.
 - **Predictions** (as in commercial apps) and punctuality statistics of individual flights are not included; they
   would need expensive data contracts.

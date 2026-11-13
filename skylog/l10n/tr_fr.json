@@ -806,7 +806,10 @@
   "Server-Adresse (z.B. skylog-push.name.workers.dev)": "Adresse du serveur (p. ex. skylog-push.name.workers.dev)",
   "Mit dem Server kannst du ausserdem einen Status-Link pro Flug und einen Live-Link für eine ganze Reise mit Familie & Freunden teilen.": "Avec le serveur, tu peux aussi partager avec ta famille et tes amis un lien de statut par vol et un lien en direct pour tout un voyage.",
   "Mehr als 24 h vor Abflug alle 12 h, 24–4 h vorher alle 2 h, danach alle 15 Min., ab 75 Min. vor Abflug bis zum Start alle 5 Min. (auch über die geplante Zeit hinaus, damit Verspätungen sofort auftauchen). In der Luft alle 15 Min., kurz vor der Landung alle 5 Min., danach bis zum Gepäckband. Etwa 15–40 kostenpflichtige Abfragen pro Flug. iOS lässt die App im Hintergrund nur selten arbeiten – mit Reisemodus öfter; mit eigenem Server kommen Änderungen sofort als Mitteilung.": "Plus de 24 h avant le départ toutes les 12 h, de 24 à 4 h avant toutes les 2 h, puis toutes les 15 min, et de 75 min avant le départ jusqu’au décollage toutes les 5 min (aussi au-delà de l’heure prévue, pour que les retards apparaissent tout de suite). En vol toutes les 15 min, peu avant l’atterrissage toutes les 5 min, puis jusqu’au tapis à bagages. Environ 15 à 40 requêtes payantes par vol. iOS laisse rarement l’app travailler en arrière-plan – plus souvent avec le mode voyage ; avec ton propre serveur, les changements arrivent aussitôt en notification.",
-  "Awaymate – Flug- und Reise-App. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.": "Awaymate – app de vols et de voyages. Données : FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live."
+  "Awaymate – Flug- und Reise-App. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.": "Awaymate – app de vols et de voyages. Données : FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.",
+  "%@: Gate geschlossen": "%@ : porte fermée",
+  "Das Gate ist geschlossen.": "La porte est fermée.",
+  "Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann.": "Ta clé AeroDataBox est aussi envoyée à ton serveur, afin qu’il puisse demander le vrai statut d’embarquement dans la dernière heure avant le départ."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Aucun vol prévu",

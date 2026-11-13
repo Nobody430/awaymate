@@ -129,6 +129,8 @@ enum PushClient {
                                    "trips": sharedTrips()]
         // Your own server uses your own FlightAware key (sent only to the server you entered, over HTTPS)
         if FlightAware.hasKey, FlightProvider.current != .aerodatabox { body["flightawareKey"] = FlightAware.apiKey }
+        // … and your AeroDataBox key for the real boarding status in the last hour before departure
+        if Settings.hasKey, FlightProvider.current != .flightaware { body["aerodataboxKey"] = Settings.apiKey }
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.timeoutInterval = 20

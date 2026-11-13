@@ -56,6 +56,7 @@
 "%@: Flugzeug ist unterwegs" = "%@: Aircraft is on its way";
 "%@: Flugzeug kommt spät" = "%@: Aircraft arriving late";
 "%@: Gate %@" = "%@: Gate %@";
+"%@: Gate geschlossen" = "%@: gate closed";
 "%@: Gate verlassen" = "%@: left the gate";
 "%@: Gate-Wechsel" = "%@: Gate change";
 "%@: Gepäckband %@" = "%@: Baggage belt %@";
@@ -198,6 +199,7 @@
 "Antwort zu lang – bitte nochmal versuchen." = "Response too long – please try again.";
 "Apple Karten" = "Apple Maps";
 "Art" = "Type";
+"Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann." = "Your AeroDataBox key is sent to your server too, so that it can ask for the real boarding status in the last hour before departure.";
 "Auf Sperrbildschirm verfolgen" = "Track on Lock Screen";
 "Aufräumen: %lld unvollständige Flüge löschen" = "Clean up: delete %lld incomplete flights";
 "Aus E-Mails importieren" = "Import from emails";
@@ -247,6 +249,7 @@
 "Damit Awaymate Flüge in deinen Mails zuverlässig erkennt. Du zahlst nur, was du nutzt – mit dem günstigen Modell (Haiku) kostet ein kompletter Postfach-Import meist nur Rappen. Du kannst denselben Key wie in Vital verwenden." = "So that Awaymate reliably recognises flights in your emails. You only pay for what you use – with the low-cost model (Haiku), a complete mailbox import usually costs just a few cents. You can use the same key as in Vital.";
 "Damit Awaymate dein ganzes Outlook/Hotmail/MSN-Postfach nach Flügen durchsuchen darf (auch alte Flüge). Private Microsoft-Konten brauchen dafür einmalig ein kostenloses Azure-Konto. Ca. 10 Minuten." = "So that Awaymate may search your whole Outlook/Hotmail/MSN mailbox for flights (including old ones). Personal Microsoft accounts need a free Azure account for this, set up once. About 10 minutes.";
 "Dann: Flugliste → + → „Aus E-Mails importieren“ → Postfach durchsuchen → „KI-Analyse starten“." = "Then: flight list → + → “Import from emails” → search mailbox → “Start AI analysis”.";
+"Das Gate ist geschlossen." = "The gate is closed.";
 "Das wird sehr knapp – früh bei der Crew melden." = "This will be very tight – tell the crew early.";
 "Datei (PDF, Wallet-Pass, …)" = "File (PDF, Wallet pass, …)";
 "Datei konnte nicht gelesen werden: %@" = "File could not be read: %@";

@@ -56,6 +56,7 @@
 "%@: Flugzeug ist unterwegs" = "%@: el avión está en camino";
 "%@: Flugzeug kommt spät" = "%@: el avión llega tarde";
 "%@: Gate %@" = "%@: puerta %@";
+"%@: Gate geschlossen" = "%@: puerta cerrada";
 "%@: Gate verlassen" = "%@: salió de la puerta";
 "%@: Gate-Wechsel" = "%@: cambio de puerta";
 "%@: Gepäckband %@" = "%@: cinta de equipaje %@";
@@ -198,6 +199,7 @@
 "Antwort zu lang – bitte nochmal versuchen." = "Respuesta demasiado larga: inténtalo de nuevo.";
 "Apple Karten" = "Mapas de Apple";
 "Art" = "Tipo";
+"Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann." = "Tu clave de AeroDataBox también se envía a tu servidor para que pueda consultar el estado real del embarque en la última hora antes de la salida.";
 "Auf Sperrbildschirm verfolgen" = "Seguir en la pantalla de bloqueo";
 "Aufräumen: %lld unvollständige Flüge löschen" = "Limpiar: eliminar %lld vuelos incompletos";
 "Aus E-Mails importieren" = "Importar desde correos";
@@ -247,6 +249,7 @@
 "Damit Awaymate Flüge in deinen Mails zuverlässig erkennt. Du zahlst nur, was du nutzt – mit dem günstigen Modell (Haiku) kostet ein kompletter Postfach-Import meist nur Rappen. Du kannst denselben Key wie in Vital verwenden." = "Para que Awaymate detecte de forma fiable los vuelos en tus correos. Solo pagas lo que usas: con el modelo económico (Haiku), importar un buzón completo suele costar solo unos céntimos. Puedes usar la misma clave que en Vital.";
 "Damit Awaymate dein ganzes Outlook/Hotmail/MSN-Postfach nach Flügen durchsuchen darf (auch alte Flüge). Private Microsoft-Konten brauchen dafür einmalig ein kostenloses Azure-Konto. Ca. 10 Minuten." = "Para que Awaymate pueda buscar vuelos en todo tu buzón de Outlook/Hotmail/MSN (también vuelos antiguos). Las cuentas personales de Microsoft necesitan para ello, una sola vez, una cuenta gratuita de Azure. Unos 10 minutos.";
 "Dann: Flugliste → + → „Aus E-Mails importieren“ → Postfach durchsuchen → „KI-Analyse starten“." = "Después: lista de vuelos → + → «Importar desde correos» → Buscar vuelos en el buzón → «Iniciar análisis con IA».";
+"Das Gate ist geschlossen." = "La puerta está cerrada.";
 "Das wird sehr knapp – früh bei der Crew melden." = "Va a ir muy justo: avisa pronto a la tripulación.";
 "Datei (PDF, Wallet-Pass, …)" = "Archivo (PDF, pase de Wallet…)";
 "Datei konnte nicht gelesen werden: %@" = "No se pudo leer el archivo: %@";

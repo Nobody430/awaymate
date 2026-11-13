@@ -56,6 +56,7 @@
 "%@: Flugzeug ist unterwegs" = "%@ : l'avion est en route";
 "%@: Flugzeug kommt spät" = "%@ : l'avion arrive en retard";
 "%@: Gate %@" = "%@ : porte %@";
+"%@: Gate geschlossen" = "%@ : porte fermée";
 "%@: Gate verlassen" = "%@ : porte quittée";
 "%@: Gate-Wechsel" = "%@ : changement de porte";
 "%@: Gepäckband %@" = "%@ : tapis à bagages %@";
@@ -198,6 +199,7 @@
 "Antwort zu lang – bitte nochmal versuchen." = "Réponse trop longue – réessaie.";
 "Apple Karten" = "Apple Plans";
 "Art" = "Type";
+"Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann." = "Ta clé AeroDataBox est aussi envoyée à ton serveur, afin qu’il puisse demander le vrai statut d’embarquement dans la dernière heure avant le départ.";
 "Auf Sperrbildschirm verfolgen" = "Suivre sur l'écran verrouillé";
 "Aufräumen: %lld unvollständige Flüge löschen" = "Nettoyer : supprimer %lld vols incomplets";
 "Aus E-Mails importieren" = "Importer depuis les e-mails";
@@ -247,6 +249,7 @@
 "Damit Awaymate Flüge in deinen Mails zuverlässig erkennt. Du zahlst nur, was du nutzt – mit dem günstigen Modell (Haiku) kostet ein kompletter Postfach-Import meist nur Rappen. Du kannst denselben Key wie in Vital verwenden." = "Pour que Awaymate détecte de façon fiable les vols dans tes e-mails. Tu ne paies que ce que tu utilises – avec le modèle économique (Haiku), l'import complet d'une boîte mail ne coûte en général que quelques centimes. Tu peux utiliser la même clé que dans Vital.";
 "Damit Awaymate dein ganzes Outlook/Hotmail/MSN-Postfach nach Flügen durchsuchen darf (auch alte Flüge). Private Microsoft-Konten brauchen dafür einmalig ein kostenloses Azure-Konto. Ca. 10 Minuten." = "Pour que Awaymate puisse parcourir toute ta boîte Outlook/Hotmail/MSN à la recherche de vols (même anciens). Les comptes Microsoft personnels ont besoin pour cela, une seule fois, d'un compte Azure gratuit. Env. 10 minutes.";
 "Dann: Flugliste → + → „Aus E-Mails importieren“ → Postfach durchsuchen → „KI-Analyse starten“." = "Ensuite : liste des vols → + → « Importer depuis les e-mails » → Rechercher dans la boîte mail → « Lancer l'analyse IA ».";
+"Das Gate ist geschlossen." = "La porte est fermée.";
 "Das wird sehr knapp – früh bei der Crew melden." = "Ça va être très juste – signale-toi rapidement à l'équipage.";
 "Datei (PDF, Wallet-Pass, …)" = "Fichier (PDF, carte Wallet…)";
 "Datei konnte nicht gelesen werden: %@" = "Impossible de lire le fichier : %@";

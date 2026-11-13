@@ -97,7 +97,10 @@ enum FlightData {
         guard adbAvailable, let first = own else { return results }
         let known = stored.map { merge(first, with: $0) } ?? first
         let key = FlightStore.normalizedNumber(number) + "|" + Fmt.apiDate.string(from: date)
-        guard needsEnrichment(known), Date().timeIntervalSince(lastEnrich[key] ?? .distantPast) > 30 * 60 else { return results }
+        // Around boarding the airport feed is asked every 6 min (boarding / gate closed), otherwise every 30 min at most.
+        let boarding = isBoardingWindow(known)
+        guard boarding || needsEnrichment(known),
+              Date().timeIntervalSince(lastEnrich[key] ?? .distantPast) > (boarding ? 6 * 60 : 30 * 60) else { return results }
         lastEnrich[key] = Date()
         DiagLog.add("quelle", "\(number): FlightAware + Ergänzung durch AeroDataBox (Gate/Terminal/Position)")
         if let extra = try? await adb(number: number, date: date) {
@@ -116,6 +119,12 @@ enum FlightData {
                 if let t = other.arrival.terminal, !t.isEmpty { m.arrival.terminal = t }
                 if let g = other.arrival.gate, !g.isEmpty { m.arrival.gate = g }
                 if let b = other.arrival.baggageBelt, !b.isEmpty { m.arrival.baggageBelt = b }
+                // FlightAware knows nothing about boarding; the airport feed does (where the airport publishes it)
+                let theirs = FlightStatus(raw: other.status), ours = FlightStatus(raw: f.status)
+                if [.checkIn, .boarding, .gateClosed].contains(theirs), [.scheduled, .delayed, .unknown, .checkIn].contains(ours) {
+                    m.status = other.status
+                    DiagLog.add("quelle", "\(number): Status vom Flughafen: \(other.status ?? "")")
+                }
                 return m
             }
         }
@@ -123,6 +132,14 @@ enum FlightData {
     }
 
     /// Only spend an AeroDataBox query when something useful is missing at the right moment.
+    /// From 70 min before departure until the plane has left: the time in which boarding starts and the gate closes.
+    private static func isBoardingWindow(_ f: Flight) -> Bool {
+        guard let dep = f.departure.best, f.departure.runway == nil, !f.isInAir,
+              ![.taxiing, .arrived, .canceled, .diverted].contains(f.normalizedStatus) else { return false }
+        let left = dep.timeIntervalSinceNow
+        return left < 70 * 60 && left > -45 * 60
+    }
+
     private static func needsEnrichment(_ f: Flight) -> Bool {
         let now = Date()
         if f.icao24 == nil && f.isInAir { return true }

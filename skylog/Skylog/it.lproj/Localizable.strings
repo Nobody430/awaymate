@@ -56,6 +56,7 @@
 "%@: Flugzeug ist unterwegs" = "%@: l’aereo è in viaggio";
 "%@: Flugzeug kommt spät" = "%@: l’aereo arriva tardi";
 "%@: Gate %@" = "%@: gate %@";
+"%@: Gate geschlossen" = "%@: gate chiuso";
 "%@: Gate verlassen" = "%@: gate lasciato";
 "%@: Gate-Wechsel" = "%@: cambio gate";
 "%@: Gepäckband %@" = "%@: nastro bagagli %@";
@@ -198,6 +199,7 @@
 "Antwort zu lang – bitte nochmal versuchen." = "Risposta troppo lunga – riprova.";
 "Apple Karten" = "Mappe di Apple";
 "Art" = "Tipo";
+"Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann." = "Anche la tua chiave AeroDataBox viene inviata al tuo server, così può chiedere il vero stato dell’imbarco nell’ultima ora prima della partenza.";
 "Auf Sperrbildschirm verfolgen" = "Segui sulla schermata di blocco";
 "Aufräumen: %lld unvollständige Flüge löschen" = "Pulizia: elimina %lld voli incompleti";
 "Aus E-Mails importieren" = "Importa dalle e-mail";
@@ -247,6 +249,7 @@
 "Damit Awaymate Flüge in deinen Mails zuverlässig erkennt. Du zahlst nur, was du nutzt – mit dem günstigen Modell (Haiku) kostet ein kompletter Postfach-Import meist nur Rappen. Du kannst denselben Key wie in Vital verwenden." = "Per far sì che Awaymate riconosca in modo affidabile i voli nelle tue e-mail. Paghi solo ciò che usi: con il modello economico (Haiku) l’importazione di un’intera casella di posta costa di solito pochi centesimi. Puoi usare la stessa chiave di Vital.";
 "Damit Awaymate dein ganzes Outlook/Hotmail/MSN-Postfach nach Flügen durchsuchen darf (auch alte Flüge). Private Microsoft-Konten brauchen dafür einmalig ein kostenloses Azure-Konto. Ca. 10 Minuten." = "Per consentire a Awaymate di cercare voli in tutta la tua casella Outlook/Hotmail/MSN (anche quelli vecchi). Per gli account Microsoft personali serve, una tantum, un account Azure gratuito. Circa 10 minuti.";
 "Dann: Flugliste → + → „Aus E-Mails importieren“ → Postfach durchsuchen → „KI-Analyse starten“." = "Poi: elenco voli → + → “Importa dalle e-mail” → cerca nella casella di posta → “Avvia analisi IA”.";
+"Das Gate ist geschlossen." = "Il gate è chiuso.";
 "Das wird sehr knapp – früh bei der Crew melden." = "Tempi strettissimi – avvisa subito l’equipaggio.";
 "Datei (PDF, Wallet-Pass, …)" = "File (PDF, pass di Wallet, …)";
 "Datei konnte nicht gelesen werden: %@" = "Impossibile leggere il file: %@";

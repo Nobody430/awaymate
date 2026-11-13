@@ -326,6 +326,10 @@ final class FlightStore {
         } else if curStatus.isAirborne && !newStatus.isAirborne && !newStatus.isFinal {
             new.status = cur.status
             new.departure.runway = new.departure.runway ?? cur.departure.runway
+        } else if [.boarding, .gateClosed].contains(curStatus), [.scheduled, .delayed, .unknown, .checkIn].contains(newStatus),
+                  new.departure.runway == nil, let dep = new.departure.best, Date() < dep.addingTimeInterval(45 * 60) {
+            // boarding comes from the airport feed, which is not asked on every refresh: keep it until the plane moves
+            new.status = cur.status
         }
 
         // Delay notifications compare against the last time we told the user (catches creeping delays)

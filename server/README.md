@@ -4,7 +4,8 @@ A small server without dependencies. It watches the upcoming flights the app rep
 notifications (gate, delay, boarding est., left the gate, departed, landed, baggage belt) as well as updates for
 the Live Activity.
 
-- **Sources:** FlightAware AeroAPI (the user's key, sent by the app) and free ADS-B networks.
+- **Sources:** FlightAware AeroAPI and, for the boarding status in the last hour before departure, AeroDataBox
+  (the user's keys, sent by the app), plus free ADS-B networks.
 - **Notifications:** through the relay of the app's publisher (`RELAY_URL`) or, if you build the app yourself,
   directly to Apple with your own key (`APNS_KEY_ID`, `APNS_KEY_P8`, `APPLE_TEAM_ID`, `APNS_TOPIC`).
 
@@ -45,7 +46,7 @@ With `Authorization: Bearer <SERVER_TOKEN>`:
 | Call | Purpose |
 |---|---|
 | `GET /health` | state (no password) |
-| `POST /sync` | the app reports device, language, upcoming flights, shared trips, Live Activity tokens and optionally the FlightAware key |
+| `POST /sync` | the app reports device, language, upcoming flights, shared trips, Live Activity tokens and optionally the FlightAware and AeroDataBox keys |
 | `POST /test` | test notification |
 | `GET /data`, `PUT /data` | one document for the sync between the user's own devices; `PUT` with `rev`, an outdated `rev` is answered with 409 and the current state. Merging happens in the app |
 

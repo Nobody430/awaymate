@@ -8,6 +8,7 @@ const TEXTS = {
   de: {
     delayed: "Verspätet", scheduled: "Planmässig", cancelled: "Annulliert", diverted: "Umgeleitet", leftGate: "Gate verlassen", inAir: "In der Luft",
     landed: "Gelandet", atGate: "Am Gate", boarding: "Boarding (ca.)",
+    boardingNow: "Boarding", gateClosed: "Gate geschlossen", boardingNowTitle: "{0}: Boarding läuft", boardingNowBody: "Das Boarding hat begonnen.", boardingNowBodyGate: "Das Boarding hat an Gate {0} begonnen.", gateClosedTitle: "{0}: Gate geschlossen", gateClosedBody: "Das Gate ist geschlossen.",
     leftGateTitle: "🛫 Gate verlassen", leftGateBody: "{0} rollt zur Startbahn.",
     departedTitle: "{0} ist gestartet", departedEta: "Ankunft ca. {0}.", departedTo: "Unterwegs nach {0}.",
     landedTitle: "{0} ist gelandet", landedBody: "Willkommen in {0}!",
@@ -22,6 +23,7 @@ const TEXTS = {
   en: {
     delayed: "Delayed", scheduled: "On time", cancelled: "Cancelled", diverted: "Diverted", leftGate: "Left the gate", inAir: "In the air",
     landed: "Landed", atGate: "At the gate", boarding: "Boarding (est.)",
+    boardingNow: "Boarding", gateClosed: "Gate closed", boardingNowTitle: "{0}: now boarding", boardingNowBody: "Boarding has started.", boardingNowBodyGate: "Boarding has started at gate {0}.", gateClosedTitle: "{0}: gate closed", gateClosedBody: "The gate is closed.",
     leftGateTitle: "🛫 Left the gate", leftGateBody: "{0} is taxiing to the runway.",
     departedTitle: "{0} has taken off", departedEta: "Arrival around {0}.", departedTo: "On the way to {0}.",
     landedTitle: "{0} has landed", landedBody: "Welcome to {0}!",
@@ -36,6 +38,7 @@ const TEXTS = {
   fr: {
     delayed: "Retardé", scheduled: "À l'heure", cancelled: "Annulé", diverted: "Dérouté", leftGate: "A quitté la porte", inAir: "En vol",
     landed: "Atterri", atGate: "À la porte", boarding: "Embarquement (env.)",
+    boardingNow: "Embarquement", gateClosed: "Porte fermée", boardingNowTitle: "{0} : embarquement en cours", boardingNowBody: "L'embarquement a commencé.", boardingNowBodyGate: "L'embarquement a commencé à la porte {0}.", gateClosedTitle: "{0} : porte fermée", gateClosedBody: "La porte est fermée.",
     leftGateTitle: "🛫 Porte quittée", leftGateBody: "{0} roule vers la piste.",
     departedTitle: "{0} a décollé", departedEta: "Arrivée vers {0}.", departedTo: "En route pour {0}.",
     landedTitle: "{0} a atterri", landedBody: "Bienvenue à {0} !",
@@ -50,6 +53,7 @@ const TEXTS = {
   it: {
     delayed: "In ritardo", scheduled: "In orario", cancelled: "Cancellato", diverted: "Dirottato", leftGate: "Ha lasciato il gate", inAir: "In volo",
     landed: "Atterrato", atGate: "Al gate", boarding: "Imbarco (ca.)",
+    boardingNow: "Imbarco", gateClosed: "Gate chiuso", boardingNowTitle: "{0}: imbarco in corso", boardingNowBody: "L'imbarco è iniziato.", boardingNowBodyGate: "L'imbarco è iniziato al gate {0}.", gateClosedTitle: "{0}: gate chiuso", gateClosedBody: "Il gate è chiuso.",
     leftGateTitle: "🛫 Gate lasciato", leftGateBody: "{0} sta rullando verso la pista.",
     departedTitle: "{0} è decollato", departedEta: "Arrivo verso le {0}.", departedTo: "In viaggio verso {0}.",
     landedTitle: "{0} è atterrato", landedBody: "Benvenuto a {0}!",
@@ -64,6 +68,7 @@ const TEXTS = {
   es: {
     delayed: "Retrasado", scheduled: "A tiempo", cancelled: "Cancelado", diverted: "Desviado", leftGate: "Salió de la puerta", inAir: "En vuelo",
     landed: "Aterrizado", atGate: "En la puerta", boarding: "Embarque (aprox.)",
+    boardingNow: "Embarque", gateClosed: "Puerta cerrada", boardingNowTitle: "{0}: embarque en curso", boardingNowBody: "El embarque ha comenzado.", boardingNowBodyGate: "El embarque ha comenzado en la puerta {0}.", gateClosedTitle: "{0}: puerta cerrada", gateClosedBody: "La puerta está cerrada.",
     leftGateTitle: "🛫 Salió de la puerta", leftGateBody: "{0} rueda hacia la pista.",
     departedTitle: "{0} ha despegado", departedEta: "Llegada sobre las {0}.", departedTo: "Rumbo a {0}.",
     landedTitle: "{0} ha aterrizado", landedBody: "¡Bienvenido a {0}!",
@@ -245,6 +250,19 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     } catch (e) { log("fa err", e.message); return null; }
   }
 
+  /** Boarding status from the airport feed (AeroDataBox): "CheckIn", "Boarding", "GateClosed", … or null. */
+  async function airportStatus(f, key) {
+    try {
+      const day = new Date(f.dep).toLocaleDateString("en-CA", { timeZone: f.depTz || "UTC" });
+      const url = `https://aerodatabox.p.rapidapi.com/flights/number/${encodeURIComponent(f.number)}/${day}?withAircraftImage=false&withLocation=false&dateLocalRole=Departure`;
+      const r = await fetch(url, { headers: { "X-RapidAPI-Key": key, "X-RapidAPI-Host": "aerodatabox.p.rapidapi.com" }, signal: AbortSignal.timeout(15000) });
+      if (!r.ok) { log("adb", r.status); return null; }
+      const list = await r.json();
+      const leg = (Array.isArray(list) ? list : []).find((x) => !f.from || x?.departure?.airport?.iata === f.from);
+      return leg ? { status: String(leg.status || ""), gate: leg.departure?.gate || null } : null;
+    } catch (e) { log("adb err", e.message); return null; }
+  }
+
   function distKm(a, b) {
     const R = 6371, rad = (x) => (x * Math.PI) / 180;
     const h = Math.sin(rad(b.lat - a.lat) / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(rad(b.lon - a.lon) / 2) ** 2;
@@ -363,9 +381,33 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     }
     if (snap.statusKey === "cancelled" && prev.statusKey !== "cancelled") msgs.push([L("cancelledTitle", shown(f.number)), L("cancelledBody")]);
 
-    // Estimated boarding (airlines don't publish boarding status in open data)
+    // Real boarding status from the airport feed, if the app sent an AeroDataBox key: asked every 6 min from
+    // 70 min before departure until the plane has left the gate (about 10 queries per flight).
+    const depNow = Date.parse(snap.dep);
+    if (dev.adbKey && !snap.leftGate && !snap.inAir && !snap.landed && snap.statusKey !== "cancelled" &&
+        now > depNow - 70 * MIN && now < depNow + 45 * MIN && now - (prev.adbAt || 0) >= 6 * MIN) {
+      snap.adbAt = now;
+      fetched = true;
+      const a = await airportStatus(f, dev.adbKey);
+      const st = (a?.status || "").toLowerCase();
+      const key = st === "boarding" ? "boardingNow" : st === "gateclosed" ? "gateClosed" : null;
+      if (key) {
+        snap.statusKey = key;
+        if (prev.statusKey !== key && !(key === "boardingNow" && prev.statusKey === "gateClosed")) {
+          const gate = snap.gate || a.gate || f.gate;
+          msgs.push(key === "boardingNow"
+            ? [L("boardingNowTitle", shown(f.number)), gate ? L("boardingNowBodyGate", gate) : L("boardingNowBody")]
+            : [L("gateClosedTitle", shown(f.number)), L("gateClosedBody")]);
+        }
+      }
+    }
+    // keep the real status between two queries (FlightAware knows nothing about boarding)
+    if (!snap.leftGate && !snap.inAir && !snap.landed && ["boardingNow", "gateClosed"].includes(prev.statusKey) &&
+        !["boardingNow", "gateClosed", "cancelled"].includes(snap.statusKey)) snap.statusKey = prev.statusKey;
+
+    // Estimated boarding (only without the airport feed: airlines don't publish boarding status in open data)
     const boardingAt = Date.parse(snap.dep) - (f.longHaul ? 50 : 35) * MIN;
-    if (!prev.boardingNotified && now >= boardingAt && now < Date.parse(snap.dep) && !snap.inAir) {
+    if (!dev.adbKey && !prev.boardingNotified && now >= boardingAt && now < Date.parse(snap.dep) && !snap.inAir) {
       snap.boardingNotified = true;
       if (!snap.leftGate) snap.statusKey = "boarding";
       const when = fmtTime(snap.dep, f.depTz, lang);
@@ -451,6 +493,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       }
       dev.live = { ...dev.live, ...(body.liveTokens || {}) };
       if (typeof body.flightawareKey === "string") dev.faKey = body.flightawareKey || undefined;
+      if (typeof body.aerodataboxKey === "string") dev.adbKey = body.aerodataboxKey || undefined;
       if (typeof body.lang === "string") dev.lang = body.lang.slice(0, 2).toLowerCase();
       const ids = new Set(dev.flights.map((f) => f.id));
       for (const k of Object.keys(dev.last || {})) if (!ids.has(k)) delete dev.last[k];
@@ -507,9 +550,9 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     const moving = snap.leftGate || snap.inAir || snap.landed || ["taxiing", "departed", "enRoute", "approaching", "arrived"].includes(f.state);
     // statusKey = set by this server (translated here); otherwise the label the app sent
     // (viewer's language): the server's own status, else the app's status code, else the app's label
-    const APP_STATE = { scheduled: "scheduled", unknown: "scheduled", delayed: "delayed", checkIn: "scheduled", boarding: "boarding", gateClosed: "boarding", taxiing: "leftGate",
+    const APP_STATE = { scheduled: "scheduled", unknown: "scheduled", delayed: "delayed", checkIn: "scheduled", boarding: "boardingNow", gateClosed: "gateClosed", taxiing: "leftGate",
                         departed: "inAir", enRoute: "inAir", approaching: "inAir", arrived: "landed", canceled: "cancelled", diverted: "diverted" };
-    const order = ["scheduled", "delayed", "boarding", "leftGate", "inAir", "landed", "atGate"];
+    const order = ["scheduled", "delayed", "boarding", "boardingNow", "gateClosed", "leftGate", "inAir", "landed", "atGate"];
     const appKey = APP_STATE[f.state];
     // take the further-along of the two views (the app may already know about the takeoff, or the server about the landing)
     let key = snap.statusKey || appKey;
