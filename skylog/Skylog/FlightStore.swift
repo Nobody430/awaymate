@@ -170,7 +170,11 @@ final class FlightStore {
 
     /// Same flight: same number + date, or a codeshare (same route, departure within 60 min / same day without times).
     static func isSameFlight(_ a: Flight, _ b: Flight) -> Bool {
-        if normalizedNumber(a.number) == normalizedNumber(b.number) && a.date == b.date { return true }
+        if normalizedNumber(a.number) == normalizedNumber(b.number) && a.date == b.date {
+            // Same number on the same day from another airport is another leg (LX 92: ZRH→GRU and GRU→EZE), not a duplicate.
+            let known = a.departure.code != "???" && b.departure.code != "???"
+            return !known || a.departure.code == b.departure.code
+        }
         guard a.departure.code == b.departure.code, a.arrival.code == b.arrival.code,
               a.departure.code != "???", a.arrival.code != "???" else { return false }
         if let da = a.departure.scheduled, let db = b.departure.scheduled { return abs(da.timeIntervalSince(db)) < 3600 }
