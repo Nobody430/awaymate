@@ -59,9 +59,9 @@ def main(out):
                 key = serialization.load_pem_private_key(key_pem, password=None)
                 x509_cert = x509.load_pem_x509_certificate(cert_pem)
                 cert_id = meta["id"]
-                print(f"✓ Vorhandenes Zertifikat wiederverwendet ({cert_id})")
+                print(f"✓ Existing certificate reused ({cert_id})")
         except Exception as e:
-            print(f"Cache unbrauchbar: {e}")
+            print(f"Cache unusable: {e}")
 
     # 2) Otherwise create a new one (and keep below Apple's limit)
     if cert_id is None:
@@ -69,7 +69,7 @@ def main(out):
         certs.sort(key=lambda c: c["attributes"].get("expirationDate") or "")
         while len(certs) >= 2:
             old = certs.pop(0)
-            print(f"Widerrufe altes Zertifikat {old['id']}")
+            print(f"Revoking old certificate {old['id']}")
             call("DELETE", f"/certificates/{old['id']}")
         key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
         csr = (x509.CertificateSigningRequestBuilder()
@@ -94,14 +94,14 @@ def main(out):
                                                 serialization.BestAvailableEncryption(password.encode()))
     with open(os.path.join(out, "dist.p12"), "wb") as f:
         f.write(p12)
-    print(f"✓ Zertifikat bereit ({cert_id})")
+    print(f"✓ Certificate ready ({cert_id})")
 
     profiles = {}
     for identifier in BUNDLE_IDS:
         found = call("GET", "/bundleIds", params={"filter[identifier]": identifier})["data"]
         found = [b for b in found if b["attributes"]["identifier"] == identifier]
         if not found:
-            print(f"::warning::Bundle-ID {identifier} fehlt")
+            print(f"::warning::Bundle ID {identifier} missing")
             continue
         bid = found[0]["id"]
         name = f"CI {identifier}"
@@ -117,7 +117,7 @@ def main(out):
         with open(os.path.join(out, f"{prof['uuid']}.mobileprovision"), "wb") as f:
             f.write(base64.b64decode(prof["profileContent"]))
         profiles[identifier] = name
-        print(f"✓ Profil {name}")
+        print(f"✓ Profile {name}")
 
     with open(os.path.join(out, "ExportOptions.plist"), "wb") as f:
         plistlib.dump({

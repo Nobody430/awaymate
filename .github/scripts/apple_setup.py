@@ -39,11 +39,11 @@ def main():
     for name, identifier, caps in APPS:
         r = call("GET", "/bundleIds", params={"filter[identifier]": identifier, "include": "bundleIdCapabilities"})
         if r.status_code >= 400:
-            sys.exit("API-Schlüssel ungültig oder ohne Admin-Rechte.")
+            sys.exit("API key invalid or without Admin rights.")
         data = [b for b in r.json().get("data", []) if b["attributes"]["identifier"] == identifier]
         if data:
             bid = data[0]["id"]
-            print(f"✓ {identifier} existiert")
+            print(f"✓ {identifier} exists")
         else:
             r = call("POST", "/bundleIds", {"data": {"type": "bundleIds", "attributes": {
                 "identifier": identifier, "name": name, "platform": "IOS"}}})
@@ -68,7 +68,7 @@ def main():
     if missing:
         print("::warning::Noch in App Store Connect anzulegen (Apps → + → Neue App): " + ", ".join(missing))
     else:
-        print("✓ Alle Apps in App Store Connect vorhanden")
+        print("✓ All apps exist in App Store Connect")
 
 
 if __name__ == "__main__":

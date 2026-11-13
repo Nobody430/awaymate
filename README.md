@@ -1,253 +1,269 @@
 # Awaymate ✈️
 
-Flug- und Reise-App fürs iPhone (SwiftUI, iOS 17+). Ohne Abo und ohne zentralen Dienst: Jede und jeder nutzt die
-eigenen API-Keys, die Daten bleiben auf dem Gerät. Wer will, betreibt zusätzlich einen eigenen kleinen Push-Server.
+A flight and travel companion for iPhone (SwiftUI, iOS 17+). No subscription and no central service: everyone uses
+their own API keys and all data stays on the device. If you like, you can also run your own small push server.
 
-*English summary: Awaymate is a self-hosted-friendly flight and trip tracker for iPhone. You bring your own API keys
-(FlightAware and/or AeroDataBox, optionally Claude or OpenAI), everything is stored on the device, and an optional
-free push server (Cloudflare Workers) delivers real-time notifications and Live Activity updates.
-The app is available in German, English, French, Italian and Spanish.*
+The app is available in German, English, French, Italian and Spanish.
 
-> **Hinweis zum Namen:** Die App hiess früher *Skylog*. Ordner, Xcode-Target, Bundle-ID (`com.nobody430.skylog`) und die
-> Server-Adressen (`skylog-push`, `skylog-relay`) behalten den alten Namen, damit bestehende Installationen und Daten weiterlaufen.
+> **About the name:** the app used to be called *Skylog*. Folders, the Xcode target, the bundle ID
+> (`com.nobody430.skylog`) and the server addresses (`skylog-push`, `skylog-relay`) keep the old name so that
+> existing installations and data keep working.
 
-
-- [Funktionen](#funktionen)
-- [Erste Schritte](#erste-schritte)
-- [Keys und Dienste](#keys-und-dienste)
-- [Eigener Push-Server](#eigener-push-server-optional)
-- [Wie aktuell sind die Daten?](#wie-aktuell-sind-die-daten)
-- [Datenschutz](#datenschutz)
-- [Selbst bauen](#selbst-bauen)
+- [Features](#features)
+- [Getting started](#getting-started)
+- [Keys and services](#keys-and-services)
+- [Your own push server](#your-own-push-server-optional)
+- [How fresh is the data?](#how-fresh-is-the-data)
+- [Privacy](#privacy)
+- [Building it yourself](#building-it-yourself)
+- [Code layout](#code-layout)
+- [Limits](#limits)
 - [Build](#build)
 - [Relay](#relay)
-- [Aufbau des Codes](#aufbau-des-codes)
-- [Grenzen](#grenzen)
+- [Security](#security)
 
-## Funktionen
+## Features
 
-**Flüge**
-- Hinzufügen per Flugnummer und Datum, von Hand, aus E-Mails (Outlook-Postfach, eingefügter Text, PDF) oder
-  aus dem iPhone-Kalender (Einträge mit Flugnummer).
-- Status, Verspätung, geplante / erwartete / tatsächliche Zeiten – immer in der Ortszeit des Flughafens.
-- Terminal, Gate, Check-in-Schalter, Gepäckband. Gates werden kurz vor Abflug gegen eine zweite Quelle geprüft;
-  bei Widerspruch erscheint ein Hinweis.
-- „Zeiten im Detail“: Gate verlassen, Rollen, Start, Landung, am Gate, Flugzeit.
-- „Wo ist mein Flugzeug?“: der Zubringerflug und die Flüge davor, mit Einschätzung, ob die Zeit reicht.
-- Anschlussflug-Karte mit Umsteigezeit und Warnung, wenn es knapp wird.
-- Live-Position auf der Karte, voraussichtliche Ankunft aus Position und Geschwindigkeit. Unplausible Orte
-  (weit neben der Route, oder der Platzhalter 0°/0°) werden nicht gezeichnet – dann steht das Flugzeug an der
-  geschätzten Stelle, Höhe und Geschwindigkeit bleiben sichtbar.
-- Eigener Status **„Rollt zum Start“** zwischen Verlassen des Gates und Abheben; „Gestartet“ erst nach dem Abheben.
-- Änderungsprotokoll pro Flug (Gate, Zeiten, Status).
+**Flights**
+- Add by flight number and date, by hand, from emails (Outlook mailbox, pasted text, PDF) or from the iPhone
+  calendar (entries with a flight number). A flight number with several legs a day (e.g. ZRH→GRU and GRU→EZE)
+  shows every leg to choose from.
+- Status, delay, scheduled / expected / actual times, always in the airport's local time.
+- Terminal, gate, check-in desk, baggage belt. Gates are checked against a second source shortly before
+  departure; a note appears if the sources disagree.
+- "Times in detail": left the gate, taxi, take-off, landing, at the gate, flight time.
+- "Where is my plane?": the inbound flight and the flights before it, with an estimate of whether there is enough time.
+- Connection card with transfer time and a warning when it gets tight.
+- Live position on the map, estimated arrival from position and speed. Implausible positions (far off the route,
+  or the 0°/0° placeholder) are not drawn; the plane is then shown at its estimated place while altitude and
+  speed stay visible.
+- A separate status **"Taxiing"** between leaving the gate and take-off; "Departed" only after lift-off.
+- Change log per flight (gate, times, status).
+- "Manage booking": copies the booking code and opens a search for the airline's booking page.
 
-**Mitteilungen und Sperrbildschirm**
-- Gate-Wechsel, neue Abflugzeit (auch schleichende Verspätungen), Zubringer gestartet / gelandet / zu spät,
-  Start, Landung, Gepäckband, Annullierung.
-- Erinnerungen: 3 h und 45 Min. vor Abflug, 20 Min. vor Landung, „weiter zum Hotel“, „bald zum Flughafen“.
-- Live-Aktivität (Sperrbildschirm und Dynamic Island) mit Countdown, Gate, Verspätung pro Flughafen und Zubringer.
-- Widgets: Home-Bildschirm (klein, mittel) und Sperrbildschirm (Zeile über der Uhr, Block darunter).
+**Notifications and lock screen**
+- Gate change, new departure time (including creeping delays), inbound aircraft departed / landed / late,
+  take-off, landing, baggage belt, cancellation.
+- Reminders: 3 h and 45 min before departure, 20 min before landing, "on to the hotel", "time to leave for the airport".
+- Live Activity (lock screen and Dynamic Island) with countdown, gate, delay per airport and inbound aircraft.
+- Widgets: home screen (small, medium) and lock screen (line above the clock, block below it).
 
-**Reisen**
-- Reisen werden aus den Flügen vorgeschlagen; Hotels, Mietwagen, Züge aus Mails werden zugeordnet.
-- Weg Flughafen ↔ Hotel mit ÖV- und Taxi-Zeit und „Losgehen spätestens …“.
-- Reisetag-Plan (am Flughafen sein, Gepäckaufgabe, Boarding, Abflug, Landung, Gepäck) mit automatischem Puffer.
-- Lage am Abflughafen: Wetter zur Abflugzeit; gemeldete Verspätungen am Flughafen (leicht / grösser, mit Grund).
-- Zielinfos: Ortszeit, Zeitverschiebung, Wetter bei Ankunft, Wechselkurs, Steckdosen.
-- Zug & Bus von und zur Heimat-Haltestelle (Schweiz).
-- KI-Reiseplan Tag für Tag und persönliche Packliste (optional mit Notizen aus einem Obsidian-Vault).
-- Dokumente pro Flug (Bordkarte, Buchung); am Reisetag als „Bordkarte öffnen“ zuoberst. PDFs, Bilder und
-  Wallet-Pässe lassen sich aus anderen Apps an Awaymate teilen.
-- Kalender-Abgleich für Flüge und Hotels (einschaltbar).
-- Umbuchungen aus neuen Mails: „ersetzt Flug … – ersetzen?“.
+**Trips**
+- Trips are suggested from upcoming flights; hotels, rental cars and trains from emails are assigned to them.
+- One timeline per trip: flight, stay, flight, stay … with the way from the last stop in between (airport → hotel,
+  hotel → hotel, hotel → airport) including public transport, taxi and walking times. A tap offers the route in
+  Apple Maps, an Uber request with pickup and destination filled in, and Bolt, Cabify and FREE NOW.
+- Stays and other bookings can be added, edited and deleted by hand; each has a "manage booking" link.
+- Trip length in days and nights (for counting medication and clothes).
+- Travel-day plan (be at the airport, bag drop, boarding, departure, landing, baggage) with an automatic buffer.
+- Conditions at the departure airport: weather at departure time; reported delays at the airport (minor / major, with reason).
+- Destination info: local time, time difference, weather on arrival, exchange rate, power sockets.
+- Train and bus from and to your home stop (Switzerland).
+- AI trip plan day by day and a personal packing list (optionally with notes from an Obsidian vault). The packing
+  list has its own page.
+- Documents per flight (boarding pass, booking); on the travel day they appear on top as "Open boarding pass".
+  PDFs, images and Wallet passes can be shared to Awaymate from other apps; a shared PDF can also be read as a booking.
+- Calendar sync for flights and hotels (optional).
+- Re-bookings from new emails: "replaces flight … – replace?".
+- A button checks the mailbox right away for new flights and bookings; it can also re-read the last 30 days.
 
-**Auswertung und Teilen**
-- Statistik: Flüge, Distanz, Flugzeit, Flughäfen, Länder (antippbar), Airlines, Strecken, Flugzeugtypen, pro Jahr.
-- Rückblick als Bild zum Teilen, Pünktlichkeit pro Airline, Flugzeug-Sammlung, „Meine Flüge auf dieser Strecke“.
-- Entschädigung nach EU 261/2004: Einschätzung und Antragstext (Deutsch / Englisch).
-- Familie & Freunde informieren: Live-Links und Statusnachricht; Flug oder Reiseplan als PDF.
-- **Status-Link** (mit eigenem Push-Server): eine Seite im Browser, ohne App, in der Sprache des Empfängers –
-  Zeiten mit Verspätung, Gate, Terminal, Gepäckband, Live-Karte mit Flugzeugposition sowie Höhe, Geschwindigkeit
-  und Reststrecke während des Flugs. Der Link ist nicht erratbar und lässt sich wieder ungültig machen.
-- **Abgleich zwischen eigenen Geräten** (mit eigenem Push-Server): Flüge, Reisen und Buchungen bleiben auf iPhone
-  und iPad gleich. Dokumente und Keys werden nicht übertragen.
-- Export und Import aller Flüge als JSON.
-- **Diagnose-Protokoll** (Einstellungen → Daten): was die App zuletzt abgefragt und was die Quellen geantwortet
-  haben, zum Teilen bei Problemen. Enthält keine Keys, Passwörter oder Mail-Inhalte.
+**Statistics and sharing**
+- Statistics: flights, distance, flight time, airports, countries (tappable), airlines, routes, aircraft types, per year.
+- Year in review as an image to share, punctuality per airline, aircraft collection, "my flights on this route".
+- Compensation under EU 261/2004: assessment and claim text (German / English).
+- Tell family & friends: status message and live links; flight or trip plan as a PDF.
+- **Status link** (with your own push server): a page in the browser, no app needed, in the recipient's language:
+  times with delay, gate, terminal, baggage belt, live map with the plane's position, and altitude, speed and
+  remaining distance during the flight. The link cannot be guessed and can be revoked.
+- **Trip link** (with your own push server): one page for a whole trip with all flights and stays in order, where
+  the traveller is right now, and the live page for every flight the server is watching.
+- **Sync between your own devices** (with your own push server): flights, trips and bookings stay the same on
+  iPhone and iPad. Documents and keys are not transferred.
+- Export and import of all flights as JSON.
+- **Diagnostic log** (Settings → Data): what the app asked last and what the sources answered, to share when
+  something goes wrong. Contains no keys, passwords or email content.
 
-**Sprachen:** Deutsch, Englisch, Französisch, Italienisch, Spanisch (folgt der Sprache des iPhones).
+**Languages:** German, English, French, Italian, Spanish (follows the iPhone's language).
 
-## Erste Schritte
+## Getting started
 
-1. App installieren (TestFlight-Einladung, oder [selbst bauen](#selbst-bauen)).
-2. **Einstellungen → Flugdaten:** Datenquelle wählen und Key eintragen. Empfohlen: „Beide kombiniert“.
-   Unter jedem Feld führt „So bekommst du den Key“ Schritt für Schritt durch die Anmeldung.
-3. **Einstellungen → Zuhause:** Heimat-Flughafen und Heimat-Haltestelle.
-4. **Einstellungen → Reisender:** Name wie auf dem Ticket (damit nur die eigenen Flüge aus Mails übernommen werden).
-5. Flug hinzufügen: in der Flugliste auf **+**.
-6. Optional: KI-Key für den Mail-Import, Outlook verbinden, Kalender einschalten, eigener Push-Server.
+1. Install the app (TestFlight invitation, or [build it yourself](#building-it-yourself)).
+2. **Settings → Flight data:** choose the data source and enter your key. Recommended: "Both combined".
+   Below each field, "How to get the key" walks you through the sign-up step by step.
+3. **Settings → Home:** home airport and home stop.
+4. **Settings → Traveller:** your name as on the ticket (so that only your own flights are taken from emails).
+5. Add a flight: tap **+** in the flight list.
+6. Optional: AI key for the email import, connect Outlook, switch on the calendar, your own push server.
 
-Alle Anleitungen stehen auch in der App, jeweils direkt beim betreffenden Feld.
+All guides are also in the app, right next to the field they belong to.
 
-## Keys und Dienste
+## Keys and services
 
-| Wofür | Dienst | Kosten | Nötig? |
+| What for | Service | Cost | Needed? |
 |---|---|---|---|
-| Flugstatus, Zeiten, Zubringer | [FlightAware AeroAPI](https://www.flightaware.com/aeroapi/portal/) („Personal“) | monatliches Gratis-Guthaben, danach pro Abfrage | eine der beiden Quellen |
-| Flugstatus, Gates, Flüge weit in der Zukunft | [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) über RapidAPI | Gratis-Plan mit wenigen Abfragen | eine der beiden Quellen |
-| Live-Position, Start, Landung | adsb.lol, airplanes.live, OpenSky | gratis, kein Key | automatisch |
-| Mail-Erkennung, Reiseplan, Packliste | Claude (Anthropic) oder OpenAI | pro Nutzung, meist Rappen | optional |
-| Postfach durchsuchen | Microsoft-Konto (eigene App-Registrierung) | gratis | optional |
-| Wetter, Wechselkurs, ÖV | Open-Meteo, Coinbase, transport.opendata.ch | gratis, kein Key | automatisch |
+| Flight status, times, inbound aircraft | [FlightAware AeroAPI](https://www.flightaware.com/aeroapi/portal/) ("Personal") | free monthly credit, then per query | one of the two sources |
+| Flight status, gates, flights far in the future | [AeroDataBox](https://rapidapi.com/aedbx-aedbx/api/aerodatabox) via RapidAPI | free plan with few queries | one of the two sources |
+| Live position, take-off, landing | adsb.lol, airplanes.live, OpenSky | free, no key | automatic |
+| Email recognition, trip plan, packing list | Claude (Anthropic) or OpenAI | per use, usually cents | optional |
+| Searching the mailbox | Microsoft account (your own app registration) | free | optional |
+| Weather, exchange rate, public transport | Open-Meteo, Coinbase, transport.opendata.ch | free, no key | automatic |
 
-**„Beide kombiniert“** nutzt FlightAware für die nächsten zwei Tage und den Live-Status, AeroDataBox für Flüge
-weiter in der Zukunft und für Gate, Terminal, Check-in und Gepäckband. Fällt eine Quelle aus, springt die andere ein.
+**"Both combined"** uses FlightAware for the next two days and the live status, AeroDataBox for flights further
+ahead and for gate, terminal, check-in and baggage belt. If one source fails, the other steps in.
 
-**Outlook einrichten** (einmalig, ca. 5 Min.): [entra.microsoft.com](https://entra.microsoft.com) →
-App-Registrierungen → Neue Registrierung → Kontotyp „persönliche Microsoft-Konten“ → Plattform „iOS/macOS“ mit
-Bundle-ID `com.nobody430.skylog` → Berechtigungen `Mail.Read`, `User.Read` → Client-ID in Awaymate eintragen.
-Die ausführliche Fassung steht in der App.
+**AI credit:** the AI is used for reading new travel emails (flights, hotels, rental cars, trains), recognising
+shared PDFs, the trip plan and the personal packing list. The background mail check only reads new emails that look
+like travel; without such emails it costs nothing. Without an AI key only flights are recognised, for free.
 
-## Eigener Push-Server (optional)
+**Setting up Outlook** (once, about 5 min): [entra.microsoft.com](https://entra.microsoft.com) →
+App registrations → New registration → account type "personal Microsoft accounts" → platform "iOS/macOS" with
+bundle ID `com.nobody430.skylog` → permissions `Mail.Read`, `User.Read` → enter the client ID in Awaymate.
+The detailed version is in the app.
 
-Ohne Server aktualisiert sich Awaymate, wenn die App offen ist oder iOS sie im Hintergrund laufen lässt
-(„Reisemodus“). Mit einem eigenen Server kommen Mitteilungen sofort – auch bei gesperrtem iPhone – und die
-Live-Aktivität aktualisiert sich von selbst.
+## Your own push server (optional)
 
-- Läuft **gratis bei Cloudflare Workers** (oder als Docker-Container überall).
-- Schreibt Mitteilungen in der Sprache des iPhones (Deutsch, Englisch, Französisch, Italienisch, Spanisch).
-- Live-Daten der Status-Seite: zuerst die Gratis-Netze (nach Rufzeichen und Transponder-Kennung), dazu die
-  Position, die die App selbst gerade sieht; findet sich nichts, fragt der Server für geteilte Flüge höchstens alle
-  5 Min. die Position bei FlightAware ab (kostet pro Abfrage etwas vom eigenen Guthaben).
-- Liefert zusätzlich die **Status-Seite** für Familie & Freunde (`/s/<zufälliger Code>`) und speichert das
-  Dokument für den **Abgleich zwischen den eigenen Geräten** (`/data`, nur mit dem Server-Passwort).
-- Nutzt den **eigenen** FlightAware-Key; ohne Key meldet er Start und Landung über ADS-B.
-- Mitteilungen gehen über ein **Relay** des App-Herausgebers an Apple (Apple nimmt sie nur vom Herausgeber an).
-  Das Relay sieht weder Keys noch Fluglisten.
+Without a server, Awaymate updates while the app is open or when iOS lets it run in the background
+("travel mode"). With your own server, notifications arrive at once, even on a locked iPhone, and the Live
+Activity updates itself.
 
-Kurzfassung: Projekt forken → Cloudflare-Konto → vier Secrets im Fork
-(`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SERVER_TOKEN`, `RELAY_URL`) → Workflow „Deploy push server“
-starten → Adresse und Passwort in Awaymate unter *Einstellungen → Echtzeit-Pushs* eintragen.
+- Runs **for free on Cloudflare Workers** (or as a Docker container anywhere).
+- Writes notifications in the iPhone's language (German, English, French, Italian, Spanish).
+- Live data for the status page: first the free networks (by callsign, transponder code and registration), plus
+  the position the app itself currently sees; if nothing is found, the server asks FlightAware for the position
+  of shared flights at most every 5 min (each query costs a little of your own credit).
+- Also serves the **status page** (`/s/<random code>`) and the **trip page** (`/t/<random code>`) for family &
+  friends, and stores the document for the **sync between your own devices** (`/data`, only with the server password).
+- Uses **your own** FlightAware key; without a key it reports take-off and landing via ADS-B.
+- Notifications go to Apple through a **relay** run by the app's publisher (Apple only accepts them from the
+  publisher). The relay sees neither keys nor flight lists.
 
-Schritt für Schritt: in der App unter *Einstellungen → Echtzeit-Pushs → So richtest du den Server ein*.
-Technik und Docker: [`server/README.md`](server/README.md). Relay-Adresse: siehe [Relay](#relay).
+In short: fork the project → Cloudflare account → four secrets in your fork
+(`CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, `SERVER_TOKEN`, `RELAY_URL`) → run the workflow
+"Deploy push server" → enter address and password in Awaymate under *Settings → Real-time pushes*.
 
-## Wie aktuell sind die Daten?
+Step by step: in the app under *Settings → Real-time pushes → How to set up the server*.
+Technical details and Docker: [`server/README.md`](server/README.md). Relay address: see [Relay](#relay).
 
-| Phase | Abfrage der Flugdaten |
+## How fresh is the data?
+
+| Phase | Flight data is queried |
 |---|---|
-| 3 Tage bis 24 h vor Abflug | alle 12 h |
-| 24 h bis 4 h | alle 2 h |
-| 4 h bis 75 Min. | alle 15 Min. |
-| 75 Min. vor Abflug bis zum Start | alle 5 Min. (auch über die geplante Zeit hinaus, und während des Rollens) |
-| in der Luft | alle 15 Min., in den letzten 40 Min. alle 5 Min. |
-| nach der Landung | alle 10 Min., bis das Gepäckband bekannt ist (max. 1 h) |
+| more than 24 h before departure | every 12 h |
+| 24 h to 4 h | every 2 h |
+| 4 h to 75 min | every 15 min |
+| 75 min before departure until take-off | every 5 min (also past the scheduled time, and while taxiing) |
+| in the air | every 15 min, every 5 min in the last 40 min |
+| after landing | every 10 min until the baggage belt is known (max. 1 h) |
 
-Dazu kommt die Gratis-Live-Position jede Minute, sobald der Flug in der Luft ist. Fehlgeschlagene Abfragen werden
-mit wachsendem Abstand wiederholt; ein aufgebrauchtes Kontingent pausiert nur die betroffene Quelle.
-Mit eigenem Push-Server prüft dieser jede Minute.
+On top of that comes the free live position every minute once the flight is airborne. Failed queries are retried
+with growing intervals; a used-up quota only pauses the source concerned. A typical flight needs about 15–40 paid
+queries. With your own push server, the server checks every minute.
 
-## Datenschutz
+## Privacy
 
-- Flüge, Reisen, Buchungen, Dokumente und alle Keys liegen **nur auf dem iPhone** (Keys im Schlüsselbund bzw. in
-  den App-Einstellungen). Es gibt kein Konto und keinen zentralen Server.
-- Abfragen gehen direkt vom Gerät an die Dienste, deren Keys eingetragen sind.
-- Für die KI-Erkennung werden die Texte der Reise-Mails an den gewählten KI-Anbieter geschickt.
-- Der eigene Push-Server bekommt die anstehenden Flüge und – falls eingetragen – den FlightAware-Key.
-- Mit „Geräte abgleichen“ liegen Flüge, Reisen und Buchungen zusätzlich auf dem eigenen Server.
-- Ein Status-Link zeigt den betreffenden Flug jedem, der den Link hat; die Karte darauf lädt Kartenbilder von
-  OpenStreetMap und die Kartenbibliothek von unpkg.com.
-- Die Daten sind im normalen iPhone-Backup enthalten; zusätzlich gibt es den JSON-Export.
+- Flights, trips, bookings, documents and all keys are stored **only on the iPhone** (keys in the keychain or in
+  the app settings). There is no account and no central server.
+- Queries go directly from the device to the services whose keys you entered.
+- For AI recognition, the text of travel emails is sent to the AI provider you chose.
+- Your own push server receives the upcoming flights and, if entered, your FlightAware key.
+- With "sync devices", flights, trips and bookings are also stored on your own server.
+- A status link shows the flight to anyone who has the link; a trip link shows all flights and the names of the
+  stays of that trip. The map loads map tiles from OpenStreetMap and the map library from unpkg.com.
+- The data is part of the normal iPhone backup; there is also the JSON export.
 
-## Selbst bauen
+## Building it yourself
 
-Mit Mac und Xcode:
+With a Mac and Xcode:
 
 ```
 brew install xcodegen
 cd skylog && xcodegen generate && open Skylog.xcodeproj
 ```
 
-Unter *Signing & Capabilities* das eigene Team wählen. Wer eine eigene Bundle-ID nimmt, ändert sie in
-`project.yml` (App, Widget, App Group) – dann braucht der Push-Server den **eigenen** Apple-Push-Schlüssel statt
-des Relays (siehe `server/README.md`).
+Choose your own team under *Signing & Capabilities*. If you use your own bundle ID, change it in `project.yml`
+(app, widget, app group); the push server then needs **your own** Apple push key instead of the relay
+(see `server/README.md`).
 
-Ohne Mac: Das Projekt baut per GitHub Actions und lädt zu TestFlight hoch (siehe [Build](#build)).
-Nötig ist ein Apple-Developer-Konto.
+Without a Mac: the project builds with GitHub Actions and uploads to TestFlight (see [Build](#build)).
+You need an Apple Developer account.
 
-## Aufbau des Codes
+## Code layout
 
-Pfade relativ zum Ordner `skylog/` (die App), sofern nicht anders angegeben.
+Paths are relative to the folder `skylog/` (the app) unless stated otherwise. The source texts in the code are
+German; the other languages are generated from `l10n/`.
 
-| Ort | Inhalt |
+| Where | What |
 |---|---|
-| `Skylog/Models.swift` | Flug, Endpunkte, Status, Zubringer, Zeiten im Detail |
-| `Skylog/FlightStore.swift` | Speicher, Aktualisierung nach Flugphase, Dubletten, Anschlüsse, Zubringer |
-| `Skylog/FlightAware.swift`, `API.swift` | Datenquellen und die kombinierte Abfrage |
-| `Skylog/LiveADSB.swift` | Gratis-Live-Daten (Start, Position, Landung) |
-| `Skylog/MailAI.swift`, `OutlookMail.swift`, `MailWatcher.swift` | Mail-Import mit KI, Abgleich von Umbuchungen und Stornos |
-| `Skylog/LiveFlight.swift`, `SkylogWidgets/` | Live-Aktivität und Widgets |
-| `Skylog/PushClient.swift`, `/server/`, `/relay/` | eigener Push-Server und Relay |
-| `Skylog/DeviceSync.swift` | Abgleich zwischen den eigenen Geräten über den eigenen Server |
-| `Skylog/CalendarSync.swift` | Flüge und Hotels in den Kalender schreiben; Flüge aus dem Kalender importieren |
-| `Skylog/DiagLog.swift` | Diagnose-Protokoll auf dem Gerät |
-| `l10n/` | Übersetzungen als JSON, Prüfwerkzeug und Generator für die `.lproj`-Dateien |
-| `Skylog/Trips.swift`, `Bookings.swift`, `HotelRoute.swift`, `TripPlanner.swift` | Reisen, Buchungen, Weg zum Hotel, KI-Reiseplan |
-| `Skylog/Views/` | alle Ansichten; `KeyGuides.swift` enthält die Anleitungen in der App |
-| `Skylog/*.lproj/` | Übersetzungen (Schlüssel = deutscher Text) |
+| `Skylog/Models.swift` | flight, endpoints, status, inbound aircraft, times in detail |
+| `Skylog/FlightStore.swift` | storage, refresh by flight phase, duplicates, connections, inbound aircraft |
+| `Skylog/FlightAware.swift`, `API.swift` | data sources and the combined query |
+| `Skylog/LiveADSB.swift` | free live data (take-off, position, landing) |
+| `Skylog/MailAI.swift`, `OutlookMail.swift`, `MailWatcher.swift` | email import with AI, re-bookings and cancellations |
+| `Skylog/LiveFlight.swift`, `SkylogWidgets/` | Live Activity and widgets |
+| `Skylog/PushClient.swift`, `/server/`, `/relay/` | your own push server and the relay |
+| `Skylog/DeviceSync.swift` | sync between your own devices through your own server |
+| `Skylog/CalendarSync.swift` | write flights and hotels to the calendar; import flights from the calendar |
+| `Skylog/DiagLog.swift` | diagnostic log on the device |
+| `Skylog/Trips.swift`, `Bookings.swift`, `HotelRoute.swift`, `TripPlanner.swift` | trips, bookings, way to the hotel, AI trip plan |
+| `Skylog/Views/` | all views; `TripTimeline.swift` (trip timeline, legs, trip link), `BookingManage.swift` (booking editor, manage links), `KeyGuides.swift` (the guides in the app) |
+| `Skylog/*.lproj/` | translations (key = German text) |
+| `l10n/` | translations as JSON, a checker and the generator for the `.lproj` files |
+| `design/icon.svg` | vector source of the app icon |
 
-Flughafen-Datenbank: [mwgg/Airports](https://github.com/mwgg/Airports) (MIT, siehe `Skylog/Resources/airports-LICENSE.txt`).
+Airport database: [mwgg/Airports](https://github.com/mwgg/Airports) (MIT, see `Skylog/Resources/airports-LICENSE.txt`).
 
-## Grenzen
+## Limits
 
-- **Boarding-Status** gibt es in offenen Daten nicht; „Boarding (ca.)“ ist eine Schätzung aus der Abflugzeit.
-- **Gates** stammen von den Datenquellen und können falsch oder veraltet sein – es gilt die Anzeige am Flughafen.
-- **Vorhersagen** (wie bei kommerziellen Apps) und Pünktlichkeits-Statistiken einzelner Flüge sind nicht enthalten;
-  dafür bräuchte es teure Datenverträge.
-- **Hintergrund ohne Server:** iOS entscheidet, wie oft die App laufen darf. Zuverlässig sofort geht es nur mit
-  dem eigenen Push-Server.
-- Die Gratis-Live-Daten sind für private, nicht-kommerzielle Nutzung gedacht.
-- **Verspätungen am Flughafen** liefert FlightAware nicht für alle Flughäfen; ausserhalb der USA bleibt die
-  Anzeige oft bei „keine Verspätungen“.
-- **Übersetzungen** sind maschinell erstellt und automatisch auf Vollständigkeit und Platzhalter geprüft, aber
-  nicht von Muttersprachlern gelesen. Korrekturen: `l10n/tr_<sprache>.json` ändern, `python3 l10n/validate.py <sprache>`
-  und `python3 l10n/write_strings.py . en fr it es` ausführen.
-- **Gratis-Live-Daten** stammen von freiwilligen Empfängern und decken manche Regionen dünn ab (z.B. Teile
-  Asiens); ohne FlightAware-Key gibt es dort nur die geschätzte Position.
-- **Airline-Namen** kommen von den Datenquellen und können veraltet sein, wenn ein Airline-Code neu vergeben
-  wurde; bekannte Fälle stehen in einer kleinen Korrekturliste (`Models.swift`, `airlineNameFixes`).
-- **Einheitliche Verspätungs-Skala:** unter 5 Min. pünktlich (grün), ab 5 Min. orange, ab 15 Min. rot.
+- **Boarding status** does not exist in open data; "Boarding (est.)" is an estimate from the departure time.
+- **Gates** come from the data sources and can be wrong or outdated; the display at the airport is what counts.
+- **Predictions** (as in commercial apps) and punctuality statistics of individual flights are not included; they
+  would need expensive data contracts.
+- **Background without a server:** iOS decides how often the app may run. Instant updates are only reliable with
+  your own push server.
+- The free live data is meant for private, non-commercial use and comes from volunteer receivers; some regions
+  are thinly covered (e.g. parts of Asia). Without a FlightAware key there is only the estimated position there.
+- **Airport delays** are not provided by FlightAware for all airports; outside the USA the display often stays at
+  "no delays".
+- **Ride apps:** only Uber gets pickup and destination filled in. Bolt, Cabify and FREE NOW are opened with the
+  destination address on the clipboard.
+- **Manage booking:** airlines have no common link format, so the app opens a web search for the airline's page.
+- **Translations** are machine-made and checked automatically for completeness and placeholders, but not read by
+  native speakers. To correct one: edit `l10n/tr_<language>.json`, then run `python3 l10n/validate.py <language>`
+  and `python3 l10n/write_strings.py . en fr it es`.
+- **Airline names** come from the data sources and can be outdated when an airline code was reassigned; known
+  cases are in a small correction list (`Models.swift`, `airlineNameFixes`).
+- **One delay scale:** under 5 min on time (green), from 5 min orange, from 15 min red.
 
 ## Build
 
-- Jeder Push, der den Ordner `skylog/` betrifft, baut die App und lädt sie zu TestFlight hoch
-  (`.github/workflows/testflight.yml`). Änderungen an `server/` oder `relay/` richten nur den Server neu ein.
-- Benötigte Repository-Secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`, `APPLE_TEAM_ID`
-  (App-Store-Connect-API-Key mit Rolle Admin).
-- Bundle-IDs, Capabilities, Zertifikat und Profile werden über die API eingerichtet (`.github/scripts/`).
-- Die Build-Nummer ist `100 + Laufnummer` des Workflows.
-- Wer das Projekt forkt und selbst verteilen will, braucht ein eigenes Apple-Developer-Konto, eigene Bundle-IDs
-  (in `skylog/project.yml` und `.github/scripts/`) und einen eigenen App-Eintrag in App Store Connect.
+- Every push that touches the folder `skylog/` builds the app and uploads it to TestFlight
+  (`.github/workflows/testflight.yml`). Changes to `server/` or `relay/` only redeploy the server.
+- Required repository secrets: `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`, `APPLE_TEAM_ID`
+  (App Store Connect API key with the Admin role).
+- Bundle IDs, capabilities, certificate and profiles are set up through the API (`.github/scripts/`).
+- The build number is `100 + run number` of the workflow.
+- If you fork the project and want to distribute it yourself, you need your own Apple Developer account, your own
+  bundle IDs (in `skylog/project.yml` and `.github/scripts/`) and your own app record in App Store Connect.
 
-| Ort | Inhalt |
+| Where | What |
 |---|---|
-| `skylog/` | die App (XcodeGen-Projekt, `project.yml`), Widgets, Übersetzungen |
-| `server/` | Push-Server (Cloudflare Workers oder Docker), siehe [`server/README.md`](server/README.md) |
-| `relay/` | Relay, das Mitteilungen an Apple weiterreicht (nur für den Herausgeber der App) |
-| `.github/workflows/` | `testflight.yml` (App), `server.yml` (Server und Relay), `l10n.yml` (Texte einsammeln) |
+| `skylog/` | the app (XcodeGen project, `project.yml`), widgets, translations |
+| `server/` | push server (Cloudflare Workers or Docker), see [`server/README.md`](server/README.md) |
+| `relay/` | relay that passes notifications on to Apple (only for the app's publisher) |
+| `.github/workflows/` | `testflight.yml` (app), `server.yml` (server and relay), `l10n.yml` (collect texts), `ios.yml` (unsigned test build) |
 
 ## Relay
 
-Apple nimmt Mitteilungen für eine App nur vom Herausgeber an. Darum gibt es ein kleines Relay (`relay/`), das
-fertige Mitteilungen von den Servern der Nutzer an Apple weiterreicht. Es sieht weder Flugdaten-Keys noch Fluglisten
-und sendet ausschliesslich an die Awaymate-App.
+Apple only accepts notifications for an app from its publisher. That is why there is a small relay (`relay/`) that
+passes finished notifications from users' servers on to Apple. It sees neither flight-data keys nor flight lists
+and only sends to the Awaymate app.
 
-**Adresse des Relays (`RELAY_URL`):** `https://skylog-relay.ranobody.workers.dev`
+**Relay address (`RELAY_URL`):** `https://skylog-relay.ranobody.workers.dev`
 
-Secrets des Herausgebers für Relay und eigenen Server: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
+Publisher's secrets for the relay and the publisher's own server: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`,
 `APNS_KEY_ID`, `APNS_KEY_P8`, `APPLE_TEAM_ID`, `SERVER_TOKEN`.
 
-## Sicherheit
+## Security
 
-- Keine Keys, Tokens oder Passwörter im Repository; alles liegt in GitHub-Secrets oder auf dem Gerät.
-- Wer einen Fehler mit Sicherheitsbezug findet, meldet ihn bitte über ein privates GitHub-Advisory statt öffentlich.
+- No keys, tokens or passwords in the repository; everything is in GitHub secrets or on the device.
+- If you find a security-related bug, please report it through a private GitHub advisory instead of publicly.

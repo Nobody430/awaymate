@@ -1,62 +1,69 @@
-# Awaymate Push-Server
+# Awaymate push server
 
-Kleiner Server ohne Abhängigkeiten. Er beobachtet die anstehenden Flüge, die die App ihm meldet, und schickt
-Echtzeit-Mitteilungen (Gate, Verspätung, Boarding ca., Gate verlassen, gestartet, gelandet, Gepäckband) sowie
-Updates für die Live-Aktivität.
+A small server without dependencies. It watches the upcoming flights the app reports to it and sends real-time
+notifications (gate, delay, boarding est., left the gate, departed, landed, baggage belt) as well as updates for
+the Live Activity.
 
-- **Quellen:** FlightAware AeroAPI (der Key des Nutzers, kommt aus der App) und kostenlose ADS-B-Netze.
-- **Mitteilungen:** über das Relay des App-Herausgebers (`RELAY_URL`) oder – wer die App selbst baut – direkt
-  an Apple mit dem eigenen Schlüssel (`APNS_KEY_ID`, `APNS_KEY_P8`, `APPLE_TEAM_ID`, `APNS_TOPIC`).
+- **Sources:** FlightAware AeroAPI (the user's key, sent by the app) and free ADS-B networks.
+- **Notifications:** through the relay of the app's publisher (`RELAY_URL`) or, if you build the app yourself,
+  directly to Apple with your own key (`APNS_KEY_ID`, `APNS_KEY_P8`, `APPLE_TEAM_ID`, `APNS_TOPIC`).
 
-## Aufbau
+## Layout
 
-| Datei | Zweck |
+| File | Purpose |
 |---|---|
-| `core.mjs` | die ganze Logik, plattformunabhängig |
-| `apns.mjs` | Mitteilungen signieren und senden (direkt oder via Relay) |
-| `worker.mjs` + `wrangler.toml` | Cloudflare Workers (gratis; Cron jede Minute, Zustand in einem Durable Object) |
-| `server.mjs` + `Dockerfile` | Node 20 / Docker (Fly.io, VPS, Raspberry Pi …), Zustand in `/data/state.json` |
-| `../relay/` | das Relay des Herausgebers (Cloudflare Worker) |
+| `core.mjs` | all the logic, platform-independent |
+| `apns.mjs` | signing and sending notifications (directly or via the relay) |
+| `worker.mjs` + `wrangler.toml` | Cloudflare Workers (free; cron every minute, state in a Durable Object) |
+| `server.mjs` + `Dockerfile` | Node 20 / Docker (Fly.io, VPS, Raspberry Pi …), state in `/data/state.json` |
+| `../relay/` | the publisher's relay (Cloudflare Worker) |
 
 ## Deployment
 
-`.github/workflows/server.yml` richtet ein, wofür Secrets vorhanden sind.
+`.github/workflows/server.yml` sets up whatever it finds secrets for.
 
-**Eigener Server bei Cloudflare (Bastler, im eigenen Fork):**
+**Your own server on Cloudflare (in your own fork):**
 
-| Secret | Inhalt |
+| Secret | Content |
 |---|---|
-| `CLOUDFLARE_API_TOKEN` | Cloudflare → Profil → API Tokens → Vorlage „Edit Cloudflare Workers“ |
+| `CLOUDFLARE_API_TOKEN` | Cloudflare → Profile → API Tokens → template "Edit Cloudflare Workers" |
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare → Workers & Pages → Account ID |
-| `SERVER_TOKEN` | frei gewähltes langes Passwort (auch in der App eintragen) |
-| `RELAY_URL` | Adresse des Relays, siehe [README](../README.md#relay) |
-| `FLIGHTAWARE_KEY` | optional; sonst nimmt der Server den Key aus der App |
+| `SERVER_TOKEN` | a long password of your choice (also entered in the app) |
+| `RELAY_URL` | address of the relay, see the [README](../README.md#relay) |
+| `FLIGHTAWARE_KEY` | optional; otherwise the server uses the key from the app |
 
-**Relay (nur der Herausgeber der App):** zusätzlich `APNS_KEY_ID`, `APNS_KEY_P8`, `APPLE_TEAM_ID`.
-Sind diese gesetzt, sendet auch der eigene Server direkt an Apple.
+**Relay (only the app's publisher):** additionally `APNS_KEY_ID`, `APNS_KEY_P8`, `APPLE_TEAM_ID`.
+If these are set, the publisher's own server also sends directly to Apple.
 
-**Docker statt Cloudflare:** `docker build -t skylog-push server && docker run -p 8080:8080 -v skylog:/data -e SERVER_TOKEN=… -e RELAY_URL=… skylog-push`
-(oder Fly.io mit `FLY_API_TOKEN` und `FLY_APP_NAME`).
+**Docker instead of Cloudflare:** `docker build -t skylog-push server && docker run -p 8080:8080 -v skylog:/data -e SERVER_TOKEN=… -e RELAY_URL=… skylog-push`
+(or Fly.io with `FLY_API_TOKEN` and `FLY_APP_NAME`).
 
-## Schnittstelle
+## API
 
-Mit `Authorization: Bearer <SERVER_TOKEN>`:
+With `Authorization: Bearer <SERVER_TOKEN>`:
 
-| Aufruf | Zweck |
+| Call | Purpose |
 |---|---|
-| `GET /health` | Zustand (ohne Passwort) |
-| `POST /sync` | die App meldet Gerät, Sprache, anstehende Flüge, Live-Aktivitäts-Tokens und optional den FlightAware-Key |
-| `POST /test` | Test-Mitteilung |
-| `GET /data`, `PUT /data` | ein Dokument für den Abgleich zwischen den eigenen Geräten; `PUT` mit `rev`, bei veralteter `rev` Antwort 409 mit dem aktuellen Stand – zusammengeführt wird in der App |
+| `GET /health` | state (no password) |
+| `POST /sync` | the app reports device, language, upcoming flights, shared trips, Live Activity tokens and optionally the FlightAware key |
+| `POST /test` | test notification |
+| `GET /data`, `PUT /data` | one document for the sync between the user's own devices; `PUT` with `rev`, an outdated `rev` is answered with 409 and the current state. Merging happens in the app |
 
-Ohne Passwort: `GET /s/<Code>` – die Status-Seite eines geteilten Flugs (HTML, Sprache nach `Accept-Language`,
-Karte mit Leaflet/OpenStreetMap, aktualisiert sich jede Minute). Der Code ist 20–64 zufällige Zeichen, die die App erzeugt.
+Without a password:
 
-Live-Position für die Status-Seite, in dieser Reihenfolge: ADS-B nach Rufzeichen, ADS-B nach Transponder-Kennung
-(`icao24`), die von der App mitgeschickte Position (`pos` im Flug), und – nur für geteilte Flüge, höchstens alle
-5 Min. – `GET /flights/{id}/position` bei FlightAware. Orte bei 0°/0° oder weit neben der Route werden verworfen;
-Höhe und Geschwindigkeit ohne Ort werden trotzdem angezeigt (das Flugzeug steht dann an der geschätzten Stelle).
+- `GET /s/<code>`: the status page of a shared flight (HTML, language from `Accept-Language`, map with
+  Leaflet/OpenStreetMap, refreshes every minute).
+- `GET /t/<code>`: the page of a shared trip with all flights and stays in order and where the traveller is right
+  now. `GET /t/<code>/<flight id>` is the status page of one of its flights while the server is watching it.
 
-Mitteilungen und Status-Seite gibt es auf Deutsch, Englisch, Französisch, Italienisch und Spanisch (`core.mjs`, `TEXTS` und `PAGE`).
+The codes are 20–64 random characters generated by the app.
 
-Relay: `GET /health` · `POST /push` mit `{deviceToken, payload, type}`; sendet ausschliesslich an die Awaymate-App.
+Live position for the status page, in this order: ADS-B by callsign, by transponder code (`icao24`), by
+registration (`reg`; in the air only once the flight has left the gate or is past its departure time), the
+position sent by the app (`pos` in the flight), and, only for shared flights and at most every 5 min,
+`GET /flights/{id}/position` at FlightAware. Positions at 0°/0° or far off the route are discarded; altitude and
+speed without a position are still shown (the plane is then drawn at its estimated place).
+
+Notifications and pages are available in German, English, French, Italian and Spanish (`core.mjs`, `TEXTS` and `PAGE`).
+
+Relay: `GET /health` · `POST /push` with `{deviceToken, payload, type}`; it only sends to the Awaymate app.

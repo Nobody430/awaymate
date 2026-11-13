@@ -38,7 +38,7 @@ jobs:
           if $cf && [ -n "$APNS_KEY_ID" ] && [ -n "$APNS_KEY_P8" ] && [ -n "$APPLE_TEAM_ID" ]; then relay=true; fi
           if $cf && [ -n "$SERVER_TOKEN" ]; then server=true; fi
           echo "cf=$cf" >> "$GITHUB_OUTPUT"; echo "relay=$relay" >> "$GITHUB_OUTPUT"; echo "server=$server" >> "$GITHUB_OUTPUT"
-          $cf || echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID fehlen – Cloudflare übersprungen."
+          $cf || echo "::notice::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID missing – Cloudflare skipped."
 
       - uses: actions/checkout@v4
         if: steps.check.outputs.cf == 'true'
@@ -61,13 +61,13 @@ jobs:
           rm -f secrets.json
           url=$(grep -o 'https://[a-zA-Z0-9.-]*workers\.dev' deploy.log | head -1)
           echo "### Relay: $url" >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice::Relay läuft: $url"
+          echo "::notice::Relay is running: $url"
           # a fresh workers.dev address can take a minute or two to answer
           for i in $(seq 1 18); do
             if curl -fsS "$url/health"; then echo; exit 0; fi
             sleep 10
           done
-          echo "::warning::$url/health antwortet noch nicht – in ein paar Minuten nochmal prüfen."
+          echo "::warning::$url/health does not answer yet – check again in a few minutes."
 
       - name: Deploy push server
         if: steps.check.outputs.server == 'true'
@@ -83,14 +83,14 @@ jobs:
           rm -f secrets.json
           url=$(grep -o 'https://[a-zA-Z0-9.-]*workers\.dev' deploy.log | head -1)
           echo "### Push-Server: $url" >> "$GITHUB_STEP_SUMMARY"
-          echo "Diese Adresse (ohne https://) und dein SERVER_TOKEN gehören in Awaymate → Einstellungen → Echtzeit-Pushs." >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice::Push-Server läuft: $url"
+          echo "Enter this address (without https://) and your SERVER_TOKEN in Awaymate → Settings → Real-time pushes." >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::Push server is running: $url"
           # a fresh workers.dev address can take a minute or two to answer
           for i in $(seq 1 18); do
             if curl -fsS "$url/health"; then echo; exit 0; fi
             sleep 10
           done
-          echo "::warning::$url/health antwortet noch nicht – in ein paar Minuten nochmal prüfen."
+          echo "::warning::$url/health does not answer yet – check again in a few minutes."
 
   fly:
     runs-on: ubuntu-latest
@@ -102,7 +102,7 @@ jobs:
         id: check
         run: |
           if [ -n "$FLY_API_TOKEN" ] && [ -n "$APP" ]; then echo "ready=true" >> "$GITHUB_OUTPUT"
-          else echo "::notice::FLY_API_TOKEN / FLY_APP_NAME fehlen – Fly.io übersprungen."; echo "ready=false" >> "$GITHUB_OUTPUT"; fi
+          else echo "::notice::FLY_API_TOKEN / FLY_APP_NAME missing – Fly.io skipped."; echo "ready=false" >> "$GITHUB_OUTPUT"; fi
 
       - uses: actions/checkout@v4
         if: steps.check.outputs.ready == 'true'
@@ -142,4 +142,4 @@ jobs:
         run: |
           sleep 10
           curl -fsS "https://$APP.fly.dev/health" && echo
-          echo "::notice::Server läuft: https://$APP.fly.dev"
+          echo "::notice::Server is running: https://$APP.fly.dev"

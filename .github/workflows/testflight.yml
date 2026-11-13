@@ -42,7 +42,7 @@ jobs:
           if [ -n "$ASC_KEY_ID" ] && [ -n "$ASC_ISSUER_ID" ] && [ -n "$ASC_KEY_P8" ] && [ -n "$APPLE_TEAM_ID" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::Apple-Secrets fehlen noch – TestFlight-Upload übersprungen."
+            echo "::notice::Apple secrets are missing – TestFlight upload skipped."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           fi
 
