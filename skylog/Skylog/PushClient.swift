@@ -76,6 +76,7 @@ enum PushClient {
         if let cs = LiveADSB.callsign(for: f) { p["callsign"] = cs }
         if let g = f.departure.gate { p["gate"] = g }
         if let t = f.departure.terminal { p["terminal"] = t }
+        if let c = f.departure.checkInDesk, !c.isEmpty { p["checkIn"] = c }
         if let c = f.arrival.coordinate { p["toLat"] = c.latitude; p["toLon"] = c.longitude }
         if let c = f.departure.coordinate { p["fromLat"] = c.latitude; p["fromLon"] = c.longitude }
         if let fa = f.faFlightID { p["faFlightID"] = fa }

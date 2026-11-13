@@ -833,7 +833,8 @@
   "T%@": "T%@",
   "Terminal %@": "Terminal %@",
   "Verspätet · +%lld Min": "Delayed · +%lld min",
-  "jetzt": "now"
+  "jetzt": "now",
+  "Check-in %@": "Check-in %@"
  },
  "InfoPlist": {
   "NSCalendarsFullAccessUsageDescription": "Awaymate adds your flights and hotels to the calendar, keeps times and gates up to date there, and can import flights from your calendar.",

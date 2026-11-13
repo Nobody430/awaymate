@@ -165,7 +165,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
 
   // Live Activity content-state must match FlightActivityAttributes.ContentState (dates = seconds since 2001-01-01).
   const refDate = (iso) => (iso ? (Date.parse(iso) - Date.UTC(2001, 0, 1)) / 1000 : null);
-  function liveUpdate(liveToken, snap, lang) {
+  function liveUpdate(liveToken, snap, lang, f) {
     const aps = {
       timestamp: Math.floor(Date.now() / 1000),
       event: snap.final ? "end" : "update",
@@ -173,6 +173,8 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         status: snap.statusKey ? t(lang, snap.statusKey) : snap.statusLabel, departure: refDate(snap.dep), arrival: refDate(snap.arr),
         gate: snap.gate || null, terminal: snap.terminal || null, delayMinutes: Math.max(0, snap.delay || 0),
         belt: snap.belt || null, inAir: !!snap.inAir, landed: !!snap.landed,
+        // check-in desks matter until the plane has left the gate
+        checkIn: snap.leftGate || snap.inAir || snap.landed ? null : (f?.checkIn || null),
       },
     };
     if (snap.final) aps["dismissal-date"] = Math.floor(Date.now() / 1000) + 30 * 60;
@@ -376,7 +378,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     if (!changed) return fetched;
     for (const [title, body] of msgs) await alert(deviceToken, title, body, f.id);
     const live = dev.live?.[f.id];
-    if (live) await liveUpdate(live, { ...snap, final: snap.final || snap.landed }, lang);
+    if (live) await liveUpdate(live, { ...snap, final: snap.final || snap.landed }, lang, f);
     return true;
   }
 

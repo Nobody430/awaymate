@@ -24,7 +24,8 @@ enum LiveFlight {
             inbound: inboundLine(f),
             inboundWarn: f.inbound.map { $0.isCanceled || $0.expectedDelay(ourDeparture: f.departure.best) >= 15 },
             arrivalDelay: f.arrival.delayMinutes,
-            landed: status == .arrived
+            landed: status == .arrived,
+            checkIn: f.isInAir || status == .arrived || status == .taxiing || f.departure.runway != nil ? nil : f.departure.checkInDesk
         )
     }
 
@@ -147,7 +148,8 @@ enum LiveFlight {
             return WidgetFlight(id: f.id.uuidString, number: f.number, from: f.departure.code, to: f.arrival.code,
                                 fromCity: f.departure.displayCity, toCity: f.arrival.displayCity,
                                 departure: dep, arrival: arr, gate: f.departure.gate, terminal: f.departure.terminal,
-                                status: f.normalizedStatus.label, delayMinutes: max(0, f.departure.delayMinutes ?? 0))
+                                status: f.normalizedStatus.label, delayMinutes: max(0, f.departure.delayMinutes ?? 0),
+                                checkIn: f.isInAir || f.departure.runway != nil ? nil : f.departure.checkInDesk)
         }
         // Widget reloads are budgeted by iOS – only reload when something visible changed
         let data = try? JSONEncoder().encode(Array(list))

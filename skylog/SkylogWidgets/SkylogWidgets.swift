@@ -106,6 +106,7 @@ struct NextFlightView: View {
                     HStack {
                         Text("\(f.departure.formatted(date: .abbreviated, time: .shortened))")
                         Spacer()
+                        if let c = f.checkIn, f.departure > .now { Text("Check-in \(c)") }
                         if let t = f.terminal { Text("T\(t)") }
                         if let g = f.gate { Text("Gate \(g)").bold() }
                     }
@@ -283,6 +284,7 @@ struct FlightProgressRow: View {
                 .tint(accent)
             }
             HStack {
+                if let c = state.checkIn, !state.inAir, !state.isLanded { Label("Check-in \(c)", systemImage: "person.crop.rectangle") }
                 if let t = state.terminal { Text("Terminal \(t)") }
                 if let g = state.gate { Text("Gate \(g)").bold() }
                 Spacer()

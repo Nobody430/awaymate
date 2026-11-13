@@ -26,6 +26,8 @@ struct WidgetFlight: Codable, Hashable, Identifiable {
     var terminal: String?
     var status: String
     var delayMinutes: Int
+    /// Check-in desks (shown until departure)
+    var checkIn: String? = nil
 }
 
 enum SharedStore {
@@ -66,6 +68,8 @@ struct FlightActivityAttributes: ActivityAttributes {
         var arrivalDelay: Int? = nil
         /// true once the flight has landed (optional, may be missing in server pushes – then `status` is checked)
         var landed: Bool? = nil
+        /// Check-in desks; only set until the flight has left (optional, may be missing in server pushes)
+        var checkIn: String? = nil
     }
 
     var flightID: String

@@ -9,6 +9,7 @@
 "Abflug in" = "Departure in";
 "Ankunft" = "Arrival";
 "Band %@" = "Belt %@";
+"Check-in %@" = "Check-in %@";
 "Countdown, Gate und Status deines nächsten Flugs." = "Countdown, gate and status of your next flight.";
 "Gate %@" = "Gate %@";
 "Gelandet" = "Landed";
