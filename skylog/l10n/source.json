@@ -568,6 +568,7 @@
   "Ortszeit",
   "Outlook / Hotmail / MSN",
   "Outlook abmelden",
+  "Outlook antwortet gerade nicht (Fehler %lld). Die App versucht es später wieder.",
   "Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren.",
   "Outlook-Client-ID (Azure)",
   "Outlook-Fehler (%lld). Evtl. neu verbinden.",

@@ -809,7 +809,8 @@
   "Awaymate – Flug- und Reise-App. Daten: FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.": "Awaymate – app de vols et de voyages. Données : FlightAware, AeroDataBox, OpenSky Network, adsb.lol, airplanes.live.",
   "%@: Gate geschlossen": "%@ : porte fermée",
   "Das Gate ist geschlossen.": "La porte est fermée.",
-  "Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann.": "Ta clé AeroDataBox est aussi envoyée à ton serveur, afin qu’il puisse demander le vrai statut d’embarquement dans la dernière heure avant le départ."
+  "Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann.": "Ta clé AeroDataBox est aussi envoyée à ton serveur, afin qu’il puisse demander le vrai statut d’embarquement dans la dernière heure avant le départ.",
+  "Outlook antwortet gerade nicht (Fehler %lld). Die App versucht es später wieder.": "Outlook ne répond pas pour le moment (erreur %lld). L’app réessaiera plus tard."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Aucun vol prévu",

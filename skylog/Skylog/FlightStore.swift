@@ -259,6 +259,7 @@ final class FlightStore {
     /// Failed refreshes back off (5, 10, 20 … 60 min) instead of being retried every minute.
     @ObservationIgnored private var attempts: [UUID: (last: Date, fails: Int)] = [:]
     @ObservationIgnored private var inFlight: Set<UUID> = []
+    @ObservationIgnored private var liveBusy: Set<UUID> = []
     @ObservationIgnored private var refreshTask: Task<Void, Never>?
     @ObservationIgnored private var inboundAttempts: [UUID: Date] = [:]
     @ObservationIgnored private var positionQueries: [UUID: Date] = [:]
@@ -503,7 +504,10 @@ final class FlightStore {
 
     /// Live data: free ADS-B first (departure/landing detection, position, ETA), then OpenSky / FlightAware as fallback.
     func updateLive(_ id: UUID) async {
-        guard let f = flight(id), isLiveWindow(f) else { return }
+        // several triggers can ask at the same moment – one lookup per flight at a time is enough
+        guard let f = flight(id), isLiveWindow(f), !liveBusy.contains(id) else { return }
+        liveBusy.insert(id)
+        defer { liveBusy.remove(id) }
         if let cs = LiveADSB.callsign(for: f) {
             var fix = await LiveADSB.lookup(callsign: cs)
             var via = "cs=\(cs)"

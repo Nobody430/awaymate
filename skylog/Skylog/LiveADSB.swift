@@ -129,6 +129,9 @@ enum LiveADSB {
             f.status = "EnRoute"
             if f.departure.runway == nil { f.departure.runway = now }
             notes.append((String(localized: "\(f.number) ist gestartet"), String(localized: "Unterwegs nach \(f.arrival.displayCity)."), true))
+        } else if fix.onGround && status.isAirborne && distToOrigin < 15 && distToDest > 50 {
+            // a source said "departed" at push-back, but the plane is still on the ground at the departure airport
+            f.status = "Taxiing"
         } else if fix.onGround && status.isAirborne && distToDest < 15 {
             f.status = "Arrived"
             if f.arrival.runway == nil { f.arrival.runway = now }

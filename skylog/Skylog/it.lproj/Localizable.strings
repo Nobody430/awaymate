@@ -567,6 +567,7 @@
 "Ortszeit" = "Ora locale";
 "Outlook / Hotmail / MSN" = "Outlook / Hotmail / MSN";
 "Outlook abmelden" = "Esci da Outlook";
+"Outlook antwortet gerade nicht (Fehler %lld). Die App versucht es später wieder." = "Outlook al momento non risponde (errore %lld). L’app riproverà più tardi.";
 "Outlook ist nicht verbunden. Verbinde dein Postfach unter Flüge → + → Aus E-Mails importieren." = "Outlook non è collegato. Collega la tua casella sotto Voli → + → Importa dalle e-mail.";
 "Outlook-Client-ID (Azure)" = "ID client Outlook (Azure)";
 "Outlook-Fehler (%lld). Evtl. neu verbinden." = "Errore di Outlook (%lld). Prova a ricollegarlo.";

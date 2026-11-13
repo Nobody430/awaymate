@@ -12,6 +12,7 @@ enum MailError: LocalizedError {
         case .noClientID: String(localized: "Keine Outlook-Client-ID hinterlegt (Einstellungen).")
         case .cancelled: String(localized: "Anmeldung abgebrochen.")
         case .auth(let msg): String(localized: "Anmeldung fehlgeschlagen: \(msg)")
+        case .http(let code) where (500...599).contains(code): String(localized: "Outlook antwortet gerade nicht (Fehler \(code)). Die App versucht es später wieder.")
         case .http(let code): String(localized: "Outlook-Fehler (\(code)). Evtl. neu verbinden.")
         }
     }
@@ -226,16 +227,23 @@ enum OutlookMail {
             URLQueryItem(name: "$filter", value: "receivedDateTime ge \(iso.string(from: since))"),
             URLQueryItem(name: "$orderby", value: "receivedDateTime desc"),
             URLQueryItem(name: "$select", value: "subject,receivedDateTime,body,from"),
-            URLQueryItem(name: "$top", value: "50"),
+            // small pages: Outlook answers 502/504 when a page with full mail texts gets too large
+            URLQueryItem(name: "$top", value: "15"),
         ]
         var next: URL? = comps.url
         var mails: [MailItem] = []
         var pages = 0
-        while let url = next, pages < 6 {
+        while let url = next, pages < 20 {
             var request = URLRequest(url: url)
+            request.timeoutInterval = 45
             request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
             request.setValue("outlook.body-content-type=\"text\"", forHTTPHeaderField: "Prefer")
-            let (data, response) = try await URLSession.shared.data(for: request)
+            var (data, response) = try await URLSession.shared.data(for: request)
+            if let code = (response as? HTTPURLResponse)?.statusCode, (500...599).contains(code) {
+                // gateway hiccup: one more try after a short pause
+                try await Task.sleep(for: .seconds(3))
+                (data, response) = try await URLSession.shared.data(for: request)
+            }
             guard (response as? HTTPURLResponse)?.statusCode == 200 else { throw MailError.http((response as? HTTPURLResponse)?.statusCode ?? 0) }
             let page = try JSONDecoder().decode(Page.self, from: data)
             for msg in page.value {
