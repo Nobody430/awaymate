@@ -270,7 +270,9 @@ struct Flight: Identifiable, Codable, Hashable {
     /// Status for display: an old flight whose status was never updated counts as landed.
     var displayStatus: FlightStatus {
         let s = normalizedStatus
-        return isPast && !s.isFinal ? .arrived : s
+        if isPast && !s.isFinal { return .arrived }
+        if s == .taxiing && isInAir { return .enRoute }      // "taxiing" for more than 45 min: it is flying
+        return s
     }
 
     var sortDate: Date {
@@ -296,7 +298,9 @@ struct Flight: Identifiable, Codable, Hashable {
 
     var isInAir: Bool {
         if isPast { return false }
-        if normalizedStatus == .taxiing { return false }     // left the gate, still on the ground
+        // left the gate, still on the ground – but a source that never reports the take-off must not keep the
+        // flight on the ground for hours: after 45 min the time decides again
+        if normalizedStatus == .taxiing, let out = departure.best, Date().timeIntervalSince(out) < 45 * 60 { return false }
         if normalizedStatus.isAirborne { return true }
         if normalizedStatus.isFinal { return false }
         if [.scheduled, .delayed, .checkIn, .boarding, .gateClosed].contains(normalizedStatus),

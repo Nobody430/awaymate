@@ -323,7 +323,9 @@ final class FlightStore {
             new.status = "Arrived"
             new.arrival.runway = new.arrival.runway ?? cur.arrival.runway
             new.departure.runway = new.departure.runway ?? cur.departure.runway
-        } else if curStatus.isAirborne && !newStatus.isAirborne && !newStatus.isFinal {
+        } else if curStatus.isAirborne && !newStatus.isAirborne && !newStatus.isFinal,
+                  !(curStatus == .departed && newStatus == .taxiing) {
+            // ("Departed" may only mean "left the gate": a source that says it is still taxiing is believed)
             new.status = cur.status
             new.departure.runway = new.departure.runway ?? cur.departure.runway
         } else if [.boarding, .gateClosed].contains(curStatus), [.scheduled, .delayed, .unknown, .checkIn].contains(newStatus),

@@ -86,6 +86,11 @@ struct ADBFlight: Decodable {
         )
         flight.callSign = callSign
         flight.status = status
+        // AeroDataBox says "Departed" as soon as the plane has left the gate. In the air only once there is a
+        // take-off time; until then it is taxiing (it can stand on the tarmac for a long time).
+        if FlightStatus(raw: status) == .departed {
+            flight.status = departure?.runwayTime?.date != nil ? "EnRoute" : "Taxiing"
+        }
         flight.airlineName = airline?.name
         flight.airlineIata = airline?.iata
         flight.airlineIcao = airline?.icao
