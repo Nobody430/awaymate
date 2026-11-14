@@ -223,6 +223,10 @@ struct Flight: Identifiable, Codable, Hashable {
     var modified: Date? = nil
     /// Random id of the public status link shared with family & friends (nil = not shared)
     var shareToken: String? = nil
+    /// Which source the times of this record came from ("flightaware" / "aerodatabox") and when –
+    /// a fallback source must not overrule fresh data from the more trusted one.
+    var timesSource: String? = nil
+    var timesAt: Date? = nil
     /// Booking code (PNR) from the mail – links re-bookings to the flight they replace
     var bookingReference: String? = nil
     /// For a suggestion from a re-booking mail: the stored flight it replaces

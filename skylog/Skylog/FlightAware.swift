@@ -390,6 +390,7 @@ enum FlightAware {
 
         var flight = Flight(number: FlightStore.displayNumber(fa.ident_iata ?? fallbackNumber), date: date, departure: dep, arrival: arr)
         flight.callSign = fa.atc_ident ?? fa.ident
+        flight.timesSource = "flightaware"
         flight.status = status
         flight.airlineIata = fa.operator_iata
         flight.aircraftModel = fa.aircraft_type

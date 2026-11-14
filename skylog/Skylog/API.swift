@@ -85,6 +85,7 @@ struct ADBFlight: Decodable {
             arrival: arrival?.endpoint ?? FlightEndpoint()
         )
         flight.callSign = callSign
+        flight.timesSource = "aerodatabox"
         flight.status = status
         // AeroDataBox says "Departed" as soon as the plane has left the gate. In the air only once there is a
         // take-off time; until then it is taxiing (it can stand on the tarmac for a long time).

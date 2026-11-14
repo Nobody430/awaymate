@@ -310,6 +310,23 @@ final class FlightStore {
         new.date = cur.date
         new.inbound = cur.inbound
         new.lastUpdated = Date()
+        // Trust order for times: FlightAware first. When it is briefly unreachable and AeroDataBox steps in, its
+        // estimates must not replace FlightAware's fresh ones (they differed by half an hour and flipped back).
+        // Actual times it knows and FlightAware did not yet are taken; after 45 min without FlightAware it takes over.
+        if picked.timesSource == "aerodatabox", cur.timesSource == "flightaware", FlightProvider.current == .both,
+           let trusted = cur.timesAt, Date().timeIntervalSince(trusted) < 45 * 60 {
+            for (path, actual) in [(\Flight.departure, picked.departure.runway), (\Flight.arrival, picked.arrival.runway)] {
+                new[keyPath: path].scheduled = cur[keyPath: path].scheduled ?? new[keyPath: path].scheduled
+                new[keyPath: path].revised = cur[keyPath: path].revised
+                new[keyPath: path].predicted = cur[keyPath: path].predicted
+                new[keyPath: path].runway = cur[keyPath: path].runway ?? actual
+            }
+            new.timesSource = cur.timesSource
+            new.timesAt = cur.timesAt
+            DiagLog.add("quelle", "\(cur.number): Zeiten bleiben von FlightAware (AeroDataBox nur als Ersatz)")
+        } else {
+            new.timesAt = Date()
+        }
         new.fixAirlineName()
         if let p = new.lastPosition, !new.isPlausible(p), !Flight.hasNoCoordinates(p) { new.lastPosition = nil }
         // No fresh airport data this time: keep the airport's gate instead of flipping back to the other source's
