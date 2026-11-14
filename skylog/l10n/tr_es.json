@@ -841,7 +841,9 @@
   "Terminal %@": "Terminal %@",
   "Verspätet · +%lld Min": "Retrasado · +%lld min",
   "jetzt": "ahora",
-  "Check-in %@": "Facturación %@"
+  "Check-in %@": "Facturación %@",
+  "Ankunft in": "Llegada en",
+  "Am Gate in": "En la puerta en"
  },
  "InfoPlist": {
   "NSCalendarsFullAccessUsageDescription": "Awaymate añade tus vuelos y hoteles al calendario, mantiene allí los horarios y las puertas al día y puede importar vuelos desde tu calendario.",

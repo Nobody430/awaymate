@@ -7,7 +7,9 @@
 "+%lld Min" = "+%lld min";
 "Abflug %@" = "Salida %@";
 "Abflug in" = "Salida en";
+"Am Gate in" = "En la puerta en";
 "Ankunft" = "Llegada";
+"Ankunft in" = "Llegada en";
 "Band %@" = "Cinta %@";
 "Check-in %@" = "Facturación %@";
 "Countdown, Gate und Status deines nächsten Flugs." = "Cuenta atrás, puerta y estado de tu próximo vuelo.";

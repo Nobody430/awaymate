@@ -180,6 +180,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
         belt: snap.belt || null, inAir: !!snap.inAir, landed: !!snap.landed,
         // check-in desks matter until the plane has left the gate
         checkIn: snap.leftGate || snap.inAir || snap.landed ? null : (f?.checkIn || null),
+        landing: snap.on ? refDate(snap.on) : null,
       },
     };
     if (snap.final) aps["dismissal-date"] = Math.floor(Date.now() / 1000) + 30 * 60;
@@ -302,6 +303,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
       if (x) {
         snap.dep = x.actual_out || x.estimated_out || x.scheduled_out || snap.dep;
         snap.arr = x.actual_in || x.estimated_in || x.scheduled_in || snap.arr;
+        snap.on = x.actual_on || x.estimated_on || snap.on;      // touch-down (snap.arr is at the gate)
         snap.gate = x.gate_origin || snap.gate;
         snap.terminal = x.terminal_origin || snap.terminal;
         snap.arrGate = x.gate_destination || snap.arrGate;
@@ -415,7 +417,7 @@ export function createEngine({ cfg, state, save, sendPush, store = null, log = (
     }
 
     dev.last[f.id] = snap;
-    const visible = ["statusKey", "statusLabel", "dep", "arr", "gate", "terminal", "belt", "delay", "inAir", "landed", "final"];
+    const visible = ["statusKey", "statusLabel", "dep", "arr", "gate", "terminal", "belt", "delay", "inAir", "landed", "final", "on"];
     const changed = msgs.length > 0 || visible.some((k) => snap[k] !== prev[k]);
     if (!changed) return fetched;
     for (const [title, body] of msgs) await alert(deviceToken, title, body, f.id);

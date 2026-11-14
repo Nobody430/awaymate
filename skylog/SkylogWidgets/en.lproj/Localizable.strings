@@ -7,7 +7,9 @@
 "+%lld Min" = "+%lld min";
 "Abflug %@" = "Departure %@";
 "Abflug in" = "Departure in";
+"Am Gate in" = "At the gate in";
 "Ankunft" = "Arrival";
+"Ankunft in" = "Arrival in";
 "Band %@" = "Belt %@";
 "Check-in %@" = "Check-in %@";
 "Countdown, Gate und Status deines nächsten Flugs." = "Countdown, gate and status of your next flight.";

@@ -25,6 +25,7 @@ enum LiveFlight {
             inboundWarn: f.inbound.map { $0.isCanceled || $0.expectedDelay(ourDeparture: f.departure.best) >= 15 },
             arrivalDelay: f.arrival.delayMinutes,
             landed: status == .arrived,
+            landing: f.timetable.flatMap { $0.onActual ?? $0.onEstimated },
             checkIn: f.isInAir || status == .arrived || status == .taxiing || f.departure.runway != nil ? nil : f.departure.checkInDesk
         )
     }

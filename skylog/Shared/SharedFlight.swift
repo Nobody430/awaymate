@@ -70,6 +70,8 @@ struct FlightActivityAttributes: ActivityAttributes {
         var landed: Bool? = nil
         /// Check-in desks; only set until the flight has left (optional, may be missing in server pushes)
         var checkIn: String? = nil
+        /// Expected touch-down on the runway (the arrival time is at the gate); optional, may be missing in server pushes
+        var landing: Date? = nil
     }
 
     var flightID: String

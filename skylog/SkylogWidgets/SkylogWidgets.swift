@@ -220,9 +220,13 @@ struct LockScreenFlightView: View {
                     } else if s.departure > now && !s.inAir {
                         Text("Abflug in").font(.caption2).foregroundStyle(.secondary)
                         Countdown(target: s.departure, overdue: String(localized: "jetzt")).font(.headline.monospacedDigit())
-                    } else if s.arrival > now {
-                        // departed (or departure time passed without newer data): count down to landing
+                    } else if let touchdown = s.landing, touchdown > now {
+                        // in the air: count down to the touch-down (what the screen in the plane shows)
                         Text("Landung in").font(.caption2).foregroundStyle(.secondary)
+                        Countdown(target: touchdown, overdue: String(localized: "jetzt")).font(.headline.monospacedDigit())
+                    } else if s.arrival > now {
+                        // no touch-down time, or already on the ground and taxiing: count down to the gate
+                        Text(s.landing == nil ? String(localized: "Ankunft in") : String(localized: "Am Gate in")).font(.caption2).foregroundStyle(.secondary)
                         Countdown(target: s.arrival, overdue: String(localized: "jetzt")).font(.headline.monospacedDigit())
                     } else {
                         Text("Ankunft").font(.caption2).foregroundStyle(.secondary)

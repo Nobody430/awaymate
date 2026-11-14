@@ -7,7 +7,9 @@
 "+%lld Min" = "+%lld min";
 "Abflug %@" = "Partenza %@";
 "Abflug in" = "Partenza tra";
+"Am Gate in" = "Al gate tra";
 "Ankunft" = "Arrivo";
+"Ankunft in" = "Arrivo tra";
 "Band %@" = "Nastro %@";
 "Check-in %@" = "Check-in %@";
 "Countdown, Gate und Status deines nächsten Flugs." = "Conto alla rovescia, gate e stato del tuo prossimo volo.";
