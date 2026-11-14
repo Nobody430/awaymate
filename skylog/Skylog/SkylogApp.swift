@@ -9,6 +9,8 @@ struct SkylogApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
+        // after a reinstall: keys and settings come back from the keychain before anything reads them
+        SettingsBackup.restoreIfNeeded()
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         NotificationDelegate.registerCategories()
     }
@@ -19,6 +21,7 @@ struct SkylogApp: App {
                 .environment(store)
                 .preferredColorScheme(.dark)
                 .task {
+                    SettingsBackup.save()
                     await Notifier.requestAuthorization()
                     PushClient.register()
                     LiveFlight.observeExistingTokens()
@@ -30,6 +33,7 @@ struct SkylogApp: App {
             switch phase {
             case .background:
                 BackgroundRefresh.schedule()
+                SettingsBackup.save()
                 Task { await DeviceSync.sync() }
             case .active:
                 Task {
