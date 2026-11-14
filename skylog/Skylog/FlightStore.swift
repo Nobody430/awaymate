@@ -79,8 +79,14 @@ final class FlightStore {
     }
 
     /// Warns when a delay eats up the connection time (once per 15-minute step).
+    /// The next leg under the same flight number from where this one lands: normally the same aircraft.
+    static func isThroughFlight(_ a: Flight, _ b: Flight) -> Bool {
+        normalizedNumber(a.number) == normalizedNumber(b.number) && a.arrival.code == b.departure.code && a.arrival.code != "???"
+    }
+
     private func checkConnection(_ id: UUID, notify: Bool) {
         guard var f = flight(id), !f.normalizedStatus.isFinal, let next = connection(after: f),
+              !Self.isThroughFlight(f, next),          // the same plane flies on – no connection to miss
               let layover = Self.layoverMinutes(f, next), let planned = f.arrival.scheduled.flatMap({ s in
                   next.departure.scheduled.map { Int($0.timeIntervalSince(s) / 60) } }) else { return }
         guard layover < 75, layover <= planned - 15, layover <= (f.warnedLayover ?? Int.max) - 15 else { return }

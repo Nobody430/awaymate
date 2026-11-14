@@ -400,6 +400,7 @@
 "Gestartet" = "Took off";
 "Gestartet (Live-Position)" = "Took off (live position)";
 "Gl. %@" = "Plat. %@";
+"Gleiche Flugnummer – in der Regel dasselbe Flugzeug. Der Weiterflug kann nicht ohne diese Maschine starten." = "Same flight number – usually the same aircraft. The onward flight cannot leave without this plane.";
 "Google Maps" = "Google Maps";
 "Grössere Verspätungen gemeldet" = "Major delays reported";
 "Günstig" = "Low-cost";
@@ -735,6 +736,7 @@
 "Wartezeiten & Infos" = "Wait times & info";
 "Weiter zu %@" = "Continue to %@";
 "Weiter zur nächsten Unterkunft" = "On to the next stay";
+"Weiterflug" = "Onward flight";
 "Weniger" = "Less";
 "Weniger anzeigen" = "Show less";
 "Wetter bei Ankunft" = "Weather on arrival";
@@ -775,6 +777,7 @@
 "Zurück: %@ → %@, ab %@" = "Return: %@ → %@, from %@";
 "Zurücksetzen" = "Reset";
 "Zusätzlich: Recht auf Erstattung des Tickets oder Ersatzflug sowie Verpflegung/Hotel." = "In addition: right to a ticket refund or replacement flight, plus meals/hotel.";
+"Zwischenstopp" = "stopover";
 "Zügig umsteigen." = "Connect quickly.";
 "eSIM / Roaming geprüft" = "eSIM / roaming checked";
 "erstellt mit Awaymate" = "created with Awaymate";

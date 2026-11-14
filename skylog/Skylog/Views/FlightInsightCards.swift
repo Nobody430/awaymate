@@ -303,9 +303,12 @@ struct ConnectionCard: View {
         if !flight.isPast, flight.normalizedStatus != .canceled, let next = store.connection(after: flight),
            let layover = FlightStore.layoverMinutes(flight, next) {
             let planned = flight.arrival.scheduled.flatMap { s in next.departure.scheduled.map { Int($0.timeIntervalSince(s) / 60) } }
-            let color: Color = layover < 45 ? .red : layover < 75 ? .orange : .green
+            // Same flight number onwards (LX 92 ZRH→GRU→EZE): the same plane continues – nothing to catch
+            let through = FlightStore.isThroughFlight(flight, next)
+            let color: Color = through ? .green : layover < 45 ? .red : layover < 75 ? .orange : .green
             VStack(alignment: .leading, spacing: 8) {
-                Label("Anschlussflug", systemImage: "arrow.triangle.branch").font(.headline)
+                Label(through ? String(localized: "Weiterflug") : String(localized: "Anschlussflug"),
+                      systemImage: through ? "arrow.right.circle" : "arrow.triangle.branch").font(.headline)
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text("\(next.number) · \(next.departure.code) → \(next.arrival.code)").font(.subheadline.weight(.semibold))
@@ -317,14 +320,17 @@ struct ConnectionCard: View {
                     Spacer()
                     VStack(alignment: .trailing, spacing: 2) {
                         Text(layover < 0 ? String(localized: "verpasst?") : Fmt.duration(layover)).font(.title3.bold()).foregroundStyle(color)
-                        Text("zum Umsteigen").font(.caption2).foregroundStyle(.secondary)
+                        Text(through ? String(localized: "Zwischenstopp") : String(localized: "zum Umsteigen")).font(.caption2).foregroundStyle(.secondary)
                     }
                 }
-                if let planned, layover <= planned - 10 {
+                if through {
+                    Text("Gleiche Flugnummer – in der Regel dasselbe Flugzeug. Der Weiterflug kann nicht ohne diese Maschine starten.")
+                        .font(.caption).foregroundStyle(.secondary)
+                } else if let planned, layover <= planned - 10 {
                     Text(String(localized: "Geplant waren \(Fmt.duration(planned)). ") + (layover < 45 ? String(localized: "Das wird sehr knapp – früh bei der Crew melden.") : String(localized: "Zügig umsteigen.")))
                         .font(.caption).foregroundStyle(color)
                 }
-                if let a = flight.arrival.terminal, let b = next.departure.terminal, a != b {
+                if !through, let a = flight.arrival.terminal, let b = next.departure.terminal, a != b {
                     Text("Terminalwechsel: Ankunft Terminal \(a), Abflug Terminal \(b).").font(.caption).foregroundStyle(.orange)
                 }
             }

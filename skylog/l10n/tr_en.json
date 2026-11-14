@@ -810,7 +810,10 @@
   "%@: Gate geschlossen": "%@: gate closed",
   "Das Gate ist geschlossen.": "The gate is closed.",
   "Auch dein AeroDataBox-Key geht an deinen Server, damit er in der letzten Stunde vor Abflug den echten Boarding-Status abfragen kann.": "Your AeroDataBox key is sent to your server too, so that it can ask for the real boarding status in the last hour before departure.",
-  "Outlook antwortet gerade nicht (Fehler %lld). Die App versucht es später wieder.": "Outlook is not answering right now (error %lld). The app will try again later."
+  "Outlook antwortet gerade nicht (Fehler %lld). Die App versucht es später wieder.": "Outlook is not answering right now (error %lld). The app will try again later.",
+  "Weiterflug": "Onward flight",
+  "Zwischenstopp": "stopover",
+  "Gleiche Flugnummer – in der Regel dasselbe Flugzeug. Der Weiterflug kann nicht ohne diese Maschine starten.": "Same flight number – usually the same aircraft. The onward flight cannot leave without this plane."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",
