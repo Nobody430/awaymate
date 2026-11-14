@@ -22,10 +22,10 @@ enum TripStep: Identifiable {
             (at: $0.departure.best ?? $0.sortDate, rank: 0, step: TripStep.flight($0))
         }
         for b in bookings {
-            var at = b.start
+            var at = b.startDay
             if b.kind == .hotel {
                 // A stay follows the last flight that lands on the check-in day (or shortly after midnight the next day).
-                let checkIn = day(b.start, .current)
+                let checkIn = TravelBooking.dayIndex(b.start)
                 let landings = flights.compactMap { f -> Date? in
                     guard let arr = f.arrival.best ?? f.arrival.scheduled else { return nil }
                     let d = day(arr, f.arrival.tz)
@@ -33,7 +33,7 @@ enum TripStep: Identifiable {
                     return d == checkIn || (d == checkIn + 1 && hour < 6) ? arr : nil
                 }
                 at = landings.max()?.addingTimeInterval(60)
-                    ?? Calendar.current.date(bySettingHour: 15, minute: 0, second: 0, of: b.start) ?? b.start
+                    ?? Calendar.current.date(bySettingHour: 15, minute: 0, second: 0, of: b.startDay) ?? b.startDay
             }
             rows.append((at: at, rank: 1, step: TripStep.booking(b)))
         }
@@ -142,9 +142,9 @@ struct StayCard: View {
 
     private var line: String {
         var parts = [booking.city]
-        let start = booking.start.formatted(.dateTime.day().month(.abbreviated))
+        let start = booking.startDay.formatted(.dateTime.day().month(.abbreviated))
         if booking.kind == .hotel || booking.kind == .car {
-            parts.append("\(start) – \(booking.end.formatted(.dateTime.day().month(.abbreviated)))")
+            parts.append("\(start) – \(booking.endDay.formatted(.dateTime.day().month(.abbreviated)))")
             if booking.kind == .hotel && booking.nights > 0 { parts.append(String(localized: "\(booking.nights) Nächte")) }
         } else {
             parts.append(start)

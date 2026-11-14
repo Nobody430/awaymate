@@ -112,7 +112,7 @@ enum PushClient {
                             "depTz": f.departure.tz.identifier, "arrTz": f.arrival.tz.identifier, "state": f.normalizedStatus.rawValue]
                 case .booking(let b):
                     return ["kind": "stay", "name": b.name, "city": b.city,
-                            "start": Fmt.apiDate.string(from: b.start), "end": Fmt.apiDate.string(from: b.end)]
+                            "start": Fmt.apiDate.string(from: b.startDay), "end": Fmt.apiDate.string(from: b.endDay)]
                 }
             }
             return ["token": trip.shareToken ?? "", "name": trip.name, "items": items]

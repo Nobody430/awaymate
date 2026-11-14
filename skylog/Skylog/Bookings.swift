@@ -44,8 +44,24 @@ struct TravelBooking: Identifiable, Codable, Hashable {
     /// Link to manage the booking (entered by hand; otherwise derived from the provider)
     var manageURL: String? = nil
 
-    var key: String { kind.rawValue + "|" + (bookingReference.isEmpty ? name.lowercased() : bookingReference.uppercased()) + "|" + Fmt.apiDate.string(from: start) }
-    var nights: Int { max(0, Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: start), to: Calendar.current.startOfDay(for: end)).day ?? 0) }
+    // Bookings are calendar days ("14 Nov"), stored as midnight in the time zone of the device that created them.
+    // Read in another time zone that instant is the evening before – after flying west every stay slipped by a day.
+    // The day is therefore taken 12 h later in UTC, which gives the intended date for any time zone.
+    static func dayIndex(_ d: Date) -> Int { Int(floor((d.timeIntervalSince1970 + 12 * 3600) / 86400)) }
+    /// Start of that calendar day in the device's current time zone (for display, date pickers and sorting).
+    static func localDay(_ d: Date) -> Date {
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(identifier: "UTC") ?? .current
+        let c = utc.dateComponents([.year, .month, .day], from: d.addingTimeInterval(12 * 3600))
+        var local = Calendar(identifier: .gregorian)
+        local.timeZone = .current
+        return local.date(from: DateComponents(year: c.year, month: c.month, day: c.day)) ?? d
+    }
+    var startDay: Date { Self.localDay(start) }
+    var endDay: Date { Self.localDay(end) }
+
+    var key: String { kind.rawValue + "|" + (bookingReference.isEmpty ? name.lowercased() : bookingReference.uppercased()) + "|" + Fmt.apiDate.string(from: startDay) }
+    var nights: Int { max(0, Self.dayIndex(end) - Self.dayIndex(start)) }
 }
 
 @MainActor
@@ -136,6 +152,6 @@ final class BookingStore {
         let cal = Calendar.current
         let start = cal.startOfDay(for: trip.start)
         let end = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: trip.end)) ?? trip.end
-        return bookings.filter { $0.start < end && $0.end >= start }
+        return bookings.filter { $0.startDay < end && $0.endDay >= start }
     }
 }

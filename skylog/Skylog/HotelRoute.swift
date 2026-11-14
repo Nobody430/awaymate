@@ -44,14 +44,14 @@ enum HotelRoute {
         let day = dayNumber(arr, f.arrival.tz)
         let late = Calendar.current.dateComponents(in: f.arrival.tz, from: arr).hour ?? 0 >= 21
         let cands = hotels.filter {
-            let ci = dayNumber($0.start, .current), co = dayNumber($0.end, .current)
+            let ci = TravelBooking.dayIndex($0.start), co = TravelBooking.dayIndex($0.end)
             return co > day && (ci <= day || (late && ci == day + 1)) && ci >= day - 1
         }
         // prefer the same city, then the check-in closest to the arrival day
         return cands.min { a, b in
             let sa = sameCity(a, f.arrival), sb = sameCity(b, f.arrival)
             if sa != sb { return sa }
-            return abs(dayNumber(a.start, .current) - day) < abs(dayNumber(b.start, .current) - day)
+            return abs(TravelBooking.dayIndex(a.start) - day) < abs(TravelBooking.dayIndex(b.start) - day)
         }
     }
 
@@ -66,13 +66,13 @@ enum HotelRoute {
         // Stay must end on the departure day (or the day before, for early-morning flights)
         let day = dayNumber(dep, f.departure.tz)
         let cands = hotels.filter {
-            let ci = dayNumber($0.start, .current), co = dayNumber($0.end, .current)
+            let ci = TravelBooking.dayIndex($0.start), co = TravelBooking.dayIndex($0.end)
             return ci <= day && (co == day || co == day + 1 || co == day - 1) && ci < co
         }
         return cands.min { a, b in
             let sa = sameCity(a, f.departure), sb = sameCity(b, f.departure)
             if sa != sb { return sa }
-            return abs(dayNumber(a.end, .current) - day) < abs(dayNumber(b.end, .current) - day)
+            return abs(TravelBooking.dayIndex(a.end) - day) < abs(TravelBooking.dayIndex(b.end) - day)
         }
     }
 

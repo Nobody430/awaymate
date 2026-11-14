@@ -84,7 +84,10 @@ struct BookingEditor: View {
     init(booking: TravelBooking? = nil, start: Date = Date(), end: Date? = nil) {
         isNew = booking == nil
         let begin = Calendar.current.startOfDay(for: start)
-        _booking = State(initialValue: booking ?? TravelBooking(
+        // show and edit the stay's calendar days in the current time zone
+        var existing = booking
+        if let b = booking { existing?.start = b.startDay; existing?.end = b.endDay }
+        _booking = State(initialValue: existing ?? TravelBooking(
             kind: .hotel, name: "", city: "", start: begin,
             end: end ?? Calendar.current.date(byAdding: .day, value: 1, to: begin) ?? begin))
     }

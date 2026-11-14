@@ -71,7 +71,7 @@ enum MailWatcher {
                 for b in result.bookings where BookingStore.shared.upsert(b) {
                     let title = b.cancelled ? String(localized: "\(b.kind.label) storniert") : String(localized: "Neue Buchung: \(b.kind.label)")
                     Notifier.post(id: "mail-booking-\(b.key)", title: title,
-                                  body: "\(b.name), \(b.city) · \(Fmt.day(b.start))" + (b.kind == .hotel && b.nights > 0 ? String(localized: " · \(b.nights) Nächte") : ""))
+                                  body: "\(b.name), \(b.city) · \(Fmt.day(b.startDay))" + (b.kind == .hotel && b.nights > 0 ? String(localized: " · \(b.nights) Nächte") : ""))
                 }
             } else {
                 candidates = relevant.flatMap { m in

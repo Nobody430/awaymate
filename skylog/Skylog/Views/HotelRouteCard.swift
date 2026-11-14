@@ -55,7 +55,7 @@ struct HotelRouteCard: View {
                 Text("Losgehen spätestens \(Fmt.time(leave, flight.departure.tz)) (\(AirportBuffer.label(AirportBuffer.minutes(for: flight))) vor Abflug am Flughafen)")
                     .font(.subheadline).foregroundStyle(Theme.accent)
             }
-            if outbound, let dep = flight.departure.best, Calendar.current.isDate(leg.hotel.end, inSameDayAs: dep) {
+            if outbound, let dep = flight.departure.best, Calendar.current.isDate(leg.hotel.endDay, inSameDayAs: dep) {
                 Text("Check-out am Abflugtag – Gepäckaufbewahrung im Hotel fragen, falls der Flug spät ist.")
                     .font(.caption2).foregroundStyle(.secondary)
             }

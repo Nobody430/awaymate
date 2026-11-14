@@ -46,17 +46,17 @@ enum CalendarSync {
             if (try? store.save(event, span: .thisEvent)) != nil { ids[key] = event.eventIdentifier }
         }
 
-        for b in bookings where b.kind == .hotel && !b.cancelled && b.end > Date() {
+        for b in bookings where b.kind == .hotel && !b.cancelled && b.endDay > Date().addingTimeInterval(-86400) {
             let key = "booking-" + b.id.uuidString
             alive.insert(key)
             let event = ids[key].flatMap { store.event(withIdentifier: $0) } ?? EKEvent(eventStore: store)
             let title = "🏨 \(b.name)"
-            if event.title == title, event.startDate == b.start, event.isAllDay { continue }
+            if event.title == title, event.startDate == b.startDay, event.isAllDay { continue }
             event.calendar = event.calendar ?? calendar
             event.title = title
             event.isAllDay = true
-            event.startDate = b.start
-            event.endDate = b.end
+            event.startDate = b.startDay
+            event.endDate = b.endDay
             event.location = b.address.isEmpty ? b.city : b.address
             event.notes = b.bookingReference.isEmpty ? nil : String(localized: "Buchung \(b.bookingReference)")
             if (try? store.save(event, span: .thisEvent)) != nil { ids[key] = event.eventIdentifier }

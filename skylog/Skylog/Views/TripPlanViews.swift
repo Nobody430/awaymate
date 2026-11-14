@@ -199,10 +199,10 @@ struct BookingRow: View {
     private var detail: String {
         var parts = [booking.city]
         if booking.kind == .hotel || booking.kind == .car {
-            parts.append("\(booking.start.formatted(.dateTime.day().month(.abbreviated))) – \(booking.end.formatted(.dateTime.day().month(.abbreviated)))")
+            parts.append("\(booking.startDay.formatted(.dateTime.day().month(.abbreviated))) – \(booking.endDay.formatted(.dateTime.day().month(.abbreviated)))")
             if booking.kind == .hotel && booking.nights > 0 { parts.append(String(localized: "\(booking.nights) Nächte")) }
         } else {
-            parts.append(booking.start.formatted(.dateTime.day().month(.abbreviated)))
+            parts.append(booking.startDay.formatted(.dateTime.day().month(.abbreviated)))
         }
         if !booking.bookingReference.isEmpty { parts.append(String(localized: "Code \(booking.bookingReference)")) }
         return parts.filter { !$0.isEmpty }.joined(separator: " · ")

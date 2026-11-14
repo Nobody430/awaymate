@@ -40,7 +40,7 @@ enum TripPlanner {
         }
         if !bookings.isEmpty {
             context += "\n\nBuchungen:\n" + bookings.map {
-                "- \($0.kind.label): \($0.name), \($0.city)\($0.address.isEmpty ? "" : " (\($0.address))"), \(f.string(from: $0.start)) bis \(f.string(from: $0.end))"
+                "- \($0.kind.label): \($0.name), \($0.city)\($0.address.isEmpty ? "" : " (\($0.address))"), \(f.string(from: $0.startDay)) bis \(f.string(from: $0.endDay))"
             }.joined(separator: "\n")
         }
         context += """
