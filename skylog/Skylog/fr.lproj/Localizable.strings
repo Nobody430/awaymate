@@ -171,6 +171,7 @@
 "Analysieren" = "Analyser";
 "Andere" = "Autre";
 "Ankunft" = "Arrivée";
+"Ankunft %@" = "Arrivée %@";
 "Ankunft %@ in %@" = "Arrivée %@ à %@";
 "Ankunft %@ zu spät (ab 3 Stunden besteht Anspruch)." = "Arrivée avec %@ de retard (droit à indemnisation dès 3 heures).";
 "Ankunft (Ortszeit)" = "Arrivée (heure locale)";
@@ -343,6 +344,7 @@
 "Flugdaten" = "Données de vol";
 "Flugdaten über RapidAPI. Der Basic-Plan ist gratis, hat aber nur wenige Abfragen pro Monat." = "Données de vol via RapidAPI. Le plan Basic est gratuit, mais ne comprend que peu de requêtes par mois.";
 "Flugdetails" = "Détails du vol";
+"Flugfunk mithören" = "Écouter la radio aérienne";
 "Flughäfen" = "Aéroports";
 "Flugliste → + → „Aus E-Mails importieren“ → „Mit Outlook anmelden & durchsuchen“. Awaymate geht das ganze Postfach durch." = "Liste des vols → + → « Importer depuis les e-mails » → « Se connecter à Outlook et rechercher ». Awaymate parcourt toute la boîte mail.";
 "Flugnummer, z.B. LX1612" = "Numéro de vol, p. ex. LX1612";
@@ -803,6 +805,7 @@
 "ÖV %@" = "TP %@";
 "ÖV-Route in Apple Karten" = "Itinéraire en transports dans Plans";
 "Öffnen" = "Ouvrir";
+"Öffnet LiveATC im Browser: der Funk zwischen Flugsicherung und Piloten am Flughafen. Nicht jeder Flughafen hat einen Stream, und in manchen Ländern ist das Mithören nicht erlaubt." = "Ouvre LiveATC dans le navigateur : la radio entre le contrôle aérien et les pilotes à l’aéroport. Tous les aéroports n’ont pas de flux, et dans certains pays l’écoute n’est pas autorisée.";
 "Über mich / KI-Erinnerungen" = "À propos de moi / souvenirs IA";
 "„%@“ ablegen bei" = "Classer « %@ » sous";
 "„Neue Registrierung“ → Name: Awaymate." = "« Nouvelle inscription » → nom : Awaymate.";

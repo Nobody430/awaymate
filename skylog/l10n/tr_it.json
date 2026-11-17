@@ -813,7 +813,10 @@
   "Outlook antwortet gerade nicht (Fehler %lld). Die App versucht es später wieder.": "Outlook al momento non risponde (errore %lld). L’app riproverà più tardi.",
   "Weiterflug": "Proseguimento",
   "Zwischenstopp": "scalo",
-  "Gleiche Flugnummer – in der Regel dasselbe Flugzeug. Der Weiterflug kann nicht ohne diese Maschine starten.": "Stesso numero di volo – di norma lo stesso aereo. Il proseguimento non può partire senza questo aeromobile."
+  "Gleiche Flugnummer – in der Regel dasselbe Flugzeug. Der Weiterflug kann nicht ohne diese Maschine starten.": "Stesso numero di volo – di norma lo stesso aereo. Il proseguimento non può partire senza questo aeromobile.",
+  "Flugfunk mithören": "Ascolta la radio aeronautica",
+  "Ankunft %@": "Arrivo %@",
+  "Öffnet LiveATC im Browser: der Funk zwischen Flugsicherung und Piloten am Flughafen. Nicht jeder Flughafen hat einen Stream, und in manchen Ländern ist das Mithören nicht erlaubt.": "Apre LiveATC nel browser: la radio tra il controllo del traffico aereo e i piloti in aeroporto. Non tutti gli aeroporti hanno uno stream e in alcuni Paesi l’ascolto non è consentito."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " Nessun volo in programma",

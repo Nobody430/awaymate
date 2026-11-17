@@ -813,7 +813,10 @@
   "Outlook antwortet gerade nicht (Fehler %lld). Die App versucht es später wieder.": "Outlook is not answering right now (error %lld). The app will try again later.",
   "Weiterflug": "Onward flight",
   "Zwischenstopp": "stopover",
-  "Gleiche Flugnummer – in der Regel dasselbe Flugzeug. Der Weiterflug kann nicht ohne diese Maschine starten.": "Same flight number – usually the same aircraft. The onward flight cannot leave without this plane."
+  "Gleiche Flugnummer – in der Regel dasselbe Flugzeug. Der Weiterflug kann nicht ohne diese Maschine starten.": "Same flight number – usually the same aircraft. The onward flight cannot leave without this plane.",
+  "Flugfunk mithören": "Listen to air traffic radio",
+  "Ankunft %@": "Arrival %@",
+  "Öffnet LiveATC im Browser: der Funk zwischen Flugsicherung und Piloten am Flughafen. Nicht jeder Flughafen hat einen Stream, und in manchen Ländern ist das Mithören nicht erlaubt.": "Opens LiveATC in the browser: the radio between air traffic control and pilots at the airport. Not every airport has a stream, and in some countries listening is not allowed."
  },
  "SkylogWidgets": {
   " Kein Flug geplant": " No flight scheduled",

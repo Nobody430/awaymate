@@ -155,3 +155,38 @@ struct BookingEditor: View {
         }
     }
 }
+
+/// Links to the live radio of air traffic control at the two airports (LiveATC, in the browser).
+struct ATCRadioCard: View {
+    let flight: Flight
+    @Environment(\.openURL) private var openURL
+
+    private func link(_ e: FlightEndpoint) -> URL? {
+        guard let icao = e.icao, icao.count == 4 else { return nil }
+        return URL(string: "https://www.liveatc.net/search/?icao=" + icao.uppercased())
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            if !flight.isPast, link(flight.departure) != nil || link(flight.arrival) != nil {
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("Flugfunk mithören", systemImage: "antenna.radiowaves.left.and.right").font(.headline)
+                    HStack {
+                        if let url = link(flight.departure) {
+                            Button { openURL(url) } label: { Text("Abflug \(flight.departure.code)").frame(maxWidth: .infinity) }
+                        }
+                        if let url = link(flight.arrival) {
+                            Button { openURL(url) } label: { Text("Ankunft \(flight.arrival.code)").frame(maxWidth: .infinity) }
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    Text("Öffnet LiveATC im Browser: der Funk zwischen Flugsicherung und Piloten am Flughafen. Nicht jeder Flughafen hat einen Stream, und in manchen Ländern ist das Mithören nicht erlaubt.")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            }
+        }
+    }
+}

@@ -61,6 +61,7 @@ struct FlightDetailView: View {
                     AirportCard(endpoint: f.departure, title: String(localized: "Abflug"))
                 }
                 AirportCard(endpoint: f.arrival, title: String(localized: "Ankunft"))
+                ATCRadioCard(flight: f)
                 DocumentsCard(flightID: f.id)
                 UpdatesCard(flight: f)
                 RouteHistoryCard(flight: f)
